@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,6 +132,39 @@
     path.rotation.x = -Math.PI / 2;
     path.position.set(0, 0, -12);
     scene.add(path);
+    
+const obstacles = [];
+const PLAYER_RADIUS = 0.42;
+
+function canStandAt(x, z) {
+  // Keep the player inside the starter area.
+  if (x < -44.5 || x > 44.5 || z < -84.5 || z > 24.5) {
+    return false;
+  }
+
+  for (const obstacle of obstacles) {
+    if (obstacle.type === "circle") {
+      const dx = x - obstacle.x;
+      const dz = z - obstacle.z;
+      const minDistance = PLAYER_RADIUS + obstacle.r;
+
+      if (dx * dx + dz * dz < minDistance * minDistance) {
+        return false;
+      }
+    }
+
+    if (obstacle.type === "box") {
+      const insideX =
+        Math.abs(x - obstacle.x) < obstacle.sx / 2 + PLAYER_RADIUS;
+      const insideZ =
+        Math.abs(z - obstacle.z) < obstacle.sz / 2 + PLAYER_RADIUS;
+
+      if (insideX && insideZ) return false;
+    }
+  }
+
+  return true;
+}
 
     // Simple trees to create a small explorable world
     function tree(x, z, scale = 1) {
@@ -156,6 +188,13 @@
         group.add(crown);
       }
       scene.add(group);
+
+obstacles.push({
+  type: "circle",
+  x,
+  z,
+  r: 0.48 * scale
+});
     }
 
     for (let i = 0; i < 65; i++) {
