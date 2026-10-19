@@ -374,13 +374,25 @@ obstacles.push({
 
       if (move.lengthSq() > 1) move.normalize();
 
-      const speed = 6 * dt;
-      player.position.addScaledVector(move, speed);
+      
+const speed = 6 * dt;
 
-      // Keep the character within the demo area
-      player.position.x = THREE.MathUtils.clamp(player.position.x, -45, 45);
-      player.position.z = THREE.MathUtils.clamp(player.position.z, -85, 25);
+if (move.lengthSq() > 0) {
+  move.normalize();
 
+  const nextX = player.position.x + move.x * speed;
+
+  // Resolve X and Z separately to allow sliding along obstacles.
+  if (canStandAt(nextX, player.position.z)) {
+    player.position.x = nextX;
+  }
+
+  const nextZ = player.position.z + move.z * speed;
+
+  if (canStandAt(player.position.x, nextZ)) {
+    player.position.z = nextZ;
+  }
+}
       if (move.lengthSq() > 0.001) {
         yaw = Math.atan2(move.x, move.z);
         player.rotation.y = yaw;
