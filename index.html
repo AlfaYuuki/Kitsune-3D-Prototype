@@ -207,12 +207,25 @@ obstacles.push({
     // A simple red shrine gate in the distance
     const red = material(0xc63f45);
     function beam(x, y, z, sx, sy, sz) {
-      const mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(sx, sy, sz), red
-      );
-      mesh.position.set(x, y, z);
-      scene.add(mesh);
-    }
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(sx, sy, sz),
+    red
+  );
+
+  mesh.position.set(x, y, z);
+  scene.add(mesh);
+
+  // Only the tall vertical posts block the player.
+  if (sy >= 3 && sx < 1 && sz < 1) {
+    obstacles.push({
+      type: "box",
+      x,
+      z,
+      sx,
+      sz
+    });
+  }
+}
     beam(-2.2, 2.0, -28, 0.35, 4, 0.35);
     beam( 2.2, 2.0, -28, 0.35, 4, 0.35);
     beam(0, 4.1, -28, 6.0, 0.4, 0.65);
