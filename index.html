@@ -4,43 +4,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Kitsune FunZone 3D — RPG v3</title>
+<title>Kitsune FunZone 3D — RPG Adventure</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#13251d;color:#fff;font-family:system-ui,Arial,sans-serif;touch-action:none}
+body{margin:0;overflow:hidden;background:#102019;color:white;font-family:system-ui,Arial,sans-serif;touch-action:none}
 canvas{display:block}
-button{cursor:pointer;font:inherit}
-#hud{position:fixed;z-index:3;top:10px;left:10px;width:min(290px,73vw);padding:11px;background:#101a17e8;border:1px solid #ffffff35;border-radius:13px;pointer-events:none}
-.brand{font-weight:900;color:#75dcff;font-size:16px}
-.small{font-size:11px;color:#c5d9d1}
-.stat{display:flex;justify-content:space-between;gap:6px;font-size:12px;margin-top:6px}
-.bar{height:8px;background:#35423e;border-radius:10px;overflow:hidden;margin-top:4px}
-.fill{height:100%;transition:width .15s}
-#hpFill{background:#ff5268}#xpFill{background:#58c9ff}#enemyFill{background:#ffb04a}
-#quest{margin-top:8px;font-size:12px;color:#ffe9a6;line-height:1.5}
-#topButtons{position:fixed;right:10px;top:10px;z-index:5;display:flex;gap:6px}
-.uiBtn{border:1px solid #ffffff55;border-radius:10px;background:#142a27eF;color:white;padding:9px 11px;font-size:12px;font-weight:800}
-#enemyHud{position:fixed;top:65px;left:50%;transform:translateX(-50%);width:min(230px,48vw);background:#111b1be8;padding:8px 10px;border-radius:10px;text-align:center;z-index:3;display:none;pointer-events:none}
-#enemyName{font-size:12px;font-weight:800}
-#toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:7;background:#101a17e8;padding:9px 13px;border-radius:10px;font-size:12px;text-align:center;max-width:90vw;pointer-events:none}
-#message{display:none;position:fixed;top:28%;left:50%;transform:translateX(-50%);z-index:8;background:#101a17f0;border:1px solid #ffffff40;border-radius:12px;padding:12px 18px;text-align:center;max-width:85vw}
-#panel{display:none;position:fixed;z-index:9;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92vw);max-height:78vh;overflow:auto;background:#101a17f5;border:1px solid #75dcff85;border-radius:16px;padding:16px;box-shadow:0 15px 60px #000b}
-#panel h2{margin:0 0 8px;color:#75dcff}
-#panel p{font-size:12px;color:#c7d8d0}
-.item{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid #ffffff25;border-radius:10px;padding:10px;margin-top:8px;background:#ffffff08}
-.item b{font-size:13px}
-.item small{display:block;color:#c4d5cf;margin-top:3px}
-.item button{background:#27566a;color:white;border:0;border-radius:8px;padding:8px;font-size:11px}
-#mobile{position:fixed;inset:0;z-index:4;pointer-events:none}
-#stickBase{position:absolute;left:20px;bottom:24px;width:124px;height:124px;border:2px solid #ffffff55;background:#ffffff18;border-radius:50%;pointer-events:auto;touch-action:none}
-#stickKnob{position:absolute;left:33px;top:33px;width:54px;height:54px;border-radius:50%;background:#b9e8ffcc;border:2px solid white}
-.action{position:absolute;right:18px;border:2px solid #ffffff70;border-radius:50%;width:70px;height:70px;color:white;font-weight:900;font-size:12px;background:#174c60e8;pointer-events:auto;touch-action:none}
-#attack{bottom:32px;background:#9d2948ed}
-#usePotion{bottom:112px;right:26px;width:60px;height:60px;background:#326e50ed}
-#dead{display:none;position:fixed;inset:0;z-index:12;background:#090c0bf0;place-items:center;text-align:center;padding:20px}
+#hud{position:fixed;top:12px;left:12px;z-index:5;width:min(300px,72vw);padding:12px;background:#101a17dc;border:1px solid #ffffff30;border-radius:14px;pointer-events:none}
+.brand{font-weight:900;color:#78d9ff;font-size:17px}
+.small{font-size:12px;color:#d2e4dd}
+.stat{display:flex;justify-content:space-between;font-size:12px;margin-top:7px}
+.bar{height:9px;border-radius:10px;background:#35423e;overflow:hidden;margin-top:4px}
+.fill{height:100%;width:100%;transition:width .15s}
+#hpFill{background:#ff5268}#xpFill{background:#60c9ff}#enemyFill{background:#ff9a49}
+#quest{margin-top:10px;font-size:12px;line-height:1.5;color:#ffe9a6}
+#enemyHud{position:fixed;top:12px;left:50%;transform:translateX(-50%);width:min(250px,48vw);padding:9px 12px;background:#161a20dc;border-radius:12px;text-align:center;display:none;z-index:5;pointer-events:none}
+#enemyName{font-size:13px;font-weight:800}
+#message{position:fixed;left:50%;top:25%;transform:translateX(-50%);background:#101a17e8;padding:10px 17px;border-radius:12px;border:1px solid #ffffff30;max-width:85vw;text-align:center;z-index:7;display:none;pointer-events:none;font-size:14px}
+#help{position:fixed;right:12px;top:12px;background:#101a17b9;padding:9px 12px;border-radius:12px;font-size:11px;line-height:1.7;text-align:right;pointer-events:none}
+#mobile{position:fixed;inset:0;z-index:6;pointer-events:none}
+#stickBase{position:absolute;left:24px;bottom:26px;width:126px;height:126px;border-radius:50%;background:#ffffff18;border:2px solid #ffffff48;pointer-events:auto;touch-action:none}
+#stickKnob{position:absolute;left:34px;top:34px;width:54px;height:54px;border-radius:50%;background:#b9e8ffbb;border:2px solid white;box-shadow:0 3px 14px #0007}
+.action{position:absolute;right:22px;width:72px;height:72px;border-radius:50%;border:2px solid #ffffff80;background:#143c54d9;color:white;font-weight:900;font-size:12px;pointer-events:auto;touch-action:none;box-shadow:0 4px 15px #0006}
+#attack{bottom:38px;background:#9d2948e8}
+#interact{bottom:122px;width:62px;height:62px;right:28px;background:#286b54e8}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0b1715dc;padding:8px 14px;border-radius:10px;font-size:12px;z-index:8;pointer-events:none;text-align:center;max-width:90vw}
+#dead{position:fixed;inset:0;background:#090c0bf0;display:none;place-items:center;z-index:10;text-align:center;padding:24px}
 #dead h1{color:#ff6b7a}
-#dead button{padding:12px 18px;border:0;border-radius:10px;background:#58c9ff;font-weight:900}
-@media(hover:hover) and (pointer:fine){#mobile{display:none}}
+#dead button{padding:12px 20px;border:0;border-radius:10px;background:#58c8ff;font-weight:900;font-size:15px}
+@media(hover:hover) and (pointer:fine){#mobile{display:none}#help{display:block}}
+@media(hover:none){#help{display:none}}
 </style>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}
@@ -49,487 +41,468 @@ button{cursor:pointer;font:inherit}
 <body>
 <div id="hud">
   <div class="brand">🦊 KITSUNE FUNZONE</div>
-  <div class="small">3D RPG v3 · Alfa Yuuki</div>
-  <div class="stat"><span>LEVEL <b id="level">1</b></span><span id="hpText">100/100 HP</span></div>
-  <div class="bar"><div id="hpFill" class="fill"></div></div>
-  <div class="stat"><span>Experience</span><span id="xpText">0/100 XP</span></div>
-  <div class="bar"><div id="xpFill" class="fill"></div></div>
-  <div id="quest">📜 Quest: Forest Threat<br>Spirits defeated: <b id="questCount">0</b>/5</div>
-  <div class="small" id="saveStatus">💾 Save ready</div>
-</div>
-
-<div id="topButtons">
-  <button class="uiBtn" id="inventoryBtn">🎒 INVENTORY</button>
-  <button class="uiBtn" id="saveBtn">💾 SAVE</button>
+  <div class="small">3D RPG Adventure • Prototype v2</div>
+  <div class="stat"><span>ALFA YUUKI · Lv.<b id="level">1</b></span><span id="hpText">100 / 100 HP</span></div>
+  <div class="bar"><div class="fill" id="hpFill"></div></div>
+  <div class="stat"><span>Experience</span><span id="xpText">0 / 100 XP</span></div>
+  <div class="bar"><div class="fill" id="xpFill"></div></div>
+  <div id="quest">📜 QUEST: The Forest Threat<br>Defeat the forest spirits: <b id="kills">0</b>/5</div>
 </div>
 
 <div id="enemyHud">
   <div id="enemyName">Forest Spirit</div>
-  <div class="bar"><div id="enemyFill" class="fill"></div></div>
-  <div class="small" id="enemyHp">40/40 HP</div>
+  <div class="bar"><div class="fill" id="enemyFill"></div></div>
+  <div class="small" id="enemyHp">40 / 40 HP</div>
 </div>
 
-<div id="panel">
-  <h2>🎒 Inventory & Equipment</h2>
-  <p>Items and equipment are saved in this browser on this device.</p>
-  <div id="equipment"></div>
-  <div id="items"></div>
-  <div style="display:flex;gap:8px;margin-top:14px">
-    <button class="uiBtn" id="drinkBtn">🧪 Use potion</button>
-    <button class="uiBtn" id="closePanel">CLOSE</button>
-  </div>
+<div id="help">
+  <b>KEYBOARD</b><br>
+  WASD / Arrows — Move<br>
+  Mouse drag — Rotate camera<br>
+  Space / Click — Attack<br>
+  E — Shrine / Interact<br>
+  Shift — Run
 </div>
 
 <div id="message"></div>
+
 <div id="mobile">
   <div id="stickBase"><div id="stickKnob"></div></div>
   <button class="action" id="attack">⚔️<br>ATTACK</button>
-  <button class="action" id="usePotion">🧪<br>HEAL</button>
+  <button class="action" id="interact">⛩️<br>USE</button>
 </div>
-<div id="toast">Welcome, Alfa! Defeat five forest spirits.</div>
+
+<div id="toast">Explore the forest. Defeat 5 spirits to complete your quest!</div>
+
 <div id="dead">
   <div>
-    <h1>💫 DEFEATED</h1>
-    <p>Your progress has been saved.</p>
-    <button id="respawn">Return to shrine</button>
+    <h1>💫 YOU WERE DEFEATED</h1>
+    <p>The forest is dangerous, Alfa.</p>
+    <button id="respawn">Return to the shrine</button>
   </div>
 </div>
 
 <script type="module">
 import * as THREE from "three";
 
-/* =====================================================
-   KITSUNE FUNZONE RPG v3
-   Procedural character animation, inventory and saves
-   ===================================================== */
+const $ = id => document.getElementById(id);
+let scene, camera, renderer, player, sword, swordPivot, clock;
+let yaw = 0, pitch = 0.25;
+let hp = 100, maxHp = 100, xp = 0, level = 1, kills = 0;
+let gameOver = false, questComplete = false, shrineMessageShown = false;
+let attackCooldown = 0, hurtCooldown = 0, swingTime = 0;
+let toastTime = 0, messageTime = 0;
+let stickX = 0, stickY = 0, stickActive = false;
+let dragging = false, lastX = 0, lastY = 0;
+const keys = {};
+const obstacles = [];
+const enemies = [];
+const worldBounds = {minX:-48,maxX:48,minZ:-86,maxZ:28};
+const playerRadius = 0.48;
+const playerVelocity = new THREE.Vector3();
+const forward = new THREE.Vector3();
+const right = new THREE.Vector3();
+const moveVector = new THREE.Vector3();
+const tempVector = new THREE.Vector3();
 
-const $=id=>document.getElementById(id);
-const SAVE_KEY="kitsune_funzone_rpg_v3";
-let scene,camera,renderer,clock,player,swordPivot,sword;
-let yaw=0,pitch=.23,gameOver=false,panelOpen=false;
-let hp=100,maxHp=100,xp=0,level=1,questProgress=0,questComplete=false;
-let attackCooldown=0,hurtCooldown=0,swingTime=0,toastTime=0,messageTime=0;
-let stickX=0,stickY=0,stickActive=false,dragging=false,lastX=0,lastY=0;
-let walkTime=0,autoSaveTimer=0;
-const keys={},obstacles=[],enemies=[];
-const inventory={potions:3,spiritCrystals:0};
-const equipment={weapon:"Blue Katana",armor:"Traveler Outfit"};
-const weaponStats={"Wooden Sword":8,"Blue Katana":18,"Spirit Blade":30};
-const bounds={minX:-48,maxX:48,minZ:-86,maxZ:28};
-const playerRadius=.46;
-
-function notify(text,seconds=2.5){
-  $("toast").textContent=text;
-  $("toast").style.opacity="1";
-  toastTime=seconds;
+function toast(text, duration=3){
+  $("toast").textContent = text;
+  toastTime = duration;
 }
-function popup(text,seconds=2){
-  $("message").textContent=text;
-  $("message").style.display="block";
-  messageTime=seconds;
+function popup(text, duration=2.3){
+  $("message").textContent = text;
+  $("message").style.display = "block";
+  messageTime = duration;
 }
-function mat(color,roughness=.85,extra={}){
-  return new THREE.MeshStandardMaterial({color,roughness,...extra});
+function material(color, roughness=0.9){
+  return new THREE.MeshStandardMaterial({color,roughness});
 }
-function addMesh(geo,material,parent,x=0,y=0,z=0){
-  const o=new THREE.Mesh(geo,material);
-  o.position.set(x,y,z);
-  o.castShadow=true;o.receiveShadow=true;
-  parent.add(o);
-  return o;
+function mesh(geometry, mat, parent, x=0,y=0,z=0){
+  const m = new THREE.Mesh(geometry,mat);
+  m.position.set(x,y,z);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  parent.add(m);
+  return m;
 }
-function addCircle(x,z,r){obstacles.push({type:"circle",x,z,r});}
-function addBox(x,z,sx,sz){obstacles.push({type:"box",x,z,sx,sz});}
+function addBoxObstacle(x,z,sx,sz){
+  obstacles.push({type:"box",x,z,sx,sz});
+}
+function addCircleObstacle(x,z,r){
+  obstacles.push({type:"circle",x,z,r});
+}
 function canStandAt(x,z){
-  if(x<bounds.minX||x>bounds.maxX||z<bounds.minZ||z>bounds.maxZ)return false;
+  if(x<worldBounds.minX || x>worldBounds.maxX ||
+     z<worldBounds.minZ || z>worldBounds.maxZ) return false;
   for(const o of obstacles){
     if(o.type==="circle"){
-      if((x-o.x)**2+(z-o.z)**2<(o.r+playerRadius)**2)return false;
+      const dx=x-o.x,dz=z-o.z;
+      const r=o.r+playerRadius;
+      if(dx*dx+dz*dz<r*r) return false;
     }else{
       const cx=Math.max(o.x-o.sx,Math.min(x,o.x+o.sx));
       const cz=Math.max(o.z-o.sz,Math.min(z,o.z+o.sz));
-      if((x-cx)**2+(z-cz)**2<playerRadius**2)return false;
+      const dx=x-cx,dz=z-cz;
+      if(dx*dx+dz*dz<playerRadius*playerRadius) return false;
     }
   }
   return true;
 }
 
 function createWorld(){
-  scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x9bcbd5);
-  scene.fog=new THREE.Fog(0x9bcbd5,50,145);
-  camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,250);
-  renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x9bcbd5);
+  scene.fog = new THREE.Fog(0x9bcbd5,48,145);
+
+  camera = new THREE.PerspectiveCamera(65,innerWidth/innerHeight,0.1,250);
+  renderer = new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
   renderer.setSize(innerWidth,innerHeight);
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-  renderer.shadowMap.enabled=true;
-  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
   document.body.insertBefore(renderer.domElement,document.body.firstChild);
 
-  scene.add(new THREE.HemisphereLight(0xe4f7ff,0x34482a,2));
-  const sun=new THREE.DirectionalLight(0xffedcf,2);
-  sun.position.set(-25,45,20);sun.castShadow=true;
+  scene.add(new THREE.HemisphereLight(0xdff7ff,0x34482a,2.0));
+  const sun = new THREE.DirectionalLight(0xffedcc,2.1);
+  sun.position.set(-25,45,20);
+  sun.castShadow = true;
   sun.shadow.mapSize.set(1024,1024);
-  sun.shadow.camera.left=-60;sun.shadow.camera.right=60;
-  sun.shadow.camera.top=60;sun.shadow.camera.bottom=-60;
+  sun.shadow.camera.left=-65;sun.shadow.camera.right=65;
+  sun.shadow.camera.top=65;sun.shadow.camera.bottom=-65;
   scene.add(sun);
 
-  const ground=addMesh(new THREE.PlaneGeometry(220,240),mat(0x547c49),scene,0,-.12,-28);
+  const grass = material(0x547c49);
+  const ground = mesh(new THREE.PlaneGeometry(220,240),grass,scene,0,-0.12,-28);
   ground.rotation.x=-Math.PI/2;
-  const path=addMesh(new THREE.PlaneGeometry(8,150),mat(0xb7b09a),scene,0,-.08,-35);
+  ground.receiveShadow=true;
+
+  // Walkable stone path
+  const pathMat=material(0xb7b09a);
+  const path=mesh(new THREE.PlaneGeometry(8,150),pathMat,scene,0,-0.09,-35);
   path.rotation.x=-Math.PI/2;
+  for(let i=0;i<24;i++){
+    const stone=mesh(new THREE.BoxGeometry(2.4,0.08,2.0),
+      material(i%2?0xbeb9a5:0x999b8a),scene,
+      (Math.random()-.5)*1.3,-0.02,18-i*5);
+    stone.rotation.y=(Math.random()-.5)*0.12;
+  }
 
-  makeTrees();
-  makeShrine();
-  makePlayer();
-  makeEnemies();
+  createTrees();
+  createShrine();
+  createPlayer();
+  createEnemies();
 
+  // Decorative lanterns along the path
   for(const z of [-5,-15,-25,-35,-45,-55]){
     for(const side of [-1,1]){
       const x=side*5.5;
-      addMesh(new THREE.BoxGeometry(.55,.65,.55),mat(0x5b4632),scene,x,.32,z);
-      addMesh(new THREE.BoxGeometry(.38,.55,.38),
-        mat(0xffd58b,.4,{emissive:0xff8c25,emissiveIntensity:1}),
+      const base=mesh(new THREE.BoxGeometry(.55,.65,.55),material(0x5b4632),scene,x,.32,z);
+      const glow=mesh(new THREE.BoxGeometry(.38,.55,.38),
+        new THREE.MeshStandardMaterial({color:0xffd58b,emissive:0xff8c25,emissiveIntensity:1.0}),
         scene,x,.92,z);
-      addMesh(new THREE.BoxGeometry(.75,.12,.75),mat(0x493b2d),scene,x,1.25,z);
+      mesh(new THREE.BoxGeometry(.75,.12,.75),material(0x493b2d),scene,x,1.25,z);
     }
   }
+
+  // Distant hills
+  for(let i=0;i<16;i++){
+    const a=i/16*Math.PI*2;
+    const r=85;
+    const hill=mesh(new THREE.ConeGeometry(13+Math.random()*7,20+Math.random()*22,7),
+      material(i%2?0x5d8064:0x6e916b),scene,
+      Math.cos(a)*r,-1,Math.sin(a)*r-28);
+    hill.scale.x=1.7;
+    hill.rotation.y=Math.random()*Math.PI;
+  }
 }
 
-function makeTrees(){
+function createTrees(){
   let seed=20261020;
-  function random(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
-  const trunk=mat(0x62452d);
-  const leaves=[mat(0x285d3a),mat(0x397647),mat(0x477e4a)];
-  for(let i=0;i<140;i++){
-    const x=(random()-.5)*100,z=20-random()*110;
-    if(Math.abs(x)<6.8&&z>-67)continue;
-    const s=.7+random()*1.2,g=new THREE.Group();
-    g.position.set(x,0,z);g.scale.setScalar(s);scene.add(g);
-    addMesh(new THREE.CylinderGeometry(.22,.36,2.8,7),trunk,g,0,1.4,0);
-    for(let j=0;j<3;j++)
-      addMesh(new THREE.ConeGeometry(1.5-j*.22,2.4,7),leaves[Math.floor(random()*3)],g,0,2.7+j*1.1,0);
-    addCircle(x,z,.58*s);
+  function rand(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
+  const trunkMat=material(0x62452d);
+  const leafMats=[material(0x285d3a),material(0x397647),material(0x477e4a)];
+  for(let i=0;i<145;i++){
+    const x=(rand()-.5)*100;
+    const z=20-rand()*110;
+    if(Math.abs(x)<6.8 && z>-67) continue;
+    const scale=.7+rand()*1.2;
+    const tree=new THREE.Group();
+    tree.position.set(x,0,z);
+    tree.scale.setScalar(scale);
+    scene.add(tree);
+    mesh(new THREE.CylinderGeometry(.22,.36,2.8,7),trunkMat,tree,0,1.4,0);
+    for(let j=0;j<3;j++){
+      mesh(new THREE.ConeGeometry(1.5-j*.22,2.4,7),
+        leafMats[Math.floor(rand()*leafMats.length)],tree,0,2.7+j*1.1,0);
+    }
+    addCircleObstacle(x,z,.58*scale);
   }
 }
-function makeShrine(){
-  const red=mat(0xa92f39),dark=mat(0x572c29);
+
+function createShrine(){
+  const red=material(0xa92f39);
+  const dark=material(0x572c29);
+  const stone=material(0x777d78);
+
+  // Torii posts and crossbeams
   for(const x of [-2.3,2.3]){
-    addMesh(new THREE.CylinderGeometry(.22,.29,5.2,10),red,scene,x,2.6,-28);
-    addBox(x,-28,.42,.42);
+    mesh(new THREE.CylinderGeometry(.22,.29,5.2,10),red,scene,x,2.6,-28);
+    mesh(new THREE.BoxGeometry(.85,.2,.85),dark,scene,x,.18,-28);
+    addBoxObstacle(x,-28,.42,.42);
   }
-  addMesh(new THREE.BoxGeometry(6.5,.45,.8),red,scene,0,5.1,-28);
-  addMesh(new THREE.BoxGeometry(7.4,.35,1),dark,scene,0,5.43,-28);
-  addMesh(new THREE.BoxGeometry(5.4,2.5,3.2),mat(0x8c4836),scene,0,1.4,-34);
-  addMesh(new THREE.ConeGeometry(4.4,1.7,4),mat(0x303d43),scene,0,3.45,-34);
-  addMesh(new THREE.CylinderGeometry(.9,1.15,.55,8),mat(0x777d78),scene,0,.28,-24);
-  const crystal=addMesh(new THREE.OctahedronGeometry(.55),
-    mat(0x5bdcff,.25,{emissive:0x159bd8,emissiveIntensity:1.5}),scene,0,1.15,-24);
-  crystal.userData.float=true;
-  addCircle(0,-24,1.15);
+  mesh(new THREE.BoxGeometry(6.5,.45,.8),red,scene,0,5.1,-28);
+  mesh(new THREE.BoxGeometry(7.4,.35,1.0),dark,scene,0,5.43,-28);
+  mesh(new THREE.BoxGeometry(5.0,.25,.65),red,scene,0,4.65,-28);
+
+  // Shrine building
+  mesh(new THREE.BoxGeometry(5.4,2.5,3.2),material(0x8c4836),scene,0,1.4,-34);
+  mesh(new THREE.ConeGeometry(4.4,1.7,4),material(0x303d43),scene,0,3.45,-34);
+  mesh(new THREE.BoxGeometry(1.1,1.8,.15),dark,scene,0,.95,-32.35);
+
+  // Quest altar
+  mesh(new THREE.CylinderGeometry(.9,1.15,.55,8),stone,scene,0,.28,-24);
+  mesh(new THREE.OctahedronGeometry(.55),new THREE.MeshStandardMaterial({
+    color:0x5bdcff,emissive:0x159bd8,emissiveIntensity:1.5,roughness:.25
+  }),scene,0,1.15,-24);
+  addCircleObstacle(0,-24,1.15);
+
+  const ring=mesh(new THREE.TorusGeometry(1.25,.06,8,32),
+    new THREE.MeshStandardMaterial({color:0x75e6ff,emissive:0x1388b6,emissiveIntensity:.8}),
+    scene,0,1.15,-24);
+  ring.rotation.x=Math.PI/2;
+  ring.userData.floating=true;
 }
 
-function makeLimb(parent, x,y,z, length, color){
-  const pivot=new THREE.Group();
-  pivot.position.set(x,y,z);
-  parent.add(pivot);
-  addMesh(new THREE.CapsuleGeometry(.13,Math.max(.1,length-.26),4,6),mat(color),pivot,0,-length/2,0);
-  return pivot;
-}
+function createPlayer(){
+  player=new THREE.Group();
+  scene.add(player);
+  const body=material(0x173d88);
+  const dark=material(0x121927);
+  const skin=material(0xf0d0b5);
+  const blue=material(0x39bfff);
+  const hair=material(0x182337);
+  const metal=new THREE.MeshStandardMaterial({color:0xcde7f4,metalness:.65,roughness:.28});
 
-function makePlayer(){
-  player=new THREE.Group();scene.add(player);
-  const body=mat(0x173d88),dark=mat(0x121927),skin=mat(0xf0d0b5);
-  const blue=mat(0x39bfff),hair=mat(0x182337);
-  const metal=mat(0xcde7f4,.25,{metalness:.65});
-  const torso=new THREE.Group();player.add(torso);
-  addMesh(new THREE.CylinderGeometry(.35,.45,.9,9),body,torso,0,1.05,0);
-  addMesh(new THREE.SphereGeometry(.34,12,10),skin,torso,0,1.72,0);
-  addMesh(new THREE.SphereGeometry(.37,10,8),hair,torso,0,1.91,-.04);
+  mesh(new THREE.CylinderGeometry(.38,.48,1.05,9),body,player,0,.92,0);
+  mesh(new THREE.SphereGeometry(.36,12,10),skin,player,0,1.72,0);
+  mesh(new THREE.SphereGeometry(.38,10,8),hair,player,0,1.91,-.04);
+
+  // Hair spikes
   for(let i=0;i<5;i++){
-    const spike=addMesh(new THREE.ConeGeometry(.14,.42,5),hair,torso,(i-2)*.13,2.12,-.02);
+    const spike=mesh(new THREE.ConeGeometry(.14,.42,5),hair,player,
+      (i-2)*.13,2.12,-.02);
     spike.rotation.z=(i-2)*-.23;
   }
+
+  // Three signature blue fox tails
   for(let i=0;i<3;i++){
-    const tail=addMesh(new THREE.ConeGeometry(.19,1.45,8),blue,torso,(i-1)*.42,.95,.67);
-    tail.rotation.x=-1;tail.rotation.z=(i-1)*-.4;
+    const tail=mesh(new THREE.ConeGeometry(.19,1.45,8),blue,player,
+      (i-1)*.42,.95,.67);
+    tail.rotation.x=-1.0;
+    tail.rotation.z=(i-1)*-.4;
   }
-  for(const x of [-.43,.43])addMesh(new THREE.SphereGeometry(.2,8,7),dark,torso,x,1.35,0);
 
-  const leftArm=makeLimb(torso,-.48,1.35,0,.68,0x173d88);
-  const rightArm=makeLimb(torso,.48,1.35,0,.68,0x173d88);
-  const leftLeg=makeLimb(player,-.2,.72,0,.72,0x172c52);
-  const rightLeg=makeLimb(player,.2,.72,0,.72,0x172c52);
+  // Shoulder pads
+  for(const x of [-.43,.43]){
+    mesh(new THREE.SphereGeometry(.22,8,7),dark,player,x,1.35,0);
+  }
 
-  // Save references for procedural animation.
-  player.userData={torso,leftArm,rightArm,leftLeg,rightLeg};
-
+  // Sword pivots around the hand during attacks
   swordPivot=new THREE.Group();
-  swordPivot.position.set(.48,1.23,-.04);
-  torso.add(swordPivot);
-  sword=new THREE.Group();swordPivot.add(sword);
-  addMesh(new THREE.BoxGeometry(.12,.92,.09),metal,sword,0,.55,0);
-  addMesh(new THREE.BoxGeometry(.43,.09,.14),mat(0xd7b56b),sword,0,.12,0);
-  addMesh(new THREE.BoxGeometry(.13,.28,.13),mat(0x573c29),sword,0,-.02,0);
+  swordPivot.position.set(.47,1.23,-.05);
+  player.add(swordPivot);
+  mesh(new THREE.BoxGeometry(.12,.18,.17),material(0x583b26),swordPivot,0,0,0);
+  sword= new THREE.Group();
+  swordPivot.add(sword);
+  mesh(new THREE.BoxGeometry(.12,.92,.09),metal,sword,0,.55,0);
+  mesh(new THREE.BoxGeometry(.43,.09,.14),material(0xd7b56b),sword,0,.12,0);
+  mesh(new THREE.BoxGeometry(.13,.28,.13),material(0x573c29),sword,0,-.02,0);
+  sword.rotation.z=-.35;
   player.position.set(0,0,0);
 }
 
-function healthBar(){
-  const canvas=document.createElement("canvas");
-  canvas.width=256;canvas.height=40;
-  const texture=new THREE.CanvasTexture(canvas);
-  const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthTest:false}));
-  sprite.scale.set(1.6,.25,1);
+function makeHealthSprite(){
+  const c=document.createElement("canvas");
+  c.width=256;c.height=48;
+  const ctx=c.getContext("2d");
+  ctx.fillStyle="#101418";ctx.fillRect(0,0,256,48);
+  ctx.strokeStyle="#ffffffaa";ctx.lineWidth=4;ctx.strokeRect(2,2,252,44);
+  ctx.fillStyle="#ff604e";ctx.fillRect(6,6,244,36);
+  const texture=new THREE.CanvasTexture(c);
+  const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,depthTest:false}));
+  sprite.scale.set(1.7,.32,1);
   sprite.position.y=1.65;
-  sprite.userData={canvas,ctx:canvas.getContext("2d"),texture};
+  sprite.userData={canvas:c,ctx,texture};
   return sprite;
 }
-function drawEnemyBar(e){
-  const {canvas,ctx,texture}=e.bar.userData;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="#161b20";ctx.fillRect(0,0,256,40);
-  ctx.fillStyle="#5ee08b";ctx.fillRect(4,4,248*Math.max(0,e.hp/e.maxHp),32);
-  ctx.strokeStyle="#fff";ctx.lineWidth=3;ctx.strokeRect(2,2,252,36);
+function updateEnemyBar(enemy){
+  const {canvas,ctx,texture}=enemy.bar.userData;
+  ctx.clearRect(0,0,256,48);
+  ctx.fillStyle="#12151b";ctx.fillRect(0,0,256,48);
+  ctx.fillStyle="#e54848";ctx.fillRect(5,5,246,38);
+  ctx.fillStyle="#6ee08d";ctx.fillRect(5,5,246*Math.max(0,enemy.hp/enemy.maxHp),38);
+  ctx.strokeStyle="#ffffff";ctx.lineWidth=4;ctx.strokeRect(2,2,252,44);
   texture.needsUpdate=true;
 }
-function spawnEnemy(x,z,index){
-  const g=new THREE.Group();scene.add(g);
-  const color=index%2?0x8c4ab7:0x4b9560;
-  addMesh(new THREE.SphereGeometry(.52,10,8),mat(color),g,0,.56,0);
-  addMesh(new THREE.SphereGeometry(.22,8,6),mat(color),g,0,1.02,0);
-  const eye=mat(0xffe4a2,.4,{emissive:0xff5c24,emissiveIntensity:.7});
-  for(const s of [-1,1]){
-    const horn=addMesh(new THREE.ConeGeometry(.14,.4,5),mat(0x26302a),g,s*.26,1.25,0);
-    horn.rotation.z=s*-.35;
-    addMesh(new THREE.SphereGeometry(.065,7,6),eye,g,s*.105,1.05,-.19);
-  }
-  const bar=healthBar();g.add(bar);
-  const e={group:g,x,z,hp:40,maxHp:40,alive:true,attackTimer:0,respawn:0,bar,index};
-  g.position.set(x,0,z);enemies.push(e);drawEnemyBar(e);
-}
-function makeEnemies(){
-  [[-8,-9],[8,-13],[-10,-22],[10,-31],[-8,-41],[9,-48],[-13,-54],[14,-17]].forEach((p,i)=>spawnEnemy(p[0],p[1],i));
-}
 
-/* SAVE SYSTEM */
-function saveGame(showMessage=true){
-  try{
-    const data={
-      version:3,hp,maxHp,xp,level,questProgress,questComplete,
-      inventory:{...inventory},equipment:{...equipment},
-      player:{x:player.position.x,z:player.position.z,yaw}
-    };
-    localStorage.setItem(SAVE_KEY,JSON.stringify(data));
-    $("saveStatus").textContent="💾 Saved locally";
-    if(showMessage)notify("💾 Progress saved on this device!",2);
-    return true;
-  }catch(err){
-    $("saveStatus").textContent="⚠️ Save unavailable";
-    if(showMessage)notify("Couldn't save. Check browser storage settings.",3);
-    return false;
+function createEnemies(){
+  const positions=[
+    [-8,-9],[8,-13],[-10,-22],[10,-31],[-8,-41],
+    [9,-48],[-13,-54],[14,-17]
+  ];
+  positions.forEach((p,i)=>spawnEnemy(p[0],p[1],i));
+}
+function spawnEnemy(x,z,index=0){
+  const g=new THREE.Group();
+  scene.add(g);
+  const skin=material(index%2?0x8c4ab7:0x4b9560);
+  const dark=material(0x26302a);
+  const eye= new THREE.MeshStandardMaterial({color:0xffe4a2,emissive:0xff5c24,emissiveIntensity:.7});
+  mesh(new THREE.SphereGeometry(.55,10,8),skin,g,0,.58,0);
+  mesh(new THREE.SphereGeometry(.22,8,6),skin,g,0,1.02,0);
+  for(const side of [-1,1]){
+    const horn=mesh(new THREE.ConeGeometry(.14,.4,5),dark,g,side*.26,1.25,0);
+    horn.rotation.z=side*-.35;
+    mesh(new THREE.SphereGeometry(.065,7,6),eye,g,side*.105,1.05,-.19);
   }
-}
-function loadGame(){
-  try{
-    const raw=localStorage.getItem(SAVE_KEY);
-    if(!raw)return;
-    const d=JSON.parse(raw);
-    if(d.version!==3)return;
-    level=Math.max(1,Number(d.level)||1);
-    maxHp=Math.max(100,Number(d.maxHp)||100);
-    hp=Math.max(1,Math.min(maxHp,Number(d.hp)||100));
-    xp=Math.max(0,Number(d.xp)||0);
-    questProgress=Math.max(0,Math.min(5,Number(d.questProgress)||0));
-    questComplete=!!d.questComplete||questProgress>=5;
-    if(d.inventory){
-      inventory.potions=Math.max(0,Number(d.inventory.potions)||0);
-      inventory.spiritCrystals=Math.max(0,Number(d.inventory.spiritCrystals)||0);
-    }
-    if(d.equipment){
-      if(weaponStats[d.equipment.weapon])equipment.weapon=d.equipment.weapon;
-      if(["Traveler Outfit","Spirit Armor"].includes(d.equipment.armor))equipment.armor=d.equipment.armor;
-    }
-    if(d.player&&Number.isFinite(d.player.x)&&Number.isFinite(d.player.z)){
-      if(canStandAt(d.player.x,d.player.z))player.position.set(d.player.x,0,d.player.z);
-      yaw=Number(d.player.yaw)||0;
-    }
-    $("saveStatus").textContent="💾 Save loaded";
-  }catch(err){
-    console.warn("Save data could not be loaded:",err);
-    $("saveStatus").textContent="⚠️ New save started";
-  }
-}
-
-function neededXP(){return 100+(level-1)*55;}
-function updateHud(){
-  $("level").textContent=level;
-  $("hpText").textContent=`${Math.ceil(hp)}/${maxHp} HP`;
-  $("hpFill").style.width=`${Math.max(0,hp/maxHp*100)}%`;
-  $("xpText").textContent=`${xp}/${neededXP()} XP`;
-  $("xpFill").style.width=`${Math.min(100,xp/neededXP()*100)}%`;
-
-  // Quest progress is its own saved value, not the number of live enemies.
-  $("questCount").textContent=questProgress;
-  $("quest").innerHTML=questComplete
-    ?"🏆 QUEST COMPLETE!<br>Forest Threat — 5/5 spirits defeated"
-    :`📜 Quest: Forest Threat<br>Spirits defeated: <b id="questCount">${questProgress}</b>/5`;
-}
-function checkLevelUp(){
-  while(xp>=neededXP()){
-    xp-=neededXP();
-    level++;
-    maxHp+=20;
-    hp=Math.min(maxHp,hp+35);
-    popup(`🎉 LEVEL UP! Level ${level}`,2.5);
-  }
-}
-function currentDamage(){
-  return weaponStats[equipment.weapon]||18;
-}
-function updateInventory(){
-  $("equipment").innerHTML=`
-    <h3>⚔️ Equipment</h3>
-    <div class="item"><div><b>Weapon: ${equipment.weapon}</b><small>Damage: ${currentDamage()}</small></div>
-      <button id="weaponBtn">Change weapon</button></div>
-    <div class="item"><div><b>Armor: ${equipment.armor}</b><small>${equipment.armor==="Spirit Armor"?"Damage resistance: 30%":"Standard protection"}</small></div>
-      <button id="armorBtn">Change armor</button></div>`;
-  $("items").innerHTML=`
-    <h3>🎒 Items</h3>
-    <div class="item"><div><b>🧪 Healing Potions × ${inventory.potions}</b><small>Restore 45 HP</small></div>
-      <button id="potionBtn">Use</button></div>
-    <div class="item"><div><b>💎 Spirit Crystals × ${inventory.spiritCrystals}</b><small>Collected from defeated spirits</small></div></div>`;
-  $("weaponBtn").onclick=()=>{
-    equipment.weapon=equipment.weapon==="Blue Katana"?"Spirit Blade":
-      equipment.weapon==="Spirit Blade"?"Wooden Sword":"Blue Katana";
-    if(equipment.weapon==="Spirit Blade"&&inventory.spiritCrystals<3){
-      equipment.weapon="Blue Katana";
-      notify("You need 3 spirit crystals to unlock the Spirit Blade.",2);
-    }else{
-      notify("Equipped: "+equipment.weapon,1.5);
-      updateInventory();saveGame(false);
-    }
-  };
-  $("armorBtn").onclick=()=>{
-    if(equipment.armor==="Traveler Outfit"){
-      if(inventory.spiritCrystals<2){notify("You need 2 spirit crystals for Spirit Armor.",2);return;}
-      equipment.armor="Spirit Armor";
-    }else equipment.armor="Traveler Outfit";
-    updateInventory();saveGame(false);
-    notify("Equipped: "+equipment.armor,1.5);
-  };
-  $("potionBtn").onclick=usePotion;
-}
-function usePotion(){
-  if(gameOver)return;
-  if(inventory.potions<=0){notify("No healing potions left!",1.5);return;}
-  if(hp>=maxHp){notify("Your HP is already full.",1.5);return;}
-  inventory.potions--;
-  hp=Math.min(maxHp,hp+45);
-  updateHud();updateInventory();saveGame(false);
-  notify("🧪 Restored 45 HP!",1.5);
+  const bar=makeHealthSprite();
+  g.add(bar);
+  const e={group:g,hp:40,maxHp:40,x,z,alive:true,attackTimer:0,respawnTimer:0,bar,index};
+  g.position.set(x,0,z);
+  updateEnemyBar(e);
+  enemies.push(e);
+  return e;
 }
 
 function attack(){
-  if(gameOver||attackCooldown>0)return;
-  attackCooldown=.48;swingTime=.32;
-  let target=null,best=3.2;
-  const fx=Math.sin(yaw),fz=-Math.cos(yaw);
+  if(gameOver || attackCooldown>0) return;
+  attackCooldown=.48;
+  swingTime=.3;
+  popup("⚔️ Sword strike!",.45);
+
+  // Find the closest enemy in front of the player
+  const facing=new THREE.Vector3(Math.sin(yaw),0,-Math.cos(yaw));
+  let target=null,best=3.0;
   for(const e of enemies){
-    if(!e.alive)continue;
+    if(!e.alive) continue;
     const dx=e.x-player.position.x,dz=e.z-player.position.z;
-    const d=Math.hypot(dx,dz);
-    const dot=(dx*fx+dz*fz)/(d||1);
-    if(d<best&&dot>.05){best=d;target=e;}
+    const dist=Math.hypot(dx,dz);
+    if(dist>best) continue;
+    const dot=(dx*facing.x+dz*facing.z)/(dist||1);
+    if(dot>.05){best=dist;target=e;}
   }
-  if(!target){notify("Swing! Face an enemy and get closer.",1);return;}
-  const damage=currentDamage();
-  target.hp-=damage;
-  drawEnemyBar(target);
-  target.group.position.y=.18;
-  setTimeout(()=>{if(target.alive)target.group.position.y=0;},100);
-  notify(`⚔️ ${equipment.weapon}: ${damage} damage!`,1);
-  if(target.hp<=0)defeatEnemy(target);
+  if(target){
+    const damage=18+Math.floor((level-1)*3);
+    target.hp-=damage;
+    updateEnemyBar(target);
+    toast(`💥 Hit! ${damage} damage`,1.2);
+    target.group.position.y=.2;
+    setTimeout(()=>{if(target.alive)target.group.position.y=0;},110);
+    if(target.hp<=0) defeatEnemy(target);
+  }else{
+    toast("Swing! Get closer and face an enemy.",1.1);
+  }
 }
 function defeatEnemy(e){
-  if(!e.alive)return;
-  e.alive=false;e.group.visible=false;e.respawn=14;
-  inventory.spiritCrystals++;
+  e.alive=false;
+  e.group.visible=false;
+  e.respawnTimer=12;
+  kills++;
   xp+=35;
+  toast(`✨ Spirit defeated! +35 XP • ${kills}/5 defeated`,2.4);
+  popup("🌟 Enemy defeated!",1.2);
 
-  // The quest count increments exactly once for each defeated spirit.
-  if(!questComplete){
-    questProgress=Math.min(5,questProgress+1);
-    if(questProgress>=5)questComplete=true;
+  if(!questComplete && kills>=5){
+    questComplete=true;
+    xp+=100;
+    popup("🏆 QUEST COMPLETE! +100 BONUS XP",3.5);
+    toast("Quest complete! Visit the shrine for your next mission.",4);
   }
-
   checkLevelUp();
   updateHud();
-  updateInventory();
-  saveGame(false);
+}
+function checkLevelUp(){
+  while(xp>=100+(level-1)*55){
+    xp-=100+(level-1)*55;
+    level++;
+    maxHp+=20;
+    hp=Math.min(maxHp,hp+35);
+    popup(`🎉 LEVEL UP! You are now level ${level}!`,2.5);
+  }
+}
+function updateHud(){
+  $("level").textContent=level;
+  $("hpText").textContent=`${Math.ceil(hp)} / ${maxHp} HP`;
+  $("hpFill").style.width=`${Math.max(0,hp/maxHp*100)}%`;
+  const needed=100+(level-1)*55;
+  $("xpText").textContent=`${xp} / ${needed} XP`;
+  $("xpFill").style.width=`${Math.min(100,xp/needed*100)}%`;
+  $("kills").textContent=Math.min(kills,5);
+  $("quest").innerHTML=questComplete
+    ?"🏆 QUEST COMPLETE!<br>All five forest spirits defeated!<br><span class='small'>Explore, level up, and keep fighting.</span>"
+    :`📜 QUEST: The Forest Threat<br>Defeat the forest spirits: <b>${Math.min(kills,5)}</b>/5`;
+}
 
-  if(questComplete&&questProgress===5){
-    popup("🏆 QUEST COMPLETE! +100 BONUS XP",3);
-    xp+=100;checkLevelUp();updateHud();saveGame(false);
-    // Keep this from awarding the bonus again after later defeats.
-    questProgress=6;
-    updateHud();saveGame(false);
-    notify("Quest complete! You earned a bonus and a spirit crystal.",3);
-  }else{
-    popup(`✨ Spirit defeated! ${questProgress}/5`,1.5);
-    notify(`+35 XP · +1 Spirit Crystal · Quest ${Math.min(questProgress,5)}/5`,2);
+function takeDamage(amount){
+  if(hurtCooldown>0 || gameOver) return;
+  hurtCooldown=.8;
+  hp=Math.max(0,hp-amount);
+  updateHud();
+  toast(`💢 You took ${amount} damage!`,1.2);
+  if(hp<=0){
+    gameOver=true;
+    $("dead").style.display="grid";
   }
 }
 
 function interact(){
-  if(gameOver)return;
-  if(Math.hypot(player.position.x,player.position.z+24)<4.2){
-    if(hp<maxHp){
-      hp=Math.min(maxHp,hp+35);updateHud();saveGame(false);
-      notify("⛩️ Shrine blessing restored HP!",2);
+  if(gameOver) return;
+  const d=Math.hypot(player.position.x,player.position.z+24);
+  if(d<4.2){
+    if(!shrineMessageShown){
+      shrineMessageShown=true;
+      popup("⛩️ Shrine of the Blue Kitsune",3);
+      toast("The shrine glows with ancient energy.",2.5);
+    }else if(hp<maxHp){
+      hp=Math.min(maxHp,hp+35);
+      updateHud();
+      toast("💙 Shrine blessing restored 35 HP!",2);
     }else{
-      saveGame(false);
-      notify(questComplete?"The shrine celebrates your victory!":"The shrine is watching over you. Progress saved.",2);
+      toast(questComplete?"The shrine recognizes your victory.":"The shrine is waiting for a worthy warrior.",2);
     }
-  }else notify("Find the glowing shrine beside the red gate.",1.5);
-}
-
-function takeDamage(amount){
-  if(hurtCooldown>0||gameOver)return;
-  hurtCooldown=.8;
-  const reduction=equipment.armor==="Spirit Armor"?.7:1;
-  hp=Math.max(0,hp-Math.ceil(amount*reduction));
-  updateHud();saveGame(false);
-  notify("💢 You took damage!",1);
-  if(hp<=0){
-    gameOver=true;
-    saveGame(false);
-    $("dead").style.display="grid";
+  }else{
+    toast("Find the glowing shrine near the red gate.",1.6);
   }
 }
+
 function updateEnemies(dt){
   let closest=null,closestD=Infinity;
   for(const e of enemies){
     if(!e.alive){
-      e.respawn-=dt;
-      if(e.respawn<=0){
+      e.respawnTimer-=dt;
+      if(e.respawnTimer<=0){
         e.alive=true;e.hp=e.maxHp;e.group.visible=true;
-        e.group.position.set(e.x,0,e.z);drawEnemyBar(e);
+        e.group.position.set(e.x,0,e.z);
+        updateEnemyBar(e);
       }
       continue;
     }
-    const dx=player.position.x-e.x,dz=player.position.z-e.z;
+    const dx=player.position.x-e.x;
+    const dz=player.position.z-e.z;
     const d=Math.hypot(dx,dz);
     if(d<closestD){closestD=d;closest=e;}
     e.group.rotation.y=Math.atan2(dx,dz);
-    e.group.position.y=.04+Math.sin(performance.now()*.004+e.index)*.04;
-    if(d<12&&d>1.05&&!gameOver){
-      const nx=e.x+dx/d*1.7*dt,nz=e.z+dz/d*1.7*dt;
-      if(canStandAt(nx,nz)&&Math.hypot(nx-player.position.x,nz-player.position.z)>.85){
+
+    if(d<12 && d>1.05 && !gameOver){
+      const speed=1.6+Math.min(level*.05,.5);
+      const nx=e.x+(dx/d)*speed*dt;
+      const nz=e.z+(dz/d)*speed*dt;
+      if(canStandAt(nx,nz) && Math.hypot(nx-player.position.x,nz-player.position.z)>0.85){
         e.x=nx;e.z=nz;e.group.position.x=nx;e.group.position.z=nz;
       }
     }
-    if(d<1.5&&!gameOver){
+    if(d<1.5 && !gameOver){
       e.attackTimer-=dt;
       if(e.attackTimer<=0){
         e.attackTimer=1.35;
@@ -537,66 +510,66 @@ function updateEnemies(dt){
       }
     }else e.attackTimer=Math.max(0,e.attackTimer-dt);
   }
-  if(closest&&closestD<15){
+  if(closest && closestD<15){
     $("enemyHud").style.display="block";
-    $("enemyName").textContent="Forest Spirit";
+    $("enemyName").textContent=closest.alive?"Forest Spirit":"";
     $("enemyFill").style.width=`${Math.max(0,closest.hp/closest.maxHp*100)}%`;
-    $("enemyHp").textContent=`${Math.max(0,closest.hp)}/${closest.maxHp} HP`;
-  }else $("enemyHud").style.display="none";
+    $("enemyHp").textContent=`${Math.max(0,closest.hp)} / ${closest.maxHp} HP`;
+  }else{
+    $("enemyHud").style.display="none";
+  }
 }
 
 function updatePlayer(dt){
-  if(gameOver)return;
-  const up=keys.KeyW||keys.ArrowUp,down=keys.KeyS||keys.ArrowDown;
-  const left=keys.KeyA||keys.ArrowLeft,rightKey=keys.KeyD||keys.ArrowRight;
-  let ix=(rightKey?1:0)-(left?1:0)+stickX;
-  let iy=(down?1:0)-(up?1:0)+stickY;
-  const len=Math.hypot(ix,iy);
-  if(len>1){ix/=len;iy/=len;}
-  const moving=Math.abs(ix)+Math.abs(iy)>.08;
-  const speed=(keys.ShiftLeft||keys.ShiftRight)?8.2:5.1;
-  const dx=(ix*Math.cos(yaw)+iy*Math.sin(yaw))*speed*dt;
-  const dz=(-ix*Math.sin(yaw)+iy*Math.cos(yaw))*speed*dt;
-  if(moving){
-    const nx=player.position.x+dx,nz=player.position.z+dz;
-    if(canStandAt(nx,player.position.z))player.position.x=nx;
-    if(canStandAt(player.position.x,nz))player.position.z=nz;
-    player.rotation.y=Math.atan2(dx,-dz);
-    walkTime+=dt*(speed>6?13:9);
-  }
+  if(gameOver) return;
+  const up=keys.KeyW||keys.ArrowUp;
+  const down=keys.KeyS||keys.ArrowDown;
+  const left=keys.KeyA||keys.ArrowLeft;
+  const rgt=keys.KeyD||keys.ArrowRight;
 
-  // Procedural idle / walk / run animation for arms and legs.
-  const ud=player.userData;
-  const amount=moving?1:0.12;
-  const wave=Math.sin(walkTime)*amount;
-  ud.leftLeg.rotation.x=wave;
-  ud.rightLeg.rotation.x=-wave;
-  ud.leftArm.rotation.x=-wave*.8;
-  ud.rightArm.rotation.x=wave*.8;
-  ud.torso.position.y=moving?Math.abs(Math.sin(walkTime*2))*.045:Math.sin(performance.now()*.0015)*.018;
+  let ix=(rgt?1:0)-(left?1:0)+stickX;
+  let iy=(down?1:0)-(up?1:0)+stickY;
+  const length=Math.hypot(ix,iy);
+  if(length>1){ix/=length;iy/=length;}
+
+  const running=keys.ShiftLeft||keys.ShiftRight;
+  const speed=running?8.5:5.2;
+  const sin=Math.sin(yaw),cos=Math.cos(yaw);
+  // Camera-relative movement
+  const dx=(ix*cos + iy*sin)*speed*dt;
+  const dz=(-ix*sin + iy*cos)*speed*dt;
+
+  if(Math.abs(ix)+Math.abs(iy)>.08){
+    const nx=player.position.x+dx;
+    const nz=player.position.z+dz;
+    if(canStandAt(nx,player.position.z)) player.position.x=nx;
+    if(canStandAt(player.position.x,nz)) player.position.z=nz;
+    player.rotation.y=Math.atan2(dx,-dz);
+  }
 
   attackCooldown=Math.max(0,attackCooldown-dt);
   hurtCooldown=Math.max(0,hurtCooldown-dt);
+
   if(swingTime>0){
     swingTime-=dt;
-    const t=1-swingTime/.32;
-    swordPivot.rotation.z=-Math.sin(t*Math.PI)*1.9;
-    swordPivot.rotation.x=-Math.sin(t*Math.PI)*.65;
-    ud.rightArm.rotation.x=-1.2;
+    const t=1-swingTime/.3;
+    swordPivot.rotation.z=-Math.sin(t*Math.PI)*1.8;
+    swordPivot.rotation.x=-Math.sin(t*Math.PI)*.7;
   }else{
     swordPivot.rotation.z=THREE.MathUtils.damp(swordPivot.rotation.z,0,12,dt);
     swordPivot.rotation.x=THREE.MathUtils.damp(swordPivot.rotation.x,0,12,dt);
   }
 }
+
 function updateCamera(dt){
-  const d=7.5;
+  const distance=7.5;
   const target=new THREE.Vector3(
-    player.position.x-Math.sin(yaw)*Math.cos(pitch)*d,
-    player.position.y+2.3+Math.sin(pitch)*d,
-    player.position.z+Math.cos(yaw)*Math.cos(pitch)*d
+    player.position.x-Math.sin(yaw)*Math.cos(pitch)*distance,
+    player.position.y+2.3+Math.sin(pitch)*distance,
+    player.position.z+Math.cos(yaw)*Math.cos(pitch)*distance
   );
   camera.position.lerp(target,1-Math.exp(-7*dt));
-  camera.lookAt(player.position.x,player.position.y+1.1,player.position.z);
+  camera.lookAt(player.position.x,player.position.y+1.15,player.position.z);
 }
 
 function bindControls(){
@@ -605,8 +578,6 @@ function bindControls(){
     if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))e.preventDefault();
     if(e.code==="Space"&&!e.repeat)attack();
     if(e.code==="KeyE"&&!e.repeat)interact();
-    if(e.code==="KeyI"&&!e.repeat)togglePanel();
-    if(e.code==="KeyH"&&!e.repeat)usePotion();
   });
   addEventListener("keyup",e=>keys[e.code]=false);
   addEventListener("blur",()=>{for(const k in keys)keys[k]=false;});
@@ -626,86 +597,86 @@ function bindControls(){
   });
   renderer.domElement.addEventListener("pointerup",()=>dragging=false);
   renderer.domElement.addEventListener("pointercancel",()=>dragging=false);
+  renderer.domElement.addEventListener("click",e=>{
+    if(e.pointerType==="mouse")attack();
+  });
 
   const base=$("stickBase"),knob=$("stickKnob");
-  function moveStick(e){
-    const r=base.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  function setStick(e){
+    const r=base.getBoundingClientRect();
+    const cx=r.left+r.width/2,cy=r.top+r.height/2;
     let dx=e.clientX-cx,dy=e.clientY-cy;
-    const max=36,len=Math.hypot(dx,dy);
-    if(len>max){dx=dx/len*max;dy=dy/len*max;}
+    const max=37,dist=Math.hypot(dx,dy);
+    if(dist>max){dx=dx/dist*max;dy=dy/dist*max;}
     stickX=dx/max;stickY=dy/max;
-    knob.style.left=33+dx+"px";knob.style.top=33+dy+"px";
+    knob.style.left=(34+dx)+"px";
+    knob.style.top=(34+dy)+"px";
   }
-  base.addEventListener("pointerdown",e=>{stickActive=true;base.setPointerCapture(e.pointerId);moveStick(e);});
-  base.addEventListener("pointermove",e=>{if(stickActive)moveStick(e);});
-  function release(){
-    stickActive=false;stickX=stickY=0;
-    knob.style.left="33px";knob.style.top="33px";
+  base.addEventListener("pointerdown",e=>{
+    stickActive=true;base.setPointerCapture(e.pointerId);setStick(e);
+  });
+  base.addEventListener("pointermove",e=>{if(stickActive)setStick(e);});
+  function releaseStick(){
+    stickActive=false;stickX=0;stickY=0;
+    knob.style.left="34px";knob.style.top="34px";
   }
-  base.addEventListener("pointerup",release);
-  base.addEventListener("pointercancel",release);
+  base.addEventListener("pointerup",releaseStick);
+  base.addEventListener("pointercancel",releaseStick);
 
   $("attack").addEventListener("pointerdown",e=>{e.preventDefault();attack();});
-  $("usePotion").addEventListener("pointerdown",e=>{e.preventDefault();usePotion();});
-  $("inventoryBtn").onclick=togglePanel;
-  $("saveBtn").onclick=()=>saveGame(true);
-  $("closePanel").onclick=togglePanel;
-  $("drinkBtn").onclick=usePotion;
-  $("respawn").onclick=()=>{
-    gameOver=false;hp=maxHp;
+  $("interact").addEventListener("pointerdown",e=>{e.preventDefault();interact();});
+  $("respawn").addEventListener("click",()=>{
+    hp=maxHp;gameOver=false;
     player.position.set(0,0,0);
+    yaw=0;pitch=.25;
     $("dead").style.display="none";
-    updateHud();saveGame(false);
-    notify("Back at the shrine. Your progress is safe.",2);
-  };
+    updateHud();
+    toast("Back in the adventure. Good luck, Alfa!",2.5);
+  });
+
   addEventListener("resize",()=>{
     camera.aspect=innerWidth/innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth,innerHeight);
-    renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+    renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));
   });
-}
-function togglePanel(){
-  panelOpen=!panelOpen;
-  $("panel").style.display=panelOpen?"block":"none";
-  if(panelOpen)updateInventory();
 }
 
 function animate(){
   requestAnimationFrame(animate);
   const dt=Math.min(clock.getDelta(),.04);
+
   updatePlayer(dt);
   updateEnemies(dt);
   updateCamera(dt);
+
   scene.traverse(o=>{
-    if(o.userData.float){
-      o.rotation.y+=dt*.8;
+    if(o.userData.floating){
+      o.rotation.z+=dt*.8;
       o.position.y=1.15+Math.sin(performance.now()*.0015)*.12;
     }
   });
+
   toastTime-=dt;
-  if(toastTime<=0)$("toast").style.opacity=".75";
+  if(toastTime<=0)$("toast").style.opacity="0.72";
+  else $("toast").style.opacity="1";
   messageTime-=dt;
   if(messageTime<=0)$("message").style.display="none";
-  autoSaveTimer+=dt;
-  if(autoSaveTimer>=15){autoSaveTimer=0;saveGame(false);}
+
   renderer.render(scene,camera);
 }
 
 try{
   createWorld();
   clock=new THREE.Clock();
-  loadGame();
-  updateHud();
-  updateInventory();
   bindControls();
-  notify("Welcome back, Alfa! I saves progress every 15 seconds.",3);
+  updateHud();
+  toast("Welcome, Alfa! Find the spirits and protect the shrine.",4);
   animate();
 }catch(err){
   console.error(err);
-  $("toast").textContent="Game couldn't start. Reload and check your internet connection.";
+  $("toast").textContent="Game failed to start. Reload the page and check your internet connection.";
 }
-addEventListener("beforeunload",()=>saveGame(false));
 </script>
 </body>
 </html>
