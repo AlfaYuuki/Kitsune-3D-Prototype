@@ -1,63 +1,165 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Kitsune FunZone — 3D Prototype</title>
+  <meta name="theme-color" content="#071426">
+  <title>Kitsune FunZone — 3D RPG Prototype</title>
 
   <style>
     * { box-sizing: border-box; }
+
     body {
-      margin: 0; overflow: hidden;
+      margin: 0;
+      overflow: hidden;
       font-family: system-ui, sans-serif;
-      background: #071426; color: white;
+      background: #071426;
+      color: white;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    canvas {
+      display: block;
       touch-action: none;
     }
-    canvas { display: block; }
+
     #hud {
-      position: fixed; top: 12px; left: 12px;
-      padding: 12px 15px; border-radius: 14px;
-      background: #071426cc; border: 1px solid #53c9ff66;
-      pointer-events: none; font-size: 13px;
+      position: fixed;
+      z-index: 5;
+      top: 12px;
+      left: 12px;
+      padding: 12px 15px;
+      border-radius: 14px;
+      background: #071426dd;
+      border: 1px solid #53c9ff66;
+      pointer-events: none;
+      font-size: 12px;
+      line-height: 1.7;
     }
-    #hud strong { color: #65d9ff; font-size: 16px; }
+
+    #hud strong {
+      color: #65d9ff;
+      font-size: 15px;
+    }
+
+    #coords { color: #b9d9f7; }
+
     #hint {
-      position: fixed; top: 12px; right: 12px;
-      max-width: 45%; text-align: right;
-      font-size: 11px; color: #e0efff;
+      position: fixed;
+      z-index: 5;
+      top: 12px;
+      right: 12px;
+      max-width: 44%;
+      text-align: right;
+      font-size: 11px;
+      color: #e0efff;
       text-shadow: 0 2px 5px #000;
       pointer-events: none;
     }
+
     #stick {
-      position: fixed; bottom: 25px; left: 25px;
-      width: 120px; height: 120px; border-radius: 50%;
-      background: #bcecff22; border: 2px solid #a8e6ff88;
+      position: fixed;
+      z-index: 10;
+      bottom: max(25px, env(safe-area-inset-bottom));
+      left: 25px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: #bcecff22;
+      border: 2px solid #a8e6ff88;
       touch-action: none;
     }
+
     #knob {
-      position: absolute; left: 35px; top: 35px;
-      width: 46px; height: 46px; border-radius: 50%;
-      background: #65d9ffcc; border: 2px solid white;
+      position: absolute;
+      left: 35px;
+      top: 35px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: #65d9ffcc;
+      border: 2px solid white;
+      pointer-events: none;
     }
+
     #attack {
-      position: fixed; right: 25px; bottom: 35px;
-      width: 78px; height: 78px; border-radius: 50%;
-      color: white; font-weight: bold; font-size: 15px;
-      background: #185dbb; border: 2px solid #83e5ff;
+      position: fixed;
+      z-index: 10;
+      right: 25px;
+      bottom: max(35px, env(safe-area-inset-bottom));
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      background: #185dbb;
+      border: 2px solid #83e5ff;
       box-shadow: 0 0 20px #167dff66;
       touch-action: none;
+      -webkit-tap-highlight-color: transparent;
     }
+
+    #attack:active {
+      background: #398cff;
+      transform: scale(.95);
+    }
+
     #message {
-      position: fixed; top: 42%; width: 100%;
-      text-align: center; font-size: 28px; font-weight: 800;
-      color: #a6ecff; text-shadow: 0 0 18px #167dff;
-      opacity: 0; pointer-events: none;
+      position: fixed;
+      z-index: 6;
+      top: 40%;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 27px;
+      font-weight: 800;
+      color: #a6ecff;
+      text-shadow: 0 0 18px #167dff;
+      opacity: 0;
+      pointer-events: none;
     }
-    @media (pointer:fine) {
+
+    #status {
+      position: fixed;
+      z-index: 6;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 80%;
+      padding: 6px 12px;
+      border-radius: 10px;
+      background: #071426bb;
+      color: #c8e9ff;
+      font-size: 11px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    #error {
+      display: none;
+      position: fixed;
+      z-index: 30;
+      inset: 15%;
+      height: fit-content;
+      padding: 18px;
+      background: #30151c;
+      border: 1px solid #ff718b;
+      border-radius: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    @media (pointer: fine) {
       #stick::after {
         content: "WASD / ARROWS";
-        position: absolute; top: 124px; left: 5px;
-        white-space: nowrap; font-size: 10px;
+        position: absolute;
+        top: 124px;
+        left: 5px;
+        white-space: nowrap;
+        font-size: 10px;
       }
     }
   </style>
@@ -74,364 +176,618 @@
 <body>
   <div id="hud">
     <strong>🦊 KITSUNE FUNZONE</strong><br>
-    3D World Prototype<br>
+    3D RPG Prototype<br>
     Level 1 · Rank D<br>
     <span id="coords">Position: 0, 0</span>
   </div>
 
-  <div id="hint">Drag the right side to look around<br>Explore the world!</div>
-  <div id="stick"><div id="knob"></div></div>
-  <button id="attack">⚔️<br>ATTACK</button>
+  <div id="hint">
+    Drag the right side to look around<br>
+    Explore the world!
+  </div>
+
+  <div id="stick">
+    <div id="knob"></div>
+  </div>
+
+  <button id="attack" type="button">⚔️<br>ATTACK</button>
   <div id="message">⚔️ SWORD SKILL!</div>
+  <div id="status">Loading 3D world...</div>
+  <div id="error"></div>
 
   <script type="module">
     import * as THREE from "three";
 
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x83cfff);
-    scene.fog = new THREE.Fog(0x83cfff, 35, 110);
+    const status = document.querySelector("#status");
+    const errorBox = document.querySelector("#error");
 
-    const camera = new THREE.PerspectiveCamera(
-      65, innerWidth / innerHeight, 0.1, 180
-    );
+    try {
+      // ================================================
+      // 1. SCENE AND CAMERA
+      // ================================================
 
-    const renderer = new THREE.WebGLRenderer({
-      antialias: false, powerPreference: "low-power"
-    });
-    renderer.setSize(innerWidth, innerHeight);
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-    renderer.shadowMap.enabled = false;
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    document.body.prepend(renderer.domElement);
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x83cfff);
+      scene.fog = new THREE.Fog(0x83cfff, 35, 110);
 
-    scene.add(new THREE.HemisphereLight(0xd7efff, 0x34522e, 2));
+      const camera = new THREE.PerspectiveCamera(
+        65,
+        innerWidth / innerHeight,
+        0.1,
+        180
+      );
 
-    const sun = new THREE.DirectionalLight(0xffffff, 2);
-    sun.position.set(-12, 24, 10);
-    scene.add(sun);
-
-    function material(color) {
-      return new THREE.MeshStandardMaterial({
-        color, roughness: 1, metalness: 0
+      const renderer = new THREE.WebGLRenderer({
+        antialias: false,
+        powerPreference: "low-power"
       });
-    }
 
-    const grassMat = material(0x4b9b60);
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(180, 180), grassMat
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -0.05;
-    scene.add(ground);
-
-    // A pale path through the starter area
-    const path = new THREE.Mesh(
-      new THREE.PlaneGeometry(7, 100),
-      material(0xcbb991)
-    );
-    path.rotation.x = -Math.PI / 2;
-    path.position.set(0, 0, -12);
-    scene.add(path);
-    
-const obstacles = [];
-const PLAYER_RADIUS = 0.42;
-
-function canStandAt(x, z) {
-  // Keep the player inside the starter area.
-  if (x < -44.5 || x > 44.5 || z < -84.5 || z > 24.5) {
-    return false;
-  }
-
-  for (const obstacle of obstacles) {
-    if (obstacle.type === "circle") {
-      const dx = x - obstacle.x;
-      const dz = z - obstacle.z;
-      const minDistance = PLAYER_RADIUS + obstacle.r;
-
-      if (dx * dx + dz * dz < minDistance * minDistance) {
-        return false;
-      }
-    }
-
-    if (obstacle.type === "box") {
-      const insideX =
-        Math.abs(x - obstacle.x) < obstacle.sx / 2 + PLAYER_RADIUS;
-      const insideZ =
-        Math.abs(z - obstacle.z) < obstacle.sz / 2 + PLAYER_RADIUS;
-
-      if (insideX && insideZ) return false;
-    }
-  }
-
-  return true;
-}
-
-    // Simple trees to create a small explorable world
-    function tree(x, z, scale = 1) {
-      const group = new THREE.Group();
-      group.position.set(x, 0, z);
-      group.scale.setScalar(scale);
-
-      const trunk = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.22, 0.35, 2, 6),
-        material(0x67432d)
-      );
-      trunk.position.y = 1;
-      group.add(trunk);
-
-      for (let i = 0; i < 3; i++) {
-        const crown = new THREE.Mesh(
-          new THREE.ConeGeometry(1.35 - i * 0.22, 2.1, 7),
-          material(i === 1 ? 0x238657 : 0x176c4a)
-        );
-        crown.position.y = 2.2 + i * 0.85;
-        group.add(crown);
-      }
-      scene.add(group);
-
-obstacles.push({
-  type: "circle",
-  x,
-  z,
-  r: 0.48 * scale
-});
-    }
-
-    for (let i = 0; i < 65; i++) {
-      const side = Math.random() < 0.5 ? -1 : 1;
-      const x = side * (6 + Math.random() * 35);
-      const z = 20 - Math.random() * 100;
-      tree(x, z, 0.7 + Math.random() * 0.8);
-    }
-
-    // A simple red shrine gate in the distance
-    const red = material(0xc63f45);
-    function beam(x, y, z, sx, sy, sz) {
-  const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(sx, sy, sz),
-    red
-  );
-
-  mesh.position.set(x, y, z);
-  scene.add(mesh);
-
-  // Only the tall vertical posts block the player.
-  if (sy >= 3 && sx < 1 && sz < 1) {
-    obstacles.push({
-      type: "box",
-      x,
-      z,
-      sx,
-      sz
-    });
-  }
-}
-    beam(-2.2, 2.0, -28, 0.35, 4, 0.35);
-    beam( 2.2, 2.0, -28, 0.35, 4, 0.35);
-    beam(0, 4.1, -28, 6.0, 0.4, 0.65);
-    beam(0, 3.65, -28, 4.5, 0.25, 0.45);
-
-    // Player: a simple placeholder character with three blue tails
-    const player = new THREE.Group();
-    scene.add(player);
-
-    const blue = material(0x2678ff);
-    const dark = material(0x17233f);
-    const white = material(0xf0f6ff);
-
-    const body = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.42, 0.75, 3, 7), blue
-    );
-    body.position.y = 1.0;
-    player.add(body);
-
-    const head = new THREE.Mesh(
-      new THREE.SphereGeometry(0.38, 10, 8), white
-    );
-    head.position.y = 1.85;
-    player.add(head);
-
-    for (let i = 0; i < 3; i++) {
-      const tail = new THREE.Mesh(
-        new THREE.ConeGeometry(0.19, 1.15, 6), blue
-      );
-      tail.rotation.x = -1.0;
-      tail.rotation.z = (i - 1) * 0.55;
-      tail.position.set((i - 1) * 0.34, 0.9, 0.55);
-      player.add(tail);
-    }
-
-    const sword = new THREE.Mesh(
-      new THREE.BoxGeometry(0.09, 0.9, 0.12),
-      material(0x9beaff)
-    );
-    sword.position.set(0.52, 1.1, -0.1);
-    sword.rotation.z = -0.35;
-    player.add(sword);
-
-    let yaw = 0;
-    let camYaw = 0;
-    let camPitch = 0.25;
-    const keys = {};
-    const input = { x: 0, y: 0 };
-
-    addEventListener("keydown", e => {
-      keys[e.key.toLowerCase()] = true;
-    });
-    addEventListener("keyup", e => {
-      keys[e.key.toLowerCase()] = false;
-    });
-
-    const stick = document.querySelector("#stick");
-    const knob = document.querySelector("#knob");
-    let stickId = null;
-
-    stick.addEventListener("pointerdown", e => {
-      stickId = e.pointerId;
-      stick.setPointerCapture(stickId);
-      moveStick(e);
-    });
-    stick.addEventListener("pointermove", e => {
-      if (e.pointerId === stickId) moveStick(e);
-    });
-
-    function moveStick(e) {
-      const r = stick.getBoundingClientRect();
-      let x = e.clientX - (r.left + r.width / 2);
-      let y = e.clientY - (r.top + r.height / 2);
-      const max = 38;
-      const len = Math.hypot(x, y) || 1;
-      if (len > max) { x *= max / len; y *= max / len; }
-      input.x = x / max;
-      input.y = y / max;
-      knob.style.transform = `translate(${x}px, ${y}px)`;
-    }
-
-    function releaseStick(e) {
-      if (e.pointerId !== stickId) return;
-      stickId = null;
-      input.x = input.y = 0;
-      knob.style.transform = "";
-    }
-    stick.addEventListener("pointerup", releaseStick);
-    stick.addEventListener("pointercancel", releaseStick);
-
-    // Drag the right half of the screen to rotate the camera
-    let lookId = null, lastX = 0, lastY = 0;
-    renderer.domElement.addEventListener("pointerdown", e => {
-      if (e.clientX < innerWidth * 0.38) return;
-      lookId = e.pointerId;
-      lastX = e.clientX;
-      lastY = e.clientY;
-      renderer.domElement.setPointerCapture(lookId);
-    });
-    renderer.domElement.addEventListener("pointermove", e => {
-      if (e.pointerId !== lookId) return;
-      camYaw -= (e.clientX - lastX) * 0.006;
-      camPitch += (e.clientY - lastY) * 0.004;
-      camPitch = THREE.MathUtils.clamp(camPitch, -0.15, 0.85);
-      lastX = e.clientX;
-      lastY = e.clientY;
-    });
-    function stopLook(e) {
-      if (e.pointerId === lookId) lookId = null;
-    }
-    renderer.domElement.addEventListener("pointerup", stopLook);
-    renderer.domElement.addEventListener("pointercancel", stopLook);
-
-    // Demo attack animation; not connected to combat yet
-    const message = document.querySelector("#message");
-    let attackTime = 0;
-    document.querySelector("#attack").addEventListener("pointerdown", e => {
-      e.preventDefault();
-      attackTime = 0.35;
-      message.style.opacity = "1";
-    });
-
-    const clock = new THREE.Clock();
-    const coords = document.querySelector("#coords");
-    const forward = new THREE.Vector3();
-    const right = new THREE.Vector3();
-    const move = new THREE.Vector3();
-
-    function animate() {
-      requestAnimationFrame(animate);
-      const dt = Math.min(clock.getDelta(), 0.04);
-
-      let ix = input.x;
-      let iz = input.y;
-      if (keys.a || keys.arrowleft) ix -= 1;
-      if (keys.d || keys.arrowright) ix += 1;
-      if (keys.w || keys.arrowup) iz -= 1;
-      if (keys.s || keys.arrowdown) iz += 1;
-
-      camYaw += 0;
-      forward.set(-Math.sin(camYaw), 0, -Math.cos(camYaw));
-      right.set(Math.cos(camYaw), 0, -Math.sin(camYaw));
-      move.set(0, 0, 0)
-        .addScaledVector(right, ix)
-        .addScaledVector(forward, -iz);
-
-      if (move.lengthSq() > 1) move.normalize();
-
-      
-const speed = 6 * dt;
-
-if (move.lengthSq() > 0) {
-  move.normalize();
-
-  const nextX = player.position.x + move.x * speed;
-
-  // Resolve X and Z separately to allow sliding along obstacles.
-  if (canStandAt(nextX, player.position.z)) {
-    player.position.x = nextX;
-  }
-
-  const nextZ = player.position.z + move.z * speed;
-
-  if (canStandAt(player.position.x, nextZ)) {
-    player.position.z = nextZ;
-  }
-}
-      if (move.lengthSq() > 0.001) {
-        yaw = Math.atan2(move.x, move.z);
-        player.rotation.y = yaw;
-      }
-
-      if (attackTime > 0) {
-        attackTime -= dt;
-        sword.rotation.z = -0.35 - Math.sin(attackTime * 18) * 1.1;
-        message.style.opacity = String(Math.min(1, attackTime * 4));
-      } else {
-        sword.rotation.z = -0.35;
-        message.style.opacity = "0";
-      }
-
-      const target = player.position.clone();
-      target.y += 1.1;
-
-      const distance = 8;
-      camera.position.set(
-        target.x + Math.sin(camYaw) * distance * Math.cos(camPitch),
-        target.y + 2.3 + Math.sin(camPitch) * distance,
-        target.z + Math.cos(camYaw) * distance * Math.cos(camPitch)
-      );
-      camera.lookAt(target);
-
-      coords.textContent =
-        `Position: ${player.position.x.toFixed(1)}, ${player.position.z.toFixed(1)}`;
-
-      renderer.render(scene, camera);
-    }
-
-    addEventListener("resize", () => {
-      camera.aspect = innerWidth / innerHeight;
-      camera.updateProjectionMatrix();
       renderer.setSize(innerWidth, innerHeight);
       renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-    });
+      renderer.shadowMap.enabled = false;
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      document.body.prepend(renderer.domElement);
 
-    animate();
+      scene.add(
+        new THREE.HemisphereLight(0xd7efff, 0x34522e, 2)
+      );
+
+      const sun = new THREE.DirectionalLight(0xffffff, 2);
+      sun.position.set(-12, 24, 10);
+      scene.add(sun);
+
+      // ================================================
+      // 2. MATERIALS AND ENVIRONMENT
+      // ================================================
+
+      function material(color) {
+        return new THREE.MeshStandardMaterial({
+          color,
+          roughness: 1,
+          metalness: 0
+        });
+      }
+
+      const grassMat = material(0x4b9b60);
+      const pathMat = material(0xcbb991);
+      const trunkMat = material(0x67432d);
+      const red = material(0xc63f45);
+
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(180, 180),
+        grassMat
+      );
+
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = -0.05;
+      scene.add(ground);
+
+      const path = new THREE.Mesh(
+        new THREE.PlaneGeometry(7, 100),
+        pathMat
+      );
+
+      path.rotation.x = -Math.PI / 2;
+      path.position.set(0, 0, -12);
+      scene.add(path);
+
+      // ================================================
+      // 3. COLLISION SYSTEM
+      // ================================================
+
+      const obstacles = [];
+      const PLAYER_RADIUS = 0.42;
+
+      function addCircleObstacle(x, z, radius) {
+        obstacles.push({
+          type: "circle",
+          x,
+          z,
+          r: radius
+        });
+      }
+
+      function addBoxObstacle(x, z, width, depth) {
+        obstacles.push({
+          type: "box",
+          x,
+          z,
+          sx: width,
+          sz: depth
+        });
+      }
+
+      function canStandAt(x, z) {
+        // World boundaries
+        if (
+          x < -44.5 || x > 44.5 ||
+          z < -84.5 || z > 24.5
+        ) {
+          return false;
+        }
+
+        for (const obstacle of obstacles) {
+          if (obstacle.type === "circle") {
+            const dx = x - obstacle.x;
+            const dz = z - obstacle.z;
+            const radius = PLAYER_RADIUS + obstacle.r;
+
+            if (
+              dx * dx + dz * dz <
+              radius * radius
+            ) {
+              return false;
+            }
+          }
+
+          if (obstacle.type === "box") {
+            const nearestX = Math.max(
+              obstacle.x - obstacle.sx / 2,
+              Math.min(x, obstacle.x + obstacle.sx / 2)
+            );
+
+            const nearestZ = Math.max(
+              obstacle.z - obstacle.sz / 2,
+              Math.min(z, obstacle.z + obstacle.sz / 2)
+            );
+
+            const dx = x - nearestX;
+            const dz = z - nearestZ;
+
+            if (
+              dx * dx + dz * dz <
+              PLAYER_RADIUS * PLAYER_RADIUS
+            ) {
+              return false;
+            }
+          }
+        }
+
+        return true;
+      }
+
+      // ================================================
+      // 4. TREES WITH COLLISION HITBOXES
+      // ================================================
+
+      function tree(x, z, scale = 1) {
+        const group = new THREE.Group();
+
+        group.position.set(x, 0, z);
+        group.scale.setScalar(scale);
+
+        const trunk = new THREE.Mesh(
+          new THREE.CylinderGeometry(
+            0.22, 0.35, 2, 6
+          ),
+          trunkMat
+        );
+
+        trunk.position.y = 1;
+        group.add(trunk);
+
+        for (let i = 0; i < 3; i++) {
+          const crown = new THREE.Mesh(
+            new THREE.ConeGeometry(
+              1.35 - i * 0.22,
+              2.1,
+              7
+            ),
+            material(
+              i === 1 ? 0x238657 : 0x176c4a
+            )
+          );
+
+          crown.position.y = 2.2 + i * 0.85;
+          group.add(crown);
+        }
+
+        scene.add(group);
+
+        // Approximate solid tree trunk.
+        addCircleObstacle(
+          x,
+          z,
+          0.48 * scale
+        );
+      }
+
+      // Use a fixed random seed so the map remains
+      // stable between page reloads.
+      let seed = 71271;
+
+      function random() {
+        seed = (seed * 16807) % 2147483647;
+        return (seed - 1) / 2147483646;
+      }
+
+      for (let i = 0; i < 65; i++) {
+        const side = random() < 0.5 ? -1 : 1;
+        const x = side * (6 + random() * 35);
+        const z = 20 - random() * 100;
+        const scale = 0.7 + random() * 0.8;
+
+        tree(x, z, scale);
+      }
+
+      // ================================================
+      // 5. SHRINE GATE AND COLLISIONS
+      // ================================================
+
+      function beam(x, y, z, sx, sy, sz) {
+        const mesh = new THREE.Mesh(
+          new THREE.BoxGeometry(sx, sy, sz),
+          red
+        );
+
+        mesh.position.set(x, y, z);
+        scene.add(mesh);
+
+        // The vertical support posts are solid.
+        if (sy >= 3 && sx < 1 && sz < 1) {
+          addBoxObstacle(x, z, sx, sz);
+        }
+      }
+
+      beam(-2.2, 2.0, -28, 0.35, 4, 0.35);
+      beam(2.2, 2.0, -28, 0.35, 4, 0.35);
+      beam(0, 4.1, -28, 6.0, 0.4, 0.65);
+      beam(0, 3.65, -28, 4.5, 0.25, 0.45);
+
+      // ================================================
+      // 6. PLAYER CHARACTER
+      // ================================================
+
+      const player = new THREE.Group();
+      scene.add(player);
+
+      const blue = material(0x2678ff);
+      const white = material(0xf0f6ff);
+      const swordMat = material(0x9beaff);
+
+      const body = new THREE.Mesh(
+        new THREE.CapsuleGeometry(0.42, 0.75, 3, 7),
+        blue
+      );
+
+      body.position.y = 1.0;
+      player.add(body);
+
+      const head = new THREE.Mesh(
+        new THREE.SphereGeometry(0.38, 10, 8),
+        white
+      );
+
+      head.position.y = 1.85;
+      player.add(head);
+
+      // Three blue kitsune tails
+      for (let i = 0; i < 3; i++) {
+        const tail = new THREE.Mesh(
+          new THREE.ConeGeometry(0.19, 1.15, 6),
+          blue
+        );
+
+        tail.rotation.x = -1.0;
+        tail.rotation.z = (i - 1) * 0.55;
+        tail.position.set(
+          (i - 1) * 0.34,
+          0.9,
+          0.55
+        );
+
+        player.add(tail);
+      }
+
+      const sword = new THREE.Mesh(
+        new THREE.BoxGeometry(0.09, 0.9, 0.12),
+        swordMat
+      );
+
+      sword.position.set(0.52, 1.1, -0.1);
+      sword.rotation.z = -0.35;
+      player.add(sword);
+
+      // ================================================
+      // 7. KEYBOARD AND MOBILE JOYSTICK
+      // ================================================
+
+      let yaw = 0;
+      let camYaw = 0;
+      let camPitch = 0.25;
+
+      const keys = {};
+      const input = { x: 0, y: 0 };
+
+      addEventListener("keydown", e => {
+        keys[e.key.toLowerCase()] = true;
+
+        if (
+          ["arrowup", "arrowdown",
+           "arrowleft", "arrowright", " "]
+          .includes(e.key.toLowerCase())
+        ) {
+          e.preventDefault();
+        }
+      });
+
+      addEventListener("keyup", e => {
+        keys[e.key.toLowerCase()] = false;
+      });
+
+      addEventListener("blur", () => {
+        for (const key in keys) {
+          keys[key] = false;
+        }
+      });
+
+      const stick = document.querySelector("#stick");
+      const knob = document.querySelector("#knob");
+
+      let stickId = null;
+
+      stick.addEventListener("pointerdown", e => {
+        e.preventDefault();
+
+        if (stickId !== null) return;
+
+        stickId = e.pointerId;
+        stick.setPointerCapture(e.pointerId);
+        moveStick(e);
+      });
+
+      stick.addEventListener("pointermove", e => {
+        if (e.pointerId === stickId) {
+          moveStick(e);
+        }
+      });
+
+      function moveStick(e) {
+        const r = stick.getBoundingClientRect();
+
+        let x = e.clientX - (r.left + r.width / 2);
+        let y = e.clientY - (r.top + r.height / 2);
+
+        const max = 38;
+        const len = Math.hypot(x, y) || 1;
+
+        if (len > max) {
+          x *= max / len;
+          y *= max / len;
+        }
+
+        input.x = x / max;
+        input.y = y / max;
+
+        knob.style.transform =
+          `translate(${x}px, ${y}px)`;
+      }
+
+      function releaseStick(e) {
+        if (e.pointerId !== stickId) return;
+
+        stickId = null;
+        input.x = 0;
+        input.y = 0;
+        knob.style.transform = "";
+      }
+
+      stick.addEventListener("pointerup", releaseStick);
+      stick.addEventListener("pointercancel", releaseStick);
+
+      // ================================================
+      // 8. CAMERA LOOK CONTROLS
+      // ================================================
+
+      let lookId = null;
+      let lastX = 0;
+      let lastY = 0;
+
+      renderer.domElement.addEventListener(
+        "pointerdown", e => {
+          if (e.clientX < innerWidth * 0.38) return;
+          if (lookId !== null) return;
+
+          lookId = e.pointerId;
+          lastX = e.clientX;
+          lastY = e.clientY;
+
+          renderer.domElement.setPointerCapture(
+            e.pointerId
+          );
+        }
+      );
+
+      renderer.domElement.addEventListener(
+        "pointermove", e => {
+          if (e.pointerId !== lookId) return;
+
+          camYaw -= (e.clientX - lastX) * 0.006;
+          camPitch += (e.clientY - lastY) * 0.004;
+
+          camPitch = THREE.MathUtils.clamp(
+            camPitch, -0.15, 0.85
+          );
+
+          lastX = e.clientX;
+          lastY = e.clientY;
+        }
+      );
+
+      function stopLook(e) {
+        if (e.pointerId === lookId) {
+          lookId = null;
+        }
+      }
+
+      renderer.domElement.addEventListener(
+        "pointerup", stopLook
+      );
+
+      renderer.domElement.addEventListener(
+        "pointercancel", stopLook
+      );
+
+      // ================================================
+      // 9. DEMO SWORD ATTACK
+      // ================================================
+
+      const message = document.querySelector("#message");
+      const attackButton = document.querySelector("#attack");
+
+      let attackTime = 0;
+
+      attackButton.addEventListener("pointerdown", e => {
+        e.preventDefault();
+        attackTime = 0.35;
+        message.style.opacity = "1";
+      });
+
+      // ================================================
+      // 10. MOVEMENT AND COLLISION RESOLUTION
+      // ================================================
+
+      const clock = new THREE.Clock();
+      const coords = document.querySelector("#coords");
+
+      const forward = new THREE.Vector3();
+      const right = new THREE.Vector3();
+      const move = new THREE.Vector3();
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        const dt = Math.min(clock.getDelta(), 0.04);
+
+        let ix = input.x;
+        let iz = input.y;
+
+        if (keys.a || keys.arrowleft) ix -= 1;
+        if (keys.d || keys.arrowright) ix += 1;
+        if (keys.w || keys.arrowup) iz -= 1;
+        if (keys.s || keys.arrowdown) iz += 1;
+
+        // Camera-relative movement
+        forward.set(
+          -Math.sin(camYaw),
+          0,
+          -Math.cos(camYaw)
+        );
+
+        right.set(
+          Math.cos(camYaw),
+          0,
+          -Math.sin(camYaw)
+        );
+
+        move.set(0, 0, 0)
+          .addScaledVector(right, ix)
+          .addScaledVector(forward, -iz);
+
+        // Prevent diagonal movement from being faster.
+        if (move.lengthSq() > 1) {
+          move.normalize();
+        }
+
+        const speed = 6 * dt;
+
+        if (move.lengthSq() > 0.0001) {
+          const nextX =
+            player.position.x + move.x * speed;
+
+          const nextZ =
+            player.position.z + move.z * speed;
+
+          // Resolve axes separately so the player
+          // can slide along walls and tree trunks.
+          if (
+            canStandAt(nextX, player.position.z)
+          ) {
+            player.position.x = nextX;
+          }
+
+          if (
+            canStandAt(player.position.x, nextZ)
+          ) {
+            player.position.z = nextZ;
+          }
+
+          yaw = Math.atan2(move.x, -move.z);
+          player.rotation.y = yaw;
+        }
+
+        // Attack animation
+        if (attackTime > 0) {
+          attackTime -= dt;
+
+          sword.rotation.z =
+            -0.35 - Math.sin(attackTime * 18) * 1.1;
+
+          message.style.opacity = String(
+            Math.min(1, attackTime * 4)
+          );
+        } else {
+          sword.rotation.z = -0.35;
+          message.style.opacity = "0";
+        }
+
+        // Third-person camera
+        const target = player.position.clone();
+        target.y += 1.1;
+
+        const distance = 8;
+
+        camera.position.set(
+          target.x +
+            Math.sin(camYaw) *
+            distance * Math.cos(camPitch),
+
+          target.y + 2.3 +
+            Math.sin(camPitch) * distance,
+
+          target.z +
+            Math.cos(camYaw) *
+            distance * Math.cos(camPitch)
+        );
+
+        camera.lookAt(target);
+
+        coords.textContent =
+          `Position: ${player.position.x.toFixed(1)}, ` +
+          `${player.position.z.toFixed(1)}`;
+
+        renderer.render(scene, camera);
+      }
+
+      // ================================================
+      // 11. RESIZE AND START
+      // ================================================
+
+      addEventListener("resize", () => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(innerWidth, innerHeight);
+
+        renderer.setPixelRatio(
+          Math.min(devicePixelRatio, 1.5)
+        );
+      });
+
+      status.textContent =
+        "World ready · Explore and avoid the trees!";
+
+      animate();
+
+    } catch (error) {
+      console.error(error);
+
+      errorBox.style.display = "block";
+      errorBox.textContent =
+        "Unable to start the 3D world: " + error.message;
+
+      status.textContent = "3D loading failed";
+    }
   </script>
 </body>
 </html>
