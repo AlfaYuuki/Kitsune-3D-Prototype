@@ -2,1070 +2,885 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kitsune FunZone 3D — Anime RPG v5.0</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Kitsune FunZone 3D — RPG v4</title>
 <style>
-:root {
-  --primary: #75dcff;
-  --accent: #ff527b;
-  --gold: #ffd24d;
-  --bg-dark: rgba(14, 22, 26, 0.92);
-  --border-glow: rgba(117, 220, 255, 0.4);
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-body { overflow: hidden; background: #0a0f12; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; touch-action: none; }
-canvas { display: block; width: 100vw; height: 100vh; }
-button { cursor: pointer; font: inherit; transition: all 0.15s ease; }
-
-/* Dynamic Floating Combat Text */
-.damage-number {
-  position: absolute;
-  font-weight: 900;
-  font-size: 18px;
-  pointer-events: none;
-  z-index: 10;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.8), 0 0 8px currentColor;
-  animation: floatUp 0.85s ease-out forwards;
-}
-@keyframes floatUp {
-  0% { opacity: 1; transform: translate(-50%, 0) scale(0.8); }
-  30% { transform: translate(-50%, -18px) scale(1.2); }
-  100% { opacity: 0; transform: translate(-50%, -45px) scale(0.9); }
-}
-
-/* Anime HUD styling */
-#hud {
-  position: fixed; top: 12px; left: 12px; width: min(310px, 80vw);
-  padding: 14px; background: var(--bg-dark);
-  border: 1px solid var(--border-glow); border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(117, 220, 255, 0.1);
-  pointer-events: none; z-index: 5; backdrop-filter: blur(8px);
-}
-.brand { font-weight: 900; color: var(--primary); font-size: 17px; letter-spacing: 0.5px; text-shadow: 0 0 10px rgba(117,220,255,0.5); }
-.subtext { font-size: 11px; color: #9eb7be; margin-bottom: 6px; }
-.stat-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-top: 6px; color: #d1eaee; }
-.bar-bg { height: 10px; background: #1c2b30; border-radius: 8px; overflow: hidden; margin-top: 3px; border: 1px solid rgba(255,255,255,0.1); }
-.bar-fill { height: 100%; transition: width 0.2s ease-out; }
-#hpFill { background: linear-gradient(90deg, #ff3b56, #ff758c); }
-#xpFill { background: linear-gradient(90deg, #32b5ff, #80d4ff); }
-#currencyRow { display: flex; gap: 14px; margin-top: 10px; font-weight: 800; font-size: 13px; color: var(--gold); }
-
-/* Boss / Enemy Bar */
-#bossHud {
-  position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
-  width: min(420px, 86vw); background: var(--bg-dark); padding: 12px 18px;
-  border: 1px solid #ff4d6d; border-radius: 14px; text-align: center;
-  z-index: 5; display: none; pointer-events: none;
-  box-shadow: 0 0 20px rgba(255, 77, 109, 0.3);
-}
-#bossName { font-size: 15px; font-weight: 900; color: #ff6b8b; text-transform: uppercase; letter-spacing: 1px; }
-
-/* Top Buttons */
-#topControls {
-  position: fixed; right: 12px; top: 12px; z-index: 6; display: flex; gap: 8px;
-}
-.ui-btn {
-  border: 1px solid var(--border-glow); border-radius: 12px;
-  background: var(--bg-dark); color: #fff; padding: 10px 14px;
-  font-size: 12px; font-weight: 800; backdrop-filter: blur(6px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-.ui-btn:hover { background: rgba(30, 48, 56, 0.95); border-color: var(--primary); transform: translateY(-1px); }
-
-/* Skills Hotbar */
-#skillBar {
-  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 10px; z-index: 6; pointer-events: auto;
-}
-.skill-slot {
-  position: relative; width: 56px; height: 56px; border-radius: 14px;
-  background: var(--bg-dark); border: 2px solid var(--border-glow);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-size: 20px; box-shadow: 0 6px 16px rgba(0,0,0,0.4); cursor: pointer;
-}
-.skill-slot .key-hint { position: absolute; top: 2px; right: 6px; font-size: 10px; font-weight: 800; color: #a1cdd8; }
-.skill-slot .cd-overlay {
-  position: absolute; inset: 0; background: rgba(0,0,0,0.72); border-radius: 12px;
-  display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: #fff;
-}
-
-/* Modals & Panels */
-.modal-panel {
-  display: none; position: fixed; z-index: 10; left: 50%; top: 50%;
-  transform: translate(-50%, -50%); width: min(520px, 92vw); max-height: 82vh;
-  overflow-y: auto; background: var(--bg-dark); border: 1px solid var(--primary);
-  border-radius: 20px; padding: 20px; box-shadow: 0 20px 80px rgba(0,0,0,0.8);
-  backdrop-filter: blur(12px);
-}
-.modal-panel h2 { color: var(--primary); margin-bottom: 12px; font-size: 20px; }
-.shop-grid, .quest-list { display: grid; gap: 10px; margin-top: 12px; }
-.panel-card {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-}
-.panel-card h4 { font-size: 14px; color: #fff; }
-.panel-card p { font-size: 11px; color: #9cb2ba; margin-top: 2px; }
-.panel-card button {
-  background: #1b495c; color: #fff; border: 1px solid var(--primary);
-  padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 800;
-}
-.panel-card button:hover { background: #26647d; }
-
-/* On-Screen Mobile Controls */
-#mobileControls {
-  position: fixed; inset: 0; z-index: 5; pointer-events: none;
-}
-#stickArea {
-  position: absolute; left: 20px; bottom: 24px; width: 130px; height: 130px;
-  border: 2px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.06);
-  border-radius: 50%; pointer-events: auto; touch-action: none;
-}
-#stickKnob {
-  position: absolute; left: 37px; top: 37px; width: 56px; height: 56px;
-  border-radius: 50%; background: rgba(117, 220, 255, 0.7); border: 2px solid #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-}
-.m-action {
-  position: absolute; right: 20px; border-radius: 50%; width: 68px; height: 68px;
-  color: #fff; font-weight: 900; font-size: 13px; border: 2px solid rgba(255,255,255,0.4);
-  background: var(--bg-dark); pointer-events: auto; touch-action: none;
-  display: flex; align-items: center; justify-content: center; text-align: center;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
-}
-#btnAttack { bottom: 30px; right: 20px; background: rgba(230, 57, 70, 0.85); width: 76px; height: 76px; }
-#btnInteract { bottom: 118px; right: 98px; background: rgba(42, 157, 143, 0.85); }
-#btnDash { bottom: 118px; right: 20px; background: rgba(233, 196, 106, 0.85); }
-
-/* Notifications / Toast */
-#toast {
-  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-  z-index: 8; background: var(--bg-dark); border: 1px solid var(--primary);
-  padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 700;
-  pointer-events: none; transition: opacity 0.3s ease; text-align: center;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-}
-
-#deathScreen {
-  display: none; position: fixed; inset: 0; z-index: 15; background: rgba(5,8,10,0.92);
-  place-items: center; text-align: center; backdrop-filter: blur(10px);
-}
-#deathScreen h1 { font-size: 36px; color: #ff4d6d; margin-bottom: 10px; }
-
-@media (min-width: 900px) {
-  #mobileControls { display: none; }
-}
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#13251d;color:#fff;font-family:system-ui,Arial,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none}
+canvas{display:block}
+button{cursor:pointer;font:inherit}
+#hud{position:fixed;z-index:3;top:10px;left:10px;width:min(290px,73vw);padding:11px;background:#101a17e8;border:1px solid #ffffff35;border-radius:13px;pointer-events:none}
+.brand{font-weight:900;color:#75dcff;font-size:16px}
+.small{font-size:11px;color:#c5d9d1}
+.stat{display:flex;justify-content:space-between;gap:6px;font-size:12px;margin-top:6px}
+.bar{height:8px;background:#35423e;border-radius:10px;overflow:hidden;margin-top:4px}
+.fill{height:100%;transition:width .15s}
+#hpFill{background:#ff5268}#xpFill{background:#58c9ff}#enemyFill{background:#ffb04a}
+#quest{margin-top:8px;font-size:12px;color:#ffe9a6;line-height:1.5}
+#topButtons{position:fixed;right:10px;top:10px;z-index:5;display:flex;gap:6px}
+.uiBtn{border:1px solid #ffffff55;border-radius:10px;background:#142a27ef;color:white;padding:9px 11px;font-size:12px;font-weight:800}
+#help{position:fixed;right:10px;top:58px;z-index:3;background:#101a17b9;padding:9px 12px;border-radius:12px;font-size:11px;line-height:1.7;text-align:right;pointer-events:none;display:none}
+#enemyHud{position:fixed;top:65px;left:50%;transform:translateX(-50%);width:min(230px,48vw);background:#111b1be8;padding:8px 10px;border-radius:10px;text-align:center;z-index:3;display:none;pointer-events:none}
+#enemyName{font-size:12px;font-weight:800}
+#toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:7;background:#101a17e8;padding:9px 13px;border-radius:10px;font-size:12px;text-align:center;max-width:90vw;pointer-events:none;transition:opacity .25s}
+#message{display:none;position:fixed;top:28%;left:50%;transform:translateX(-50%);z-index:8;background:#101a17f0;border:1px solid #ffffff40;border-radius:12px;padding:12px 18px;text-align:center;max-width:85vw;pointer-events:none;font-size:14px}
+#panel{display:none;position:fixed;z-index:9;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92vw);max-height:80vh;overflow:auto;background:#101a17f5;border:1px solid #75dcff85;border-radius:16px;padding:16px;box-shadow:0 15px 60px #000b;touch-action:pan-y}
+#panel h2{margin:0 0 8px;color:#75dcff}
+#panel h3{margin:14px 0 0;font-size:14px}
+#panel p{font-size:12px;color:#c7d8d0}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid #ffffff25;border-radius:10px;padding:10px;margin-top:8px;background:#ffffff08}
+.item b{font-size:13px}
+.item small{display:block;color:#c4d5cf;margin-top:3px}
+.item button{background:#27566a;color:white;border:0;border-radius:8px;padding:8px;font-size:11px}
+.danger{background:#6a2735!important}
+#mobile{position:fixed;inset:0;z-index:4;pointer-events:none}
+#stickBase{position:absolute;left:20px;bottom:24px;width:124px;height:124px;border:2px solid #ffffff55;background:#ffffff18;border-radius:50%;pointer-events:auto;touch-action:none}
+#stickKnob{position:absolute;left:33px;top:33px;width:54px;height:54px;border-radius:50%;background:#b9e8ffcc;border:2px solid white;box-shadow:0 3px 14px #0007}
+.action{position:absolute;right:18px;border:2px solid #ffffff70;border-radius:50%;width:70px;height:70px;color:white;font-weight:900;font-size:12px;background:#174c60e8;pointer-events:auto;touch-action:none;box-shadow:0 4px 15px #0006}
+#attack{bottom:32px;background:#9d2948ed}
+#interact{bottom:112px;right:96px;width:58px;height:58px;background:#286b54e8}
+#usePotion{bottom:112px;right:26px;width:60px;height:60px;background:#326e50ed}
+#dead{display:none;position:fixed;inset:0;z-index:12;background:#090c0bf0;place-items:center;text-align:center;padding:20px}
+#dead h1{color:#ff6b7a}
+#dead button{padding:12px 18px;border:0;border-radius:10px;background:#58c9ff;font-weight:900;font-size:15px}
+@media(hover:hover) and (pointer:fine){#mobile{display:none}#help{display:block}}
 </style>
 <script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
-  }
-}
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}
 </script>
 </head>
 <body>
-
 <div id="hud">
-  <div class="brand">🦊 KITSUNE FUNZONE 3D</div>
-  <div class="subtext">Anime RPG v5.0 · Major Boss Update</div>
-  <div class="stat-row"><span>LEVEL <b id="lblLevel">1</b></span><span id="lblHp">120/120 HP</span></div>
-  <div class="bar-bg"><div id="hpFill" class="bar-fill" style="width: 100%;"></div></div>
-  <div class="stat-row"><span>EXP</span><span id="lblXp">0/100 XP</span></div>
-  <div class="bar-bg"><div id="xpFill" class="bar-fill" style="width: 0%;"></div></div>
-  <div id="currencyRow">
-    <span>🪙 <span id="lblCoins">0</span> Coins</span>
-    <span>💎 <span id="lblCrystals">0</span> Crystals</span>
+  <div class="brand">🦊 KITSUNE FUNZONE</div>
+  <div class="small">3D RPG v4 · Alfa Yuuki</div>
+  <div class="stat"><span>LEVEL <b id="level">1</b></span><span id="hpText">100/100 HP</span></div>
+  <div class="bar"><div id="hpFill" class="fill"></div></div>
+  <div class="stat"><span>Experience</span><span id="xpText">0/100 XP</span></div>
+  <div class="bar"><div id="xpFill" class="fill"></div></div>
+  <div id="quest"></div>
+  <div class="small" id="saveStatus">💾 Save ready</div>
+</div>
+
+<div id="topButtons">
+  <button class="uiBtn" id="inventoryBtn">🎒 INVENTORY</button>
+  <button class="uiBtn" id="saveBtn">💾 SAVE</button>
+</div>
+
+<div id="help">
+  <b>KEYBOARD</b><br>
+  WASD / Arrows — Move<br>
+  Shift — Run<br>
+  Mouse drag — Rotate camera<br>
+  Space / Click — Attack<br>
+  E — Shrine / Interact<br>
+  H — Use potion<br>
+  I — Inventory
+</div>
+
+<div id="enemyHud">
+  <div id="enemyName">Forest Spirit</div>
+  <div class="bar"><div id="enemyFill" class="fill"></div></div>
+  <div class="small" id="enemyHp">40/40 HP</div>
+</div>
+
+<div id="panel">
+  <h2>🎒 Inventory & Equipment</h2>
+  <p>Game is paused while this is open. Progress is saved in this browser on this device.</p>
+  <div id="equipment"></div>
+  <div id="items"></div>
+  <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+    <button class="uiBtn" id="drinkBtn">🧪 Use potion</button>
+    <button class="uiBtn danger" id="resetBtn">🗑 New game</button>
+    <button class="uiBtn" id="closePanel">CLOSE</button>
   </div>
 </div>
 
-<div id="bossHud">
-  <div id="bossName">Kitsune Shrine Guardian</div>
-  <div class="bar-bg" style="height: 12px; margin-top:6px;"><div id="bossFill" class="bar-fill" style="width: 100%; background: linear-gradient(90deg, #ff0055, #ff6600);"></div></div>
+<div id="message"></div>
+<div id="mobile">
+  <div id="stickBase"><div id="stickKnob"></div></div>
+  <button class="action" id="attack">⚔️<br>ATTACK</button>
+  <button class="action" id="interact">⛩️<br>USE</button>
+  <button class="action" id="usePotion">🧪<br>HEAL</button>
 </div>
-
-<div id="topControls">
-  <button class="ui-btn" id="btnOpenQuest">📜 QUESTS</button>
-  <button class="ui-btn" id="btnOpenShop">🏪 SHOP</button>
-  <button class="ui-btn" id="btnOpenInv">🎒 GEAR</button>
-  <button class="ui-btn" id="btnSave">💾 SAVE</button>
-</div>
-
-<div id="skillBar">
-  <div class="skill-slot" id="skDash" title="Dash Dodge (Shift / Space)">
-    ⚡<span class="key-hint">SHIFT</span><div class="cd-overlay" id="cdDash" style="display:none;">0</div>
-  </div>
-  <div class="skill-slot" id="skFoxfire" title="Foxfire Spell (1)">
-    🔥<span class="key-hint">1</span><div class="cd-overlay" id="cdFoxfire" style="display:none;">0</div>
-  </div>
-  <div class="skill-slot" id="skBurst" title="Spirit Burst AoE (2)">
-    💥<span class="key-hint">2</span><div class="cd-overlay" id="cdBurst" style="display:none;">0</div>
-  </div>
-  <div class="skill-slot" id="skHeal" title="Heal Potion (3 / H)">
-    🧪<span class="key-hint">3</span><div class="cd-overlay" id="cdHeal" style="display:none;">0</div>
-  </div>
-</div>
-
-<!-- Modal Panels -->
-<div id="panelQuest" class="modal-panel">
-  <h2>📜 Quest Journal</h2>
-  <div class="quest-list" id="questList"></div>
-  <div style="margin-top: 16px; text-align: right;"><button class="ui-btn" onclick="closePanels()">Close</button></div>
-</div>
-
-<div id="panelShop" class="modal-panel">
-  <h2>🏪 Kitsune Merchant</h2>
-  <p style="font-size: 12px; color: #a0c2cd;">Trade hard-earned coins and spirit crystals for items.</p>
-  <div class="shop-grid" id="shopGrid"></div>
-  <div style="margin-top: 16px; text-align: right;"><button class="ui-btn" onclick="closePanels()">Close</button></div>
-</div>
-
-<div id="panelInv" class="modal-panel">
-  <h2>🎒 Inventory & Weapons</h2>
-  <div id="invEquipment"></div>
-  <div style="margin-top: 16px; text-align: right;"><button class="ui-btn" onclick="closePanels()">Close</button></div>
-</div>
-
-<div id="toast">Welcome to Kitsune FunZone 3D v5.0!</div>
-
-<div id="mobileControls">
-  <div id="stickArea"><div id="stickKnob"></div></div>
-  <button class="m-action" id="btnAttack">⚔️<br>ATTACK</button>
-  <button class="m-action" id="btnInteract">⛩️<br>TALK</button>
-  <button class="m-action" id="btnDash">💨<br>DASH</button>
-</div>
-
-<div id="deathScreen">
+<div id="toast">Welcome, Alfa! Defeat five forest spirits.</div>
+<div id="dead">
   <div>
-    <h1>💫 DEFEATED</h1>
-    <p style="color: #a0b8c0; margin-bottom: 20px;">Your spirit returns safely to the Sacred Shrine.</p>
-    <button class="ui-btn" id="btnRespawn" style="padding: 12px 24px; font-size: 15px; background: var(--primary); color: #000;">Respawn at Shrine</button>
+    <h1>💫 YOU WERE DEFEATED</h1>
+    <p>The forest is dangerous, Alfa. Your progress has been saved.</p>
+    <button id="respawn">Return to the shrine</button>
   </div>
 </div>
 
 <script type="module">
-import * as THREE from 'three';
+import * as THREE from "three";
 
-// --- Web Audio Synthesizer ---
-class SoundEffects {
-  constructor() {
-    this.ctx = null;
+/* =====================================================
+   KITSUNE FUNZONE RPG v4
+   = v2 world & flavour (torii gate, stone path, hills,
+     shrine intro, level-scaled combat)
+   + v3 systems (limb animation, inventory, equipment,
+     potions, spirit crystals, local saves)
+   ===================================================== */
+
+const $=id=>document.getElementById(id);
+const SAVE_KEY="kitsune_funzone_rpg_v4";
+const OLD_SAVE_KEY="kitsune_funzone_rpg_v3";
+const QUEST_GOAL=5;
+
+let scene,camera,renderer,clock,player,swordPivot,sword;
+let yaw=0,pitch=.25,gameOver=false,panelOpen=false;
+let hp=100,maxHp=100,xp=0,level=1;
+let questProgress=0,questComplete=false,bonusAwarded=false,totalKills=0,shrineSeen=false;
+let attackCooldown=0,hurtCooldown=0,swingTime=0,toastTime=0,messageTime=0;
+let stickX=0,stickY=0,stickPointer=null;
+let walkTime=0,autoSaveTimer=0,dirty=false,faceAngle=0;
+let dragPointer=null,dragMoved=false,lastX=0,lastY=0,startX=0,startY=0;
+const keys={},obstacles=[],enemies=[],floaters=[],tails=[];
+const inventory={potions:3,spiritCrystals:0};
+const equipment={weapon:"Blue Katana",armor:"Traveler Outfit"};
+const unlocks={spiritBlade:false,spiritArmor:false};
+const WEAPONS=["Wooden Sword","Blue Katana","Spirit Blade"];
+const weaponStats={"Wooden Sword":8,"Blue Katana":18,"Spirit Blade":30};
+const bounds={minX:-48,maxX:48,minZ:-86,maxZ:28};
+const playerRadius=.47;
+const camTarget=new THREE.Vector3();
+
+/* ---------- small helpers ---------- */
+function notify(text,seconds=2.5){
+  $("toast").textContent=text;
+  $("toast").style.opacity="1";
+  toastTime=seconds;
+}
+function popup(text,seconds=2){
+  $("message").textContent=text;
+  $("message").style.display="block";
+  messageTime=seconds;
+}
+function mat(color,roughness=.85,extra={}){
+  return new THREE.MeshStandardMaterial({color,roughness,...extra});
+}
+function addMesh(geo,material,parent,x=0,y=0,z=0){
+  const o=new THREE.Mesh(geo,material);
+  o.position.set(x,y,z);
+  o.castShadow=true;o.receiveShadow=true;
+  parent.add(o);
+  return o;
+}
+function addCircle(x,z,r){obstacles.push({type:"circle",x,z,r});}
+function addBox(x,z,sx,sz){obstacles.push({type:"box",x,z,sx,sz});}
+function canStandAt(x,z){
+  if(x<bounds.minX||x>bounds.maxX||z<bounds.minZ||z>bounds.maxZ)return false;
+  for(const o of obstacles){
+    if(o.type==="circle"){
+      if((x-o.x)**2+(z-o.z)**2<(o.r+playerRadius)**2)return false;
+    }else{
+      const cx=Math.max(o.x-o.sx,Math.min(x,o.x+o.sx));
+      const cz=Math.max(o.z-o.sz,Math.min(z,o.z+o.sz));
+      if((x-cx)**2+(z-cz)**2<playerRadius**2)return false;
+    }
   }
-  init() {
-    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  return true;
+}
+const markDirty=()=>{dirty=true;};
+const neededXP=()=>100+(level-1)*55;
+const currentDamage=()=>(weaponStats[equipment.weapon]||18)+(level-1)*3;
+
+/* ---------- world ---------- */
+function createWorld(){
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x9bcbd5);
+  scene.fog=new THREE.Fog(0x9bcbd5,48,145);
+  camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,250);
+  renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;
+  document.body.insertBefore(renderer.domElement,document.body.firstChild);
+
+  scene.add(new THREE.HemisphereLight(0xdff7ff,0x34482a,2));
+  const sun=new THREE.DirectionalLight(0xffedcc,2.1);
+  sun.position.set(-25,45,20);sun.castShadow=true;
+  sun.shadow.mapSize.set(1024,1024);
+  sun.shadow.camera.left=-65;sun.shadow.camera.right=65;
+  sun.shadow.camera.top=65;sun.shadow.camera.bottom=-65;
+  scene.add(sun);
+
+  const ground=addMesh(new THREE.PlaneGeometry(220,240),mat(0x547c49),scene,0,-.12,-28);
+  ground.rotation.x=-Math.PI/2;
+  const path=addMesh(new THREE.PlaneGeometry(8,150),mat(0xb7b09a),scene,0,-.09,-35);
+  path.rotation.x=-Math.PI/2;
+  for(let i=0;i<24;i++){
+    const stone=addMesh(new THREE.BoxGeometry(2.4,.08,2),
+      mat(i%2?0xbeb9a5:0x999b8a),scene,(Math.random()-.5)*1.3,-.02,18-i*5);
+    stone.rotation.y=(Math.random()-.5)*.12;
   }
-  play(type) {
-    if (!this.ctx) return;
-    const ctx = this.ctx;
-    const now = ctx.currentTime;
-    
-    if (type === 'slash') {
-      const osc = ctx.createOscillator(), gain = ctx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(400, now);
-      osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.start(); osc.stop(now + 0.15);
-    } else if (type === 'hit') {
-      const osc = ctx.createOscillator(), gain = ctx.createGain();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(120, now);
-      osc.frequency.exponentialRampToValueAtTime(30, now + 0.2);
-      gain.gain.setValueAtTime(0.4, now);
-      gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.start(); osc.stop(now + 0.2);
-    } else if (type === 'spell') {
-      const osc = ctx.createOscillator(), gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(300, now);
-      osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.start(); osc.stop(now + 0.3);
-    } else if (type === 'levelup') {
-      [261, 329, 392, 523].forEach((freq, idx) => {
-        const osc = ctx.createOscillator(), gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-        gain.gain.setValueAtTime(0.2, now + idx * 0.08);
-        gain.gain.linearRampToValueAtTime(0.01, now + idx * 0.08 + 0.25);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(now + idx * 0.08); osc.stop(now + idx * 0.08 + 0.25);
-      });
+
+  makeTrees();
+  makeShrine();
+  makePlayer();
+  makeEnemies();
+  makeLanterns();
+  makeHills();
+}
+
+function makeTrees(){
+  let seed=20261020;
+  const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
+  const trunk=mat(0x62452d);
+  const leaves=[mat(0x285d3a),mat(0x397647),mat(0x477e4a)];
+  for(let i=0;i<145;i++){
+    const x=(random()-.5)*100,z=20-random()*110;
+    if(Math.abs(x)<6.8&&z>-67)continue;
+    const s=.7+random()*1.2,g=new THREE.Group();
+    g.position.set(x,0,z);g.scale.setScalar(s);scene.add(g);
+    addMesh(new THREE.CylinderGeometry(.22,.36,2.8,7),trunk,g,0,1.4,0);
+    for(let j=0;j<3;j++)
+      addMesh(new THREE.ConeGeometry(1.5-j*.22,2.4,7),leaves[Math.floor(random()*3)],g,0,2.7+j*1.1,0);
+    addCircle(x,z,.58*s);
+  }
+}
+
+function makeShrine(){
+  const red=mat(0xa92f39),dark=mat(0x572c29),stone=mat(0x777d78);
+  // Torii gate
+  for(const x of [-2.3,2.3]){
+    addMesh(new THREE.CylinderGeometry(.22,.29,5.2,10),red,scene,x,2.6,-28);
+    addMesh(new THREE.BoxGeometry(.85,.2,.85),dark,scene,x,.18,-28);
+    addBox(x,-28,.42,.42);
+  }
+  addMesh(new THREE.BoxGeometry(6.5,.45,.8),red,scene,0,5.1,-28);
+  addMesh(new THREE.BoxGeometry(7.4,.35,1),dark,scene,0,5.43,-28);
+  addMesh(new THREE.BoxGeometry(5,.25,.65),red,scene,0,4.65,-28);
+  // Shrine building
+  addMesh(new THREE.BoxGeometry(5.4,2.5,3.2),mat(0x8c4836),scene,0,1.4,-34);
+  addMesh(new THREE.ConeGeometry(4.4,1.7,4),mat(0x303d43),scene,0,3.45,-34);
+  addMesh(new THREE.BoxGeometry(1.1,1.8,.15),dark,scene,0,.95,-32.35);
+  addBox(0,-34,2.7,1.6);
+  // Altar, crystal and ring
+  addMesh(new THREE.CylinderGeometry(.9,1.15,.55,8),stone,scene,0,.28,-24);
+  const crystal=addMesh(new THREE.OctahedronGeometry(.55),
+    mat(0x5bdcff,.25,{emissive:0x159bd8,emissiveIntensity:1.5}),scene,0,1.15,-24);
+  floaters.push({obj:crystal,spin:"y"});
+  addCircle(0,-24,1.15);
+  const ring=addMesh(new THREE.TorusGeometry(1.25,.06,8,32),
+    mat(0x75e6ff,.5,{emissive:0x1388b6,emissiveIntensity:.8}),scene,0,1.15,-24);
+  ring.rotation.x=Math.PI/2;
+  floaters.push({obj:ring,spin:"z"});
+}
+
+function makeLanterns(){
+  const glow=mat(0xffd58b,.4,{emissive:0xff8c25,emissiveIntensity:1});
+  for(const z of [-5,-15,-25,-35,-45,-55]){
+    for(const side of [-1,1]){
+      const x=side*5.5;
+      addMesh(new THREE.BoxGeometry(.55,.65,.55),mat(0x5b4632),scene,x,.32,z);
+      addMesh(new THREE.BoxGeometry(.38,.55,.38),glow,scene,x,.92,z);
+      addMesh(new THREE.BoxGeometry(.75,.12,.75),mat(0x493b2d),scene,x,1.25,z);
     }
   }
 }
-const sound = new SoundEffects();
-const unlockAudio = () => { sound.init(); window.removeEventListener('pointerdown', unlockAudio); };
-window.addEventListener('pointerdown', unlockAudio);
-
-// --- Game State & Data ---
-const SAVE_KEY = 'kitsune_funzone_rpg_v5';
-let scene, camera, renderer, clock, player, swordPivot, cameraAngle = 0, cameraPitch = 0.3;
-let gameOver = false, currentPanel = null;
-
-// Stats
-let hp = 120, maxHp = 120, xp = 0, level = 1, coins = 50, crystals = 2;
-let inv = { potions: 3, elixirs: 1 };
-let equipment = { weapon: 'Katana', armor: 'Traveler Robes' };
-let cooldowns = { dash: 0, foxfire: 0, burst: 0, heal: 0 };
-let invulnerableTime = 0;
-
-const WEAPONS = {
-  'Katana': { dmg: 18, speed: 0.35, range: 3.2, icon: '⚔️' },
-  'Greatsword': { dmg: 34, speed: 0.6, range: 4.0, icon: '🗡️' },
-  'Spirit Staff': { dmg: 24, speed: 0.45, range: 5.5, icon: '🪄' },
-  'Dual Blades': { dmg: 14, speed: 0.22, range: 2.6, icon: '⚔️' }
-};
-
-const QUESTS = [
-  { id: 'q1', title: 'Forest Threat', desc: 'Defeat 4 Forest Spirits around the village.', target: 4, count: 0, rewardCoins: 80, rewardXp: 120, done: false },
-  { id: 'q2', title: 'Shadow Stalker', desc: 'Slay the Shadow Spirit Mini-Boss.', target: 1, count: 0, rewardCoins: 150, rewardXp: 250, done: false },
-  { id: 'q3', title: 'Guardian Awakening', desc: 'Defeat the Kitsune Shrine Guardian World Boss!', target: 1, count: 0, rewardCoins: 400, rewardXp: 600, done: false }
-];
-
-const enemies = [], particles = [], floatingTexts = [], obstacles = [];
-let stickVector = { x: 0, y: 0 }, stickPointer = null;
-let keys = {}, swingAnim = 0, playerVelocity = new THREE.Vector3();
-
-// --- Initialization & Scene Setup ---
-function init() {
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x101a24);
-  scene.fog = new THREE.FogExp2(0x101a24, 0.015);
-
-  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 300);
-  renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  document.body.insertBefore(renderer.domElement, document.body.firstChild);
-
-  clock = new THREE.Clock();
-
-  // Lighting
-  const hemiLight = new THREE.HemisphereLight(0xdff2ff, 0x1f2e22, 1.8);
-  scene.add(hemiLight);
-
-  const dirLight = new THREE.DirectionalLight(0xffeedd, 2.2);
-  dirLight.position.set(-30, 60, 30);
-  dirLight.castShadow = true;
-  dirLight.shadow.mapSize.set(2048, 2048);
-  dirLight.shadow.camera.left = -70; dirLight.shadow.camera.right = 70;
-  dirLight.shadow.camera.top = 70; dirLight.shadow.camera.bottom = -70;
-  scene.add(dirLight);
-
-  buildEnvironment();
-  buildPlayer();
-  spawnNPCs();
-  spawnEnemiesAndBosses();
-
-  bindEvents();
-  loadGame();
-  updateHUD();
-
-  animate();
-  showToast('⛩️ Welcome back to Kitsune FunZone 3D v5.0!');
-}
-
-// --- World Building ---
-function buildEnvironment() {
-  // Ground
-  const groundGeo = new THREE.PlaneGeometry(260, 260);
-  const groundMat = new THREE.MeshStandardMaterial({ color: 0x3d5a45, roughness: 0.9, metalness: 0.1 });
-  const ground = new THREE.Mesh(groundGeo, groundMat);
-  ground.rotation.x = -Math.PI / 2;
-  ground.receiveShadow = true;
-  scene.add(ground);
-
-  // Cobblestone Path
-  const pathGeo = new THREE.PlaneGeometry(10, 160);
-  const pathMat = new THREE.MeshStandardMaterial({ color: 0x8a8475, roughness: 0.8 });
-  const path = new THREE.Mesh(pathGeo, pathMat);
-  path.rotation.x = -Math.PI / 2; path.position.set(0, 0.01, -30);
-  path.receiveShadow = true;
-  scene.add(path);
-
-  // Shrine Structures
-  createToriiGate(0, -10);
-  createShrineBuilding(0, -65);
-
-  // Stylized Foliage / Sakura Trees
-  for (let i = 0; i < 90; i++) {
-    const x = (Math.random() - 0.5) * 220;
-    const z = (Math.random() - 0.5) * 220;
-    if (Math.abs(x) < 12 && z > -80 && z < 10) continue; // path clearance
-    createSakuraTree(x, z);
-    obstacles.push({ x, z, r: 1.2 });
-  }
-
-  // Floating Lanterns
-  for (let z = -60; z <= 10; z += 18) {
-    createLantern(-7, z);
-    createLantern(7, z);
+function makeHills(){
+  for(let i=0;i<16;i++){
+    const a=i/16*Math.PI*2,r=85;
+    const hill=addMesh(new THREE.ConeGeometry(13+Math.random()*7,20+Math.random()*22,7),
+      mat(i%2?0x5d8064:0x6e916b),scene,Math.cos(a)*r,-1,Math.sin(a)*r-28);
+    hill.scale.x=1.7;hill.rotation.y=Math.random()*Math.PI;
+    hill.castShadow=false;
   }
 }
 
-function createToriiGate(x, z) {
-  const red = new THREE.MeshStandardMaterial({ color: 0xc83232, roughness: 0.5 });
-  const black = new THREE.MeshStandardMaterial({ color: 0x1f1f1f, roughness: 0.5 });
-
-  for (const side of [-3.5, 3.5]) {
-    const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 6, 12), red);
-    pillar.position.set(x + side, 3, z);
-    pillar.castShadow = true;
-    scene.add(pillar);
+/* ---------- player ---------- */
+function makeLimb(parent,x,y,z,length,color){
+  const pivot=new THREE.Group();
+  pivot.position.set(x,y,z);
+  parent.add(pivot);
+  addMesh(new THREE.CapsuleGeometry(.13,Math.max(.1,length-.26),4,6),mat(color),pivot,0,-length/2,0);
+  return pivot;
+}
+function makePlayer(){
+  player=new THREE.Group();scene.add(player);
+  const body=mat(0x173d88),dark=mat(0x121927),skin=mat(0xf0d0b5);
+  const blue=mat(0x39bfff),hair=mat(0x182337);
+  const metal=mat(0xcde7f4,.28,{metalness:.65});
+  const torso=new THREE.Group();player.add(torso);
+  addMesh(new THREE.CylinderGeometry(.35,.45,.9,9),body,torso,0,1.05,0);
+  addMesh(new THREE.SphereGeometry(.34,12,10),skin,torso,0,1.72,0);
+  // Hair sits toward the back/top of the head so the face stays visible
+  addMesh(new THREE.SphereGeometry(.37,10,8),hair,torso,0,1.9,.09);
+  // Bangs across the front of the forehead
+  for(let i=0;i<3;i++){
+    const bang=addMesh(new THREE.ConeGeometry(.1,.26,5),hair,torso,(i-1)*.14,1.96,-.28);
+    bang.rotation.x=Math.PI+.35;
   }
-  const topBeam = new THREE.Mesh(new THREE.BoxGeometry(9, 0.5, 0.7), red);
-  topBeam.position.set(x, 5.8, z); topBeam.castShadow = true;
-  scene.add(topBeam);
-
-  const roof = new THREE.Mesh(new THREE.BoxGeometry(10, 0.3, 1), black);
-  roof.position.set(x, 6.2, z); roof.castShadow = true;
-  scene.add(roof);
-}
-
-function createShrineBuilding(x, z) {
-  const wood = new THREE.MeshStandardMaterial({ color: 0x7a3c28 });
-  const roofMat = new THREE.MeshStandardMaterial({ color: 0x22333b, roughness: 0.4 });
-  const gold = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.8 });
-
-  const base = new THREE.Mesh(new THREE.BoxGeometry(14, 4, 10), wood);
-  base.position.set(x, 2, z); base.castShadow = true;
-  scene.add(base);
-
-  const roof = new THREE.Mesh(new THREE.ConeGeometry(11, 4, 4), roofMat);
-  roof.position.set(x, 5.8, z); roof.rotation.y = Math.PI / 4; roof.castShadow = true;
-  scene.add(roof);
-
-  // Crystal Emblem
-  const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.8), gold);
-  crystal.position.set(x, 2.5, z + 5.2);
-  scene.add(crystal);
-
-  obstacles.push({ x, z, r: 7 });
-}
-
-function createSakuraTree(x, z) {
-  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3525 });
-  const leavesMat = new THREE.MeshStandardMaterial({ color: 0xffa6c9, roughness: 0.6 });
-
-  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.5, 3.5, 8), trunkMat);
-  trunk.position.set(x, 1.75, z); trunk.castShadow = true;
-  scene.add(trunk);
-
-  const foliage = new THREE.Mesh(new THREE.DodecahedronGeometry(2.2, 1), leavesMat);
-  foliage.position.set(x, 4.2, z); foliage.castShadow = true;
-  scene.add(foliage);
-}
-
-function createLantern(x, z) {
-  const mat = new THREE.MeshStandardMaterial({ color: 0x2b2b2b });
-  const glow = new THREE.MeshBasicMaterial({ color: 0xffaa33 });
-
-  const post = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 2.2), mat);
-  post.position.set(x, 1.1, z); scene.add(post);
-
-  const box = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.7, 0.6), glow);
-  box.position.set(x, 2.2, z); scene.add(box);
-}
-
-// --- Player Character ---
-function buildPlayer() {
-  player = new THREE.Group();
-  scene.add(player);
-
-  const skin = new THREE.MeshStandardMaterial({ color: 0xffdbac });
-  const outfit = new THREE.MeshStandardMaterial({ color: 0x1d3557 });
-  const hairMat = new THREE.MeshStandardMaterial({ color: 0x457b9d });
-  const foxTailMat = new THREE.MeshStandardMaterial({ color: 0x75dcff });
-
-  // Body / Torso
-  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 1.1, 10), outfit);
-  torso.position.y = 1.1; torso.castShadow = true; player.add(torso);
-
-  // Head
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 12), skin);
-  head.position.y = 1.85; head.castShadow = true; player.add(head);
-
-  // Fox Ears
-  for (const side of [-0.18, 0.18]) {
-    const ear = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.3, 4), foxTailMat);
-    ear.position.set(side, 2.2, 0); ear.rotation.z = -side * 0.5; player.add(ear);
+  // FACE (front of the character is local -Z)
+  const eyeWhite=mat(0xffffff,.3),iris=mat(0x39bfff,.3,{emissive:0x1a8fd0,emissiveIntensity:.8});
+  const pupil=mat(0x0a1020,.3),brow=mat(0x182337,.8);
+  for(const s of [-1,1]){
+    addMesh(new THREE.SphereGeometry(.065,10,8),eyeWhite,torso,s*.13,1.74,-.29);
+    addMesh(new THREE.SphereGeometry(.04,8,6),iris,torso,s*.13,1.74,-.335);
+    addMesh(new THREE.SphereGeometry(.022,8,6),pupil,torso,s*.13,1.74,-.357);
+    const eb=addMesh(new THREE.BoxGeometry(.11,.025,.03),brow,torso,s*.13,1.84,-.3);
+    eb.rotation.z=s*-.18;
+    // Blue fox ears
+    const ear=addMesh(new THREE.ConeGeometry(.12,.34,4),blue,torso,s*.24,2.2,.02);
+    ear.rotation.z=s*-.3;
   }
-
-  // Multi Fox Tails
-  player.tails = [];
-  for (let i = 0; i < 3; i++) {
-    const tailGroup = new THREE.Group();
-    tailGroup.position.set((i - 1) * 0.2, 1.0, -0.3);
-    const tail = new THREE.Mesh(new THREE.ConeGeometry(0.16, 1.2, 8), foxTailMat);
-    tail.rotation.x = -Math.PI / 3; tail.position.z = -0.5;
-    tailGroup.add(tail); player.add(tailGroup);
-    player.tails.push(tailGroup);
+  addMesh(new THREE.BoxGeometry(.1,.02,.02),mat(0x8a4b4b),torso,0,1.58,-.31);
+  addMesh(new THREE.SphereGeometry(.025,6,5),mat(0xd9b79c),torso,0,1.67,-.34);
+  // Front-of-body details: chest emblem + belt with buckle
+  const gold=mat(0xd7b56b,.4,{metalness:.4});
+  const emblem=addMesh(new THREE.BoxGeometry(.18,.18,.05),gold,torso,0,1.25,-.39);
+  emblem.rotation.z=Math.PI/4;
+  addMesh(new THREE.CylinderGeometry(.45,.45,.1,9),dark,torso,0,.72,0);
+  addMesh(new THREE.BoxGeometry(.16,.12,.05),gold,torso,0,.72,-.45);
+  for(let i=0;i<5;i++){
+    const spike=addMesh(new THREE.ConeGeometry(.14,.42,5),hair,torso,(i-2)*.13,2.12,-.02);
+    spike.rotation.z=(i-2)*-.23;
   }
-
-  // Weapon Pivot
-  swordPivot = new THREE.Group();
-  swordPivot.position.set(0.4, 1.2, 0.2);
-  player.add(swordPivot);
-
-  updateWeaponModel();
-}
-
-function updateWeaponModel() {
-  while (swordPivot.children.length > 0) swordPivot.remove(swordPivot.children[0]);
-  const steel = new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.9, roughness: 0.2 });
-  const gold = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.8 });
-
-  if (equipment.weapon === 'Katana') {
-    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.1, 0.1), steel);
-    blade.position.set(0, 0.5, 0); swordPivot.add(blade);
-  } else if (equipment.weapon === 'Greatsword') {
-    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.5, 0.2), steel);
-    blade.position.set(0, 0.7, 0); swordPivot.add(blade);
-  } else if (equipment.weapon === 'Spirit Staff') {
-    const staff = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.8), gold);
-    staff.position.set(0, 0.6, 0);
-    const orb = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshBasicMaterial({ color: 0x75dcff }));
-    orb.position.set(0, 1.5, 0); swordPivot.add(staff); swordPivot.add(orb);
-  } else if (equipment.weapon === 'Dual Blades') {
-    const b1 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.8, 0.08), steel);
-    b1.position.set(0, 0.4, 0); swordPivot.add(b1);
+  // Three signature blue fox tails (they sway while moving)
+  for(let i=0;i<3;i++){
+    const tail=addMesh(new THREE.ConeGeometry(.19,1.45,8),blue,torso,(i-1)*.42,.95,.67);
+    tail.rotation.x=-1;tail.rotation.z=(i-1)*-.4;
+    tails.push({mesh:tail,baseZ:tail.rotation.z,phase:i*1.3});
   }
+  for(const x of [-.43,.43])addMesh(new THREE.SphereGeometry(.2,8,7),dark,torso,x,1.35,0);
+
+  const leftArm=makeLimb(torso,-.48,1.35,0,.68,0x173d88);
+  const rightArm=makeLimb(torso,.48,1.35,0,.68,0x173d88);
+  const leftLeg=makeLimb(player,-.2,.72,0,.72,0x172c52);
+  const rightLeg=makeLimb(player,.2,.72,0,.72,0x172c52);
+  player.userData={torso,leftArm,rightArm,leftLeg,rightLeg};
+
+  swordPivot=new THREE.Group();
+  swordPivot.position.set(.48,1.23,-.04);
+  torso.add(swordPivot);
+  sword=new THREE.Group();swordPivot.add(sword);
+  addMesh(new THREE.BoxGeometry(.12,.92,.09),metal,sword,0,.55,0);
+  addMesh(new THREE.BoxGeometry(.43,.09,.14),mat(0xd7b56b),sword,0,.12,0);
+  addMesh(new THREE.BoxGeometry(.13,.28,.13),mat(0x573c29),sword,0,-.02,0);
+  sword.rotation.z=-.35;
+  player.position.set(0,0,0);
 }
 
-// --- NPCs & Trading ---
-let merchantNPC;
-function spawnNPCs() {
-  const npcMat = new THREE.MeshStandardMaterial({ color: 0xe63946 });
-  merchantNPC = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.2), npcMat);
-  merchantNPC.position.set(5, 0.6, -15);
-  scene.add(merchantNPC);
-
-  // Floating Tag
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.04, 8, 24), new THREE.MeshBasicMaterial({ color: 0xffd700 }));
-  ring.rotation.x = Math.PI / 2; ring.position.set(5, 1.5, -15);
-  scene.add(ring);
+/* ---------- enemies ---------- */
+function healthBar(){
+  const canvas=document.createElement("canvas");
+  canvas.width=256;canvas.height=40;
+  const texture=new THREE.CanvasTexture(canvas);
+  const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthTest:false,transparent:true}));
+  sprite.scale.set(1.6,.25,1);
+  sprite.position.y=1.65;
+  sprite.userData={canvas,ctx:canvas.getContext("2d"),texture};
+  return sprite;
+}
+function drawEnemyBar(e){
+  const {canvas,ctx,texture}=e.bar.userData;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#161b20";ctx.fillRect(0,0,256,40);
+  ctx.fillStyle="#e54848";ctx.fillRect(4,4,248,32);
+  ctx.fillStyle="#5ee08b";ctx.fillRect(4,4,248*Math.max(0,e.hp/e.maxHp),32);
+  ctx.strokeStyle="#fff";ctx.lineWidth=3;ctx.strokeRect(2,2,252,36);
+  texture.needsUpdate=true;
+}
+function spawnEnemy(x,z,index){
+  const g=new THREE.Group();scene.add(g);
+  const color=index%2?0x8c4ab7:0x4b9560;
+  addMesh(new THREE.SphereGeometry(.55,10,8),mat(color),g,0,.58,0);
+  addMesh(new THREE.SphereGeometry(.22,8,6),mat(color),g,0,1.02,0);
+  const eye=mat(0xffe4a2,.4,{emissive:0xff5c24,emissiveIntensity:.7});
+  for(const s of [-1,1]){
+    const horn=addMesh(new THREE.ConeGeometry(.14,.4,5),mat(0x26302a),g,s*.26,1.25,0);
+    horn.rotation.z=s*-.35;
+    addMesh(new THREE.SphereGeometry(.065,7,6),eye,g,s*.105,1.05,-.19);
+  }
+  const bar=healthBar();g.add(bar);
+  const e={group:g,x,z,spawnX:x,spawnZ:z,hp:40,maxHp:40,alive:true,attackTimer:0,respawn:0,hitTimer:0,bar,index};
+  g.position.set(x,0,z);enemies.push(e);drawEnemyBar(e);
+}
+function makeEnemies(){
+  [[-8,-9],[8,-13],[-10,-22],[10,-31],[-8,-41],[9,-48],[-13,-54],[14,-17]]
+    .forEach((p,i)=>spawnEnemy(p[0],p[1],i));
 }
 
-// --- Enemies & Bosses ---
-function spawnEnemiesAndBosses() {
-  // Regular Enemies
-  const enemyLocs = [[-12, -20], [12, -25], [-15, -40], [15, -45], [-8, -55], [8, -55]];
-  enemyLocs.forEach(([x, z], i) => {
-    createEnemy(x, z, 'Spirit Ghost', 45, 10, false);
-  });
-
-  // Mini Boss
-  createEnemy(-18, -60, 'Shadow Spirit (Mini-Boss)', 180, 18, true);
-
-  // World Boss
-  createEnemy(0, -85, 'Kitsune Shrine Guardian', 450, 28, true, true);
-}
-
-function createEnemy(x, z, name, maxHpVal, atkDmg, isMini = false, isWorldBoss = false) {
-  const g = new THREE.Group();
-  g.position.set(x, 0, z); scene.add(g);
-
-  const col = isWorldBoss ? 0xff0055 : (isMini ? 0x800080 : 0x2a9d8f);
-  const size = isWorldBoss ? 1.8 : (isMini ? 1.3 : 0.8);
-
-  const body = new THREE.Mesh(new THREE.SphereGeometry(size, 12, 12), new THREE.MeshStandardMaterial({ color: col }));
-  body.position.y = size; body.castShadow = true; g.add(body);
-
-  const enemyObj = {
-    group: g, name, hp: maxHpVal, maxHp: maxHpVal, dmg: atkDmg,
-    spawnX: x, spawnZ: z, isMini, isWorldBoss, alive: true, attackCooldown: 0,
-    respawnTimer: 0
-  };
-  enemies.push(enemyObj);
-}
-
-// --- Dynamic Particle System & Damage Numbers ---
-function createHitParticles(pos, colorHex = 0xff527b) {
-  for (let i = 0; i < 12; i++) {
-    const p = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), new THREE.MeshBasicMaterial({ color: colorHex }));
-    p.position.copy(pos);
-    p.vel = new THREE.Vector3((Math.random() - 0.5) * 6, Math.random() * 5 + 2, (Math.random() - 0.5) * 6);
-    p.life = 0.4;
-    scene.add(p);
-    particles.push(p);
+/* ---------- save system ---------- */
+function saveGame(showMessage=true){
+  try{
+    const data={
+      version:4,hp,maxHp,xp,level,questProgress,questComplete,bonusAwarded,totalKills,shrineSeen,
+      inventory:{...inventory},equipment:{...equipment},unlocks:{...unlocks},
+      player:{x:player.position.x,z:player.position.z,yaw}
+    };
+    localStorage.setItem(SAVE_KEY,JSON.stringify(data));
+    dirty=false;
+    $("saveStatus").textContent="💾 Saved locally";
+    if(showMessage)notify("💾 Progress saved on this device!",2);
+    return true;
+  }catch(err){
+    $("saveStatus").textContent="⚠️ Save unavailable";
+    if(showMessage)notify("Couldn't save. Check browser storage settings.",3);
+    return false;
   }
 }
-
-function spawnDamageNumber(pos, amount, isCrit = false) {
-  const vector = pos.clone().project(camera);
-  const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
-  const y = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
-
-  const el = document.createElement('div');
-  el.className = 'damage-number';
-  el.style.left = `${x}px`; el.style.top = `${y}px`;
-  el.style.color = isCrit ? '#ffd24d' : '#ff4d6d';
-  el.textContent = amount;
-  document.body.appendChild(el);
-
-  setTimeout(() => el.remove(), 850);
-}
-
-// --- Combat & Skill Mechanics ---
-function performAttack() {
-  if (gameOver || currentPanel) return;
-  const w = WEAPONS[equipment.weapon];
-  if (swingAnim > 0) return;
-
-  swingAnim = w.speed;
-  sound.play('slash');
-
-  // Check Hit Angle & Range
-  const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
-  
-  enemies.forEach(e => {
-    if (!e.alive) return;
-    const dist = player.position.distanceTo(e.group.position);
-    if (dist <= w.range) {
-      const dir = e.group.position.clone().sub(player.position).normalize();
-      if (forward.dot(dir) > 0.3) {
-        // Hit successfully
-        const isCrit = Math.random() < 0.25;
-        const totalDmg = Math.round((w.dmg + level * 3) * (isCrit ? 1.6 : 1.0));
-        e.hp = Math.max(0, e.hp - totalDmg);
-        
-        sound.play('hit');
-        createHitParticles(e.group.position.clone().add(new THREE.Vector3(0, 1, 0)));
-        spawnDamageNumber(e.group.position, totalDmg, isCrit);
-
-        if (e.hp <= 0) defeatEnemy(e);
-      }
+function loadGame(){
+  try{
+    // Prefer the v4 save; fall back to a v3 save so old progress isn't lost.
+    const raw=localStorage.getItem(SAVE_KEY)||localStorage.getItem(OLD_SAVE_KEY);
+    if(!raw)return;
+    const d=JSON.parse(raw);
+    if(d.version!==3&&d.version!==4)return;
+    level=Math.max(1,Number(d.level)||1);
+    maxHp=Math.max(100,Number(d.maxHp)||100);
+    hp=Number(d.hp)>0?Math.min(maxHp,Number(d.hp)):maxHp;
+    xp=Math.max(0,Number(d.xp)||0);
+    questProgress=Math.max(0,Math.min(QUEST_GOAL,Number(d.questProgress)||0));
+    questComplete=!!d.questComplete||questProgress>=QUEST_GOAL;
+    // v3 used questProgress=6 as a "bonus given" marker; handle both formats.
+    bonusAwarded=!!d.bonusAwarded||Number(d.questProgress)>QUEST_GOAL;
+    totalKills=Math.max(0,Number(d.totalKills)||0);
+    shrineSeen=!!d.shrineSeen;
+    if(d.inventory){
+      inventory.potions=Math.max(0,Number(d.inventory.potions)||0);
+      inventory.spiritCrystals=Math.max(0,Number(d.inventory.spiritCrystals)||0);
     }
-  });
-}
-
-function useSkill(type) {
-  if (gameOver || currentPanel) return;
-
-  if (type === 'dash' && cooldowns.dash <= 0) {
-    cooldowns.dash = 2.5;
-    invulnerableTime = 0.6;
-    sound.play('spell');
-    const moveDir = new THREE.Vector3(stickVector.x, 0, stickVector.y).applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraAngle);
-    if (moveDir.length() < 0.1) moveDir.set(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
-    player.position.add(moveDir.normalize().multiplyScalar(6));
-  } else if (type === 'foxfire' && cooldowns.foxfire <= 0) {
-    cooldowns.foxfire = 4.0;
-    sound.play('spell');
-    showToast('🔥 Cast Foxfire Spell!');
-    enemies.forEach(e => {
-      if (e.alive && player.position.distanceTo(e.group.position) < 8) {
-        e.hp = Math.max(0, e.hp - (40 + level * 5));
-        spawnDamageNumber(e.group.position, 40 + level * 5, true);
-        if (e.hp <= 0) defeatEnemy(e);
-      }
-    });
-  } else if (type === 'burst' && cooldowns.burst <= 0) {
-    cooldowns.burst = 7.0;
-    sound.play('spell');
-    showToast('💥 Cast Spirit Burst AoE!');
-    createHitParticles(player.position.clone().add(new THREE.Vector3(0, 1, 0)), 0x75dcff);
-    enemies.forEach(e => {
-      if (e.alive && player.position.distanceTo(e.group.position) < 10) {
-        e.hp = Math.max(0, e.hp - (70 + level * 8));
-        spawnDamageNumber(e.group.position, 70 + level * 8, true);
-        if (e.hp <= 0) defeatEnemy(e);
-      }
-    });
-  } else if (type === 'heal' && cooldowns.heal <= 0) {
-    if (inv.potions > 0 && hp < maxHp) {
-      inv.potions--;
-      cooldowns.heal = 3.0;
-      hp = Math.min(maxHp, hp + 50);
-      sound.play('spell');
-      showToast('🧪 Restored 50 HP!');
-      updateHUD();
-    } else showToast('No potions available or HP full!');
+    if(d.unlocks){
+      unlocks.spiritBlade=!!d.unlocks.spiritBlade;
+      unlocks.spiritArmor=!!d.unlocks.spiritArmor;
+    }
+    if(d.equipment){
+      if(weaponStats[d.equipment.weapon])equipment.weapon=d.equipment.weapon;
+      if(["Traveler Outfit","Spirit Armor"].includes(d.equipment.armor))equipment.armor=d.equipment.armor;
+    }
+    // Anything equipped is implicitly unlocked.
+    if(equipment.weapon==="Spirit Blade")unlocks.spiritBlade=true;
+    if(equipment.armor==="Spirit Armor")unlocks.spiritArmor=true;
+    if(d.player&&Number.isFinite(d.player.x)&&Number.isFinite(d.player.z)){
+      if(canStandAt(d.player.x,d.player.z))player.position.set(d.player.x,0,d.player.z);
+      yaw=Number(d.player.yaw)||0;
+    }
+    $("saveStatus").textContent="💾 Save loaded";
+  }catch(err){
+    console.warn("Save data could not be loaded:",err);
+    $("saveStatus").textContent="⚠️ New save started";
   }
 }
+function newGame(){
+  if(!confirm("Start a new game? Your saved progress will be erased."))return;
+  try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem(OLD_SAVE_KEY);}catch(e){}
+  hp=maxHp=100;xp=0;level=1;
+  questProgress=0;questComplete=false;bonusAwarded=false;totalKills=0;shrineSeen=false;
+  inventory.potions=3;inventory.spiritCrystals=0;
+  equipment.weapon="Blue Katana";equipment.armor="Traveler Outfit";
+  unlocks.spiritBlade=unlocks.spiritArmor=false;
+  player.position.set(0,0,0);yaw=0;pitch=.25;faceAngle=0;player.rotation.y=0;
+  for(const e of enemies){
+    e.alive=true;e.hp=e.maxHp;e.group.visible=true;
+    e.x=e.spawnX;e.z=e.spawnZ;e.group.position.set(e.x,0,e.z);
+    drawEnemyBar(e);
+  }
+  gameOver=false;
+  $("dead").style.display="none";
+  closePanel();
+  updateHud();saveGame(false);
+  notify("New adventure started. Good luck, Alfa!",2.5);
+}
 
-function defeatEnemy(e) {
-  e.alive = false;
-  e.group.visible = false;
-  e.respawnTimer = 15; // 15s respawn
-
-  const earnedCoins = e.isWorldBoss ? 200 : (e.isMini ? 80 : 25);
-  const earnedXp = e.isWorldBoss ? 350 : (e.isMini ? 150 : 45);
-  coins += earnedCoins; xp += earnedXp; crystals += e.isMini || e.isWorldBoss ? 2 : 1;
-
-  showToast(`✨ Defeated ${e.name}! +${earnedCoins} Coins, +${earnedXp} EXP`);
-
-  // Update Quests
-  QUESTS.forEach(q => {
-    if (!q.done) {
-      if (q.id === 'q1' && !e.isMini) q.count = Math.min(q.target, q.count + 1);
-      if (q.id === 'q2' && e.isMini) q.count = Math.min(q.target, q.count + 1);
-      if (q.id === 'q3' && e.isWorldBoss) q.count = Math.min(q.target, q.count + 1);
-      if (q.count >= q.target) {
-        q.done = true;
-        coins += q.rewardCoins; xp += q.rewardXp;
-        showToast(`🏆 Quest Complete: ${q.title}! Reward: +${q.rewardCoins} Coins`);
-      }
+/* ---------- HUD & inventory ---------- */
+function updateHud(){
+  $("level").textContent=level;
+  $("hpText").textContent=`${Math.ceil(hp)}/${maxHp} HP`;
+  $("hpFill").style.width=`${Math.max(0,hp/maxHp*100)}%`;
+  $("xpText").textContent=`${xp}/${neededXP()} XP`;
+  $("xpFill").style.width=`${Math.min(100,xp/neededXP()*100)}%`;
+  $("quest").innerHTML=questComplete
+    ?`🏆 QUEST COMPLETE!<br>Forest Threat — ${QUEST_GOAL}/${QUEST_GOAL} spirits defeated<br><span class="small">Total defeated: ${totalKills} · keep exploring & levelling up</span>`
+    :`📜 Quest: Forest Threat<br>Spirits defeated: <b>${questProgress}</b>/${QUEST_GOAL}`;
+}
+function checkLevelUp(){
+  while(xp>=neededXP()){
+    xp-=neededXP();
+    level++;
+    maxHp+=20;
+    hp=Math.min(maxHp,hp+35);
+    popup(`🎉 LEVEL UP! You are now level ${level}!`,2.5);
+  }
+}
+function updateInventory(){
+  const spiritNote=unlocks.spiritBlade?"Unlocked":"Needs 3 spirit crystals";
+  const armorNote=equipment.armor==="Spirit Armor"?"Damage resistance: 30%"
+    :unlocks.spiritArmor?"Spirit Armor unlocked (30% resistance)":"Standard protection · Spirit Armor needs 2 crystals";
+  $("equipment").innerHTML=`
+    <h3>⚔️ Equipment</h3>
+    <div class="item"><div><b>Weapon: ${equipment.weapon}</b>
+      <small>Damage: ${currentDamage()} (level bonus +${(level-1)*3}) · Spirit Blade: ${spiritNote}</small></div>
+      <button id="weaponBtn">Change weapon</button></div>
+    <div class="item"><div><b>Armor: ${equipment.armor}</b><small>${armorNote}</small></div>
+      <button id="armorBtn">Change armor</button></div>`;
+  $("items").innerHTML=`
+    <h3>🎒 Items</h3>
+    <div class="item"><div><b>🧪 Healing Potions × ${inventory.potions}</b><small>Restore 45 HP · potions sometimes drop from spirits</small></div>
+      <button id="potionBtn">Use</button></div>
+    <div class="item"><div><b>💎 Spirit Crystals × ${inventory.spiritCrystals}</b><small>Collected from defeated spirits</small></div></div>`;
+  $("weaponBtn").onclick=changeWeapon;
+  $("armorBtn").onclick=changeArmor;
+  $("potionBtn").onclick=usePotion;
+}
+function changeWeapon(){
+  if(!unlocks.spiritBlade&&inventory.spiritCrystals>=3){
+    unlocks.spiritBlade=true;
+    notify("💎 Spirit Blade unlocked!",2);
+  }
+  const available=WEAPONS.filter(w=>w!=="Spirit Blade"||unlocks.spiritBlade);
+  const next=available[(available.indexOf(equipment.weapon)+1)%available.length];
+  equipment.weapon=next;
+  if(!unlocks.spiritBlade&&WEAPONS.includes(next))
+    notify(`Equipped: ${next} · Spirit Blade needs 3 spirit crystals`,2.2);
+  else notify("Equipped: "+next,1.5);
+  updateInventory();markDirty();saveGame(false);
+}
+function changeArmor(){
+  if(equipment.armor==="Traveler Outfit"){
+    if(!unlocks.spiritArmor){
+      if(inventory.spiritCrystals<2){notify("You need 2 spirit crystals for Spirit Armor.",2);return;}
+      unlocks.spiritArmor=true;
     }
-  });
+    equipment.armor="Spirit Armor";
+  }else equipment.armor="Traveler Outfit";
+  updateInventory();saveGame(false);
+  notify("Equipped: "+equipment.armor,1.5);
+}
+function usePotion(){
+  if(gameOver)return;
+  if(inventory.potions<=0){notify("No healing potions left!",1.5);return;}
+  if(hp>=maxHp){notify("Your HP is already full.",1.5);return;}
+  inventory.potions--;
+  hp=Math.min(maxHp,hp+45);
+  updateHud();if(panelOpen)updateInventory();markDirty();
+  notify("🧪 Restored 45 HP!",1.5);
+}
+function togglePanel(){panelOpen?closePanel():openPanel();}
+function openPanel(){panelOpen=true;$("panel").style.display="block";updateInventory();}
+function closePanel(){panelOpen=false;$("panel").style.display="none";saveGame(false);}
 
+/* ---------- combat ---------- */
+function attack(){
+  if(gameOver||panelOpen||attackCooldown>0)return;
+  attackCooldown=.48;swingTime=.32;
+  let target=null,best=3.2;
+  // Attack where the character is facing (wide cone = a little aim assist)
+  const fx=-Math.sin(faceAngle),fz=-Math.cos(faceAngle);
+  for(const e of enemies){
+    if(!e.alive)continue;
+    const dx=e.x-player.position.x,dz=e.z-player.position.z;
+    const d=Math.hypot(dx,dz);
+    const dot=(dx*fx+dz*fz)/(d||1);
+    if(d<best&&dot>-.3){best=d;target=e;}
+  }
+  if(!target){notify("Swing! Get closer to an enemy.",1.1);return;}
+  // Turn to face the enemy that was hit
+  faceAngle=Math.atan2(-(target.x-player.position.x),-(target.z-player.position.z));
+  player.rotation.y=faceAngle;
+  const damage=currentDamage();
+  target.hp-=damage;
+  target.hitTimer=.12;
+  drawEnemyBar(target);
+  notify(`💥 ${equipment.weapon}: ${damage} damage!`,1.1);
+  if(target.hp<=0)defeatEnemy(target);
+}
+function defeatEnemy(e){
+  if(!e.alive)return;
+  e.alive=false;e.group.visible=false;e.respawn=14;
+  inventory.spiritCrystals++;
+  totalKills++;
+  xp+=35;
+  let dropped=false;
+  if(Math.random()<.25){inventory.potions++;dropped=true;}
+
+  let justCompleted=false;
+  if(!questComplete){
+    questProgress=Math.min(QUEST_GOAL,questProgress+1);
+    if(questProgress>=QUEST_GOAL)questComplete=true;
+  }
+  if(questComplete&&!bonusAwarded){
+    bonusAwarded=true;justCompleted=true;
+    xp+=100;
+  }
   checkLevelUp();
-  updateHUD();
-}
+  updateHud();if(panelOpen)updateInventory();markDirty();
 
-function checkLevelUp() {
-  const needed = level * 100;
-  if (xp >= needed) {
-    xp -= needed; level++;
-    maxHp += 20; hp = maxHp;
-    sound.play('levelup');
-    showToast(`🎉 LEVEL UP! You reached Level ${level}!`);
+  if(justCompleted){
+    popup("🏆 QUEST COMPLETE! +100 BONUS XP",3.5);
+    notify("Quest complete! Visit the shrine for a blessing.",4);
+  }else{
+    popup("🌟 Spirit defeated!",1.3);
+    notify(`✨ +35 XP · +1 💎${dropped?" · +1 🧪":""}${questComplete?"":` · Quest ${questProgress}/${QUEST_GOAL}`}`,2.2);
   }
 }
-
-function takeDamage(amt) {
-  if (invulnerableTime > 0 || gameOver) return;
-  hp = Math.max(0, hp - amt);
-  sound.play('hit');
-  updateHUD();
-  if (hp <= 0) {
-    gameOver = true;
-    document.getElementById('deathScreen').style.display = 'grid';
+function takeDamage(amount){
+  if(hurtCooldown>0||gameOver)return;
+  hurtCooldown=.8;
+  const reduction=equipment.armor==="Spirit Armor"?.7:1;
+  const dmg=Math.max(1,Math.ceil(amount*reduction));
+  hp=Math.max(0,hp-dmg);
+  updateHud();markDirty();
+  notify(`💢 You took ${dmg} damage!`,1.1);
+  if(hp<=0){
+    gameOver=true;
+    closePanel();
+    saveGame(false);
+    $("dead").style.display="grid";
   }
 }
-
-// --- Logic Update Loops ---
-function updatePlayerMovement(dt) {
-  if (gameOver) return;
-
-  // Key direction input
-  let moveX = stickVector.x, moveZ = stickVector.y;
-  if (keys['KeyW'] || keys['ArrowUp']) moveZ = -1;
-  if (keys['KeyS'] || keys['ArrowDown']) moveZ = 1;
-  if (keys['KeyA'] || keys['ArrowLeft']) moveX = -1;
-  if (keys['KeyD'] || keys['ArrowRight']) moveX = 1;
-
-  const len = Math.hypot(moveX, moveZ);
-  if (len > 0.1) {
-    const normX = moveX / Math.max(1, len);
-    const normZ = moveZ / Math.max(1, len);
-
-    // Camera relative movement
-    const moveDir = new THREE.Vector3(normX, 0, normZ).applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraAngle);
-    const speed = 8.5;
-
-    const nextX = player.position.x + moveDir.x * speed * dt;
-    const nextZ = player.position.z + moveDir.z * speed * dt;
-
-    // Obstacle Collision Response
-    let collide = false;
-    for (const ob of obstacles) {
-      if (Math.hypot(nextX - ob.x, nextZ - ob.z) < ob.r + 0.5) { collide = true; break; }
+function interact(){
+  if(gameOver||panelOpen)return;
+  if(Math.hypot(player.position.x,player.position.z+24)<4.2){
+    if(!shrineSeen){
+      shrineSeen=true;markDirty();
+      popup("⛩️ Shrine of the Blue Kitsune",3);
+      notify("The shrine glows with ancient energy. Press USE/E again for blessings.",3);
+    }else if(hp<maxHp){
+      hp=Math.min(maxHp,hp+35);updateHud();markDirty();
+      notify("💙 Shrine blessing restored 35 HP!",2);
+    }else{
+      saveGame(false);
+      notify(questComplete?"The shrine recognizes your victory. Progress saved.":"The shrine is waiting for a worthy warrior. Progress saved.",2.2);
     }
-    if (!collide) {
-      player.position.x = nextX;
-      player.position.z = nextZ;
-    }
-
-    // Turn character to face movement
-    const targetAngle = Math.atan2(moveDir.x, moveDir.z);
-    player.rotation.y = targetAngle;
-  }
-
-  // Tail animations
-  player.tails.forEach((tail, idx) => {
-    tail.rotation.z = Math.sin(clock.getElapsedTime() * 4 + idx) * 0.15;
-  });
-
-  // Swing Animation
-  if (swingAnim > 0) {
-    swingAnim -= dt;
-    swordPivot.rotation.x = -Math.sin((1 - swingAnim / 0.35) * Math.PI) * 1.5;
-  } else swordPivot.rotation.x = 0;
+  }else notify("Find the glowing shrine near the red gate.",1.6);
 }
 
-function updateEnemiesLogic(dt) {
-  let activeBoss = null;
-
-  enemies.forEach(e => {
-    if (!e.alive) {
-      e.respawnTimer -= dt;
-      if (e.respawnTimer <= 0) {
-        e.alive = true; e.hp = e.maxHp; e.group.visible = true;
-        e.group.position.set(e.spawnX, 0, e.spawnZ);
+/* ---------- updates ---------- */
+function updateEnemies(dt){
+  let closest=null,closestD=Infinity;
+  for(const e of enemies){
+    if(!e.alive){
+      e.respawn-=dt;
+      if(e.respawn<=0){
+        e.alive=true;e.hp=e.maxHp;e.group.visible=true;
+        e.group.position.set(e.x,0,e.z);drawEnemyBar(e);
       }
-      return;
+      continue;
     }
+    const dx=player.position.x-e.x,dz=player.position.z-e.z;
+    const d=Math.hypot(dx,dz);
+    if(d<closestD){closestD=d;closest=e;}
+    e.group.rotation.y=Math.atan2(dx,dz);
+    e.hitTimer=Math.max(0,e.hitTimer-dt);
+    e.group.position.y=e.hitTimer>0?.2:.04+Math.sin(performance.now()*.004+e.index)*.04;
 
-    const dist = player.position.distanceTo(e.group.position);
-    if (e.isWorldBoss && dist < 22) activeBoss = e;
-
-    // AI Pursuit
-    if (dist < 16 && dist > 1.8 && !gameOver) {
-      const dir = player.position.clone().sub(e.group.position).normalize();
-      e.group.position.add(dir.multiplyScalar(3.2 * dt));
-      e.group.lookAt(player.position.x, e.group.position.y, player.position.z);
-    }
-
-    // AI Attack
-    if (dist <= 2.2 && !gameOver) {
-      e.attackCooldown -= dt;
-      if (e.attackCooldown <= 0) {
-        e.attackCooldown = 1.5;
-        takeDamage(e.dmg);
+    if(d<12&&d>1.05&&!gameOver){
+      const speed=1.6+Math.min(level*.05,.5);   // enemies get a bit faster as you level
+      const nx=e.x+dx/d*speed*dt,nz=e.z+dz/d*speed*dt;
+      if(canStandAt(nx,nz)&&Math.hypot(nx-player.position.x,nz-player.position.z)>.85){
+        e.x=nx;e.z=nz;e.group.position.x=nx;e.group.position.z=nz;
       }
     }
+    if(d<1.5&&!gameOver){
+      e.attackTimer-=dt;
+      if(e.attackTimer<=0){
+        e.attackTimer=1.35;
+        takeDamage(8+Math.floor(level*.5));
+      }
+    }else e.attackTimer=Math.max(0,e.attackTimer-dt);
+  }
+  if(closest&&closestD<15){
+    $("enemyHud").style.display="block";
+    $("enemyName").textContent="Forest Spirit";
+    $("enemyFill").style.width=`${Math.max(0,closest.hp/closest.maxHp*100)}%`;
+    $("enemyHp").textContent=`${Math.max(0,closest.hp)}/${closest.maxHp} HP`;
+  }else $("enemyHud").style.display="none";
+}
+
+function updatePlayer(dt){
+  if(gameOver)return;
+  const up=keys.KeyW||keys.ArrowUp,down=keys.KeyS||keys.ArrowDown;
+  const left=keys.KeyA||keys.ArrowLeft,rightKey=keys.KeyD||keys.ArrowRight;
+  let ix=(rightKey?1:0)-(left?1:0)+stickX;
+  let iy=(down?1:0)-(up?1:0)+stickY;
+  const len=Math.hypot(ix,iy);
+  if(len>1){ix/=len;iy/=len;}
+  const moving=Math.abs(ix)+Math.abs(iy)>.08;
+  const running=keys.ShiftLeft||keys.ShiftRight;
+  const speed=running?8.4:5.1;
+  // Camera-relative movement: W / stick-up always heads away from the camera
+  const dx=(ix*Math.cos(yaw)-iy*Math.sin(yaw))*speed*dt;
+  const dz=(ix*Math.sin(yaw)+iy*Math.cos(yaw))*speed*dt;
+  if(moving){
+    const nx=player.position.x+dx,nz=player.position.z+dz;
+    if(canStandAt(nx,player.position.z))player.position.x=nx;
+    if(canStandAt(player.position.x,nz))player.position.z=nz;
+    faceAngle=Math.atan2(-dx,-dz);   // character's front (-Z) points where it moves
+    walkTime+=dt*(running?13:9);
+  }
+  // Smoothly turn the body toward faceAngle via the shortest path
+  let turn=faceAngle-player.rotation.y;
+  turn=Math.atan2(Math.sin(turn),Math.cos(turn));
+  player.rotation.y+=turn*(1-Math.exp(-16*dt));
+
+  // Procedural idle / walk / run animation
+  const ud=player.userData;
+  const amount=moving?1:.12;
+  const wave=Math.sin(walkTime)*amount;
+  ud.leftLeg.rotation.x=wave;
+  ud.rightLeg.rotation.x=-wave;
+  ud.leftArm.rotation.x=-wave*.8;
+  ud.rightArm.rotation.x=wave*.8;
+  ud.torso.position.y=moving?Math.abs(Math.sin(walkTime*2))*.045:Math.sin(performance.now()*.0015)*.018;
+  const t=performance.now()*.003;
+  for(const tl of tails)tl.mesh.rotation.z=tl.baseZ+Math.sin(t+tl.phase)*(moving?.22:.08);
+
+  if(swingTime>0){
+    swingTime-=dt;
+    const k=1-Math.max(0,swingTime)/.32;
+    swordPivot.rotation.z=-Math.sin(k*Math.PI)*1.9;
+    swordPivot.rotation.x=-Math.sin(k*Math.PI)*.65;
+    ud.rightArm.rotation.x=-1.2;
+  }else{
+    swordPivot.rotation.z=THREE.MathUtils.damp(swordPivot.rotation.z,0,12,dt);
+    swordPivot.rotation.x=THREE.MathUtils.damp(swordPivot.rotation.x,0,12,dt);
+  }
+}
+function updateCamera(dt){
+  const d=7.5;
+  camTarget.set(
+    player.position.x-Math.sin(yaw)*Math.cos(pitch)*d,
+    player.position.y+2.3+Math.sin(pitch)*d,
+    player.position.z+Math.cos(yaw)*Math.cos(pitch)*d
+  );
+  camera.position.lerp(camTarget,1-Math.exp(-7*dt));
+  camera.lookAt(player.position.x,player.position.y+1.15,player.position.z);
+}
+
+/* ---------- controls ---------- */
+function bindControls(){
+  addEventListener("keydown",e=>{
+    keys[e.code]=true;
+    if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))e.preventDefault();
+    if(e.repeat)return;
+    if(e.code==="Space")attack();
+    if(e.code==="KeyE")interact();
+    if(e.code==="KeyI"||(e.code==="Escape"&&panelOpen))togglePanel();
+    if(e.code==="KeyH")usePotion();
   });
+  addEventListener("keyup",e=>{keys[e.code]=false;});
+  addEventListener("blur",()=>{for(const k in keys)keys[k]=false;});
 
-  // Boss Health Bar UI
-  const bossHud = document.getElementById('bossHud');
-  if (activeBoss) {
-    bossHud.style.display = 'block';
-    document.getElementById('bossName').textContent = activeBoss.name;
-    document.getElementById('bossFill').style.width = `${(activeBoss.hp / activeBoss.maxHp) * 100}%`;
-  } else bossHud.style.display = 'none';
-}
-
-function updateCameraPosition() {
-  const camDist = 11.0;
-  const targetX = player.position.x - Math.sin(cameraAngle) * Math.cos(cameraPitch) * camDist;
-  const targetY = player.position.y + Math.sin(cameraPitch) * camDist + 1.5;
-  const targetZ = player.position.z - Math.cos(cameraAngle) * Math.cos(cameraPitch) * camDist;
-
-  camera.position.set(targetX, targetY, targetZ);
-  camera.lookAt(player.position.x, player.position.y + 1.2, player.position.z);
-}
-
-// --- UI & Modals ---
-function updateHUD() {
-  document.getElementById('lblLevel').textContent = level;
-  document.getElementById('lblHp').textContent = `${Math.ceil(hp)}/${maxHp} HP`;
-  document.getElementById('hpFill').style.width = `${(hp / maxHp) * 100}%`;
-  
-  const needed = level * 100;
-  document.getElementById('lblXp').textContent = `${xp}/${needed} XP`;
-  document.getElementById('xpFill').style.width = `${Math.min(100, (xp / needed) * 100)}%`;
-
-  document.getElementById('lblCoins').textContent = coins;
-  document.getElementById('lblCrystals').textContent = crystals;
-}
-
-function showToast(msg) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg; toast.style.opacity = '1';
-  setTimeout(() => toast.style.opacity = '0', 3000);
-}
-
-function openPanel(id) {
-  closePanels();
-  currentPanel = document.getElementById(id);
-  currentPanel.style.display = 'block';
-
-  if (id === 'panelShop') renderShop();
-  if (id === 'panelQuest') renderQuests();
-  if (id === 'panelInv') renderInventory();
-}
-
-window.closePanels = function() {
-  document.querySelectorAll('.modal-panel').forEach(p => p.style.display = 'none');
-  currentPanel = null;
-};
-
-function renderShop() {
-  const shopGrid = document.getElementById('shopGrid');
-  shopGrid.innerHTML = `
-    <div class="panel-card"><div><h4>🧪 Health Potion</h4><p>Restores 50 HP. Cost: 25 Coins</p></div><button onclick="buyItem('potion')">Buy</button></div>
-    <div class="panel-card"><div><h4>🗡️ Greatsword</h4><p>High damage weapon. Cost: 120 Coins</p></div><button onclick="buyItem('greatsword')">Buy</button></div>
-    <div class="panel-card"><div><h4>🪄 Spirit Staff</h4><p>Longer attack reach. Cost: 180 Coins</p></div><button onclick="buyItem('staff')">Buy</button></div>
-    <div class="panel-card"><div><h4>⚔️ Dual Blades</h4><p>Ultra fast slash speed. Cost: 250 Coins</p></div><button onclick="buyItem('blades')">Buy</button></div>
-  `;
-}
-
-window.buyItem = function(type) {
-  if (type === 'potion' && coins >= 25) {
-    coins -= 25; inv.potions++; showToast('Bought 1 Health Potion!');
-  } else if (type === 'greatsword' && coins >= 120) {
-    coins -= 120; equipment.weapon = 'Greatsword'; updateWeaponModel(); showToast('Equipped Greatsword!');
-  } else if (type === 'staff' && coins >= 180) {
-    coins -= 180; equipment.weapon = 'Spirit Staff'; updateWeaponModel(); showToast('Equipped Spirit Staff!');
-  } else if (type === 'blades' && coins >= 250) {
-    coins -= 250; equipment.weapon = 'Dual Blades'; updateWeaponModel(); showToast('Equipped Dual Blades!');
-  } else showToast('Not enough coins!');
-  updateHUD(); renderShop();
-};
-
-function renderQuests() {
-  const list = document.getElementById('questList');
-  list.innerHTML = QUESTS.map(q => `
-    <div class="panel-card">
-      <div>
-        <h4>${q.title} ${q.done ? '✅ (Completed)' : ''}</h4>
-        <p>${q.desc} Progress: ${q.count}/${q.target}</p>
-      </div>
-      <div style="font-size:12px; font-weight:800; color:var(--gold);">+${q.rewardCoins} Coins</div>
-    </div>
-  `).join('');
-}
-
-function renderInventory() {
-  const invDiv = document.getElementById('invEquipment');
-  invDiv.innerHTML = `
-    <div class="panel-card"><div><h4>Equipped Weapon</h4><p>${equipment.weapon} (${WEAPONS[equipment.weapon].dmg} Base DMG)</p></div></div>
-    <div class="panel-card"><div><h4>Potions Inventory</h4><p>${inv.potions}x Health Potions</p></div></div>
-  `;
-}
-
-// --- Control Bindings ---
-function bindEvents() {
-  window.addEventListener('keydown', e => {
-    keys[e.code] = true;
-    if (e.code === 'Space') performAttack();
-    if (e.code === 'ShiftLeft') useSkill('dash');
-    if (e.code === 'Digit1') useSkill('foxfire');
-    if (e.code === 'Digit2') useSkill('burst');
-    if (e.code === 'Digit3' || e.code === 'KeyH') useSkill('heal');
-    if (e.code === 'KeyE') checkInteractions();
+  // Camera drag (mouse, touch or pen). A mouse click without dragging attacks.
+  const cv=renderer.domElement;
+  cv.addEventListener("pointerdown",e=>{
+    if(dragPointer!==null)return;
+    dragPointer=e.pointerId;dragMoved=false;
+    lastX=startX=e.clientX;lastY=startY=e.clientY;
+    cv.setPointerCapture(e.pointerId);
   });
-  window.addEventListener('keyup', e => keys[e.code] = false);
-
-  // Mouse Drag Camera Angle
-  let isDragging = false, lastX = 0;
-  window.addEventListener('pointerdown', e => {
-    if (e.target.tagName === 'CANVAS') { isDragging = true; lastX = e.clientX; }
+  cv.addEventListener("pointermove",e=>{
+    if(e.pointerId!==dragPointer)return;
+    if(Math.hypot(e.clientX-startX,e.clientY-startY)>6)dragMoved=true;
+    yaw-=(e.clientX-lastX)*.006;
+    pitch=THREE.MathUtils.clamp(pitch+(e.clientY-lastY)*.003,-.15,.85);
+    lastX=e.clientX;lastY=e.clientY;
   });
-  window.addEventListener('pointermove', e => {
-    if (isDragging) {
-      cameraAngle -= (e.clientX - lastX) * 0.006;
-      lastX = e.clientX;
-    }
-  });
-  window.addEventListener('pointerup', () => isDragging = false);
-
-  // Mobile JoyStick
-  const area = document.getElementById('stickArea'), knob = document.getElementById('stickKnob');
-  area.addEventListener('pointerdown', e => {
-    stickPointer = e.pointerId; area.setPointerCapture(e.pointerId);
-  });
-  area.addEventListener('pointermove', e => {
-    if (e.pointerId === stickPointer) {
-      const rect = area.getBoundingClientRect();
-      const dx = e.clientX - (rect.left + rect.width / 2);
-      const dy = e.clientY - (rect.top + rect.height / 2);
-      const dist = Math.min(40, Math.hypot(dx, dy));
-      const angle = Math.atan2(dy, dx);
-      stickVector = { x: Math.cos(angle) * (dist / 40), y: Math.sin(angle) * (dist / 40) };
-      knob.style.left = `${37 + Math.cos(angle) * dist}px`;
-      knob.style.top = `${37 + Math.sin(angle) * dist}px`;
-    }
-  });
-  const resetStick = e => {
-    if (e.pointerId === stickPointer) {
-      stickPointer = null; stickVector = { x: 0, y: 0 };
-      knob.style.left = '37px'; knob.style.top = '37px';
-    }
+  const endDrag=e=>{
+    if(e.pointerId!==dragPointer)return;
+    if(e.type==="pointerup"&&e.pointerType==="mouse"&&e.button===0&&!dragMoved)attack();
+    dragPointer=null;
   };
-  area.addEventListener('pointerup', resetStick);
-  area.addEventListener('pointercancel', resetStick);
+  cv.addEventListener("pointerup",endDrag);
+  cv.addEventListener("pointercancel",endDrag);
 
-  // Buttons
-  document.getElementById('btnAttack').onclick = performAttack;
-  document.getElementById('btnDash').onclick = () => useSkill('dash');
-  document.getElementById('btnInteract').onclick = checkInteractions;
-  document.getElementById('btnOpenQuest').onclick = () => openPanel('panelQuest');
-  document.getElementById('btnOpenShop').onclick = () => openPanel('panelShop');
-  document.getElementById('btnOpenInv').onclick = () => openPanel('panelInv');
-  document.getElementById('btnSave').onclick = () => saveGame(true);
+  // Virtual joystick
+  const base=$("stickBase"),knob=$("stickKnob");
+  function moveStick(e){
+    const r=base.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+    let dx=e.clientX-cx,dy=e.clientY-cy;
+    const max=36,len=Math.hypot(dx,dy);
+    if(len>max){dx=dx/len*max;dy=dy/len*max;}
+    stickX=dx/max;stickY=dy/max;
+    knob.style.left=33+dx+"px";knob.style.top=33+dy+"px";
+  }
+  base.addEventListener("pointerdown",e=>{
+    if(stickPointer!==null)return;
+    stickPointer=e.pointerId;base.setPointerCapture(e.pointerId);moveStick(e);
+  });
+  base.addEventListener("pointermove",e=>{if(e.pointerId===stickPointer)moveStick(e);});
+  function release(e){
+    if(e.pointerId!==stickPointer)return;
+    stickPointer=null;stickX=stickY=0;
+    knob.style.left="33px";knob.style.top="33px";
+  }
+  base.addEventListener("pointerup",release);
+  base.addEventListener("pointercancel",release);
 
-  document.getElementById('btnRespawn').onclick = () => {
-    gameOver = false; hp = maxHp;
-    player.position.set(0, 0, 0);
-    document.getElementById('deathScreen').style.display = 'none';
-    updateHUD();
+  $("attack").addEventListener("pointerdown",e=>{e.preventDefault();attack();});
+  $("interact").addEventListener("pointerdown",e=>{e.preventDefault();interact();});
+  $("usePotion").addEventListener("pointerdown",e=>{e.preventDefault();usePotion();});
+  $("inventoryBtn").onclick=togglePanel;
+  $("saveBtn").onclick=()=>saveGame(true);
+  $("closePanel").onclick=closePanel;
+  $("drinkBtn").onclick=usePotion;
+  $("resetBtn").onclick=newGame;
+  $("respawn").onclick=()=>{
+    gameOver=false;hp=maxHp;
+    player.position.set(0,0,0);
+    yaw=0;pitch=.25;hurtCooldown=1;faceAngle=0;player.rotation.y=0;
+    for(const e of enemies){e.attackTimer=1;}
+    $("dead").style.display="none";
+    updateHud();saveGame(false);
+    notify("Back at the shrine. Your progress is safe.",2.5);
   };
-
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+  addEventListener("resize",()=>{
+    camera.aspect=innerWidth/innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(innerWidth,innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
   });
 }
 
-function checkInteractions() {
-  if (player.position.distanceTo(merchantNPC.position) < 4.0) {
-    openPanel('panelShop');
-  } else {
-    showToast('⛩️ Interacted with Shrine. HP restored!');
-    hp = maxHp; updateHUD();
-  }
-}
-
-// --- Persistence ---
-function saveGame(notify = false) {
-  const data = { version: 5, level, hp, maxHp, xp, coins, crystals, inv, equipment, QUESTS };
-  localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-  if (notify) showToast('💾 Progress saved successfully!');
-}
-
-function loadGame() {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return;
-    const d = JSON.parse(raw);
-    if (d && d.version === 5) {
-      level = d.level || 1; hp = d.hp || 120; maxHp = d.maxHp || 120;
-      xp = d.xp || 0; coins = d.coins || 50; crystals = d.crystals || 0;
-      inv = d.inv || inv; equipment = d.equipment || equipment;
-      updateWeaponModel();
-    }
-  } catch(e) { console.warn(e); }
-}
-
-// --- Main Game Loop ---
-function animate() {
+/* ---------- main loop ---------- */
+function animate(){
   requestAnimationFrame(animate);
-  const dt = Math.min(clock.getDelta(), 0.05);
+  const dt=Math.min(clock.getDelta(),.04);
 
-  // Cooldown timers update
-  for (const k in cooldowns) {
-    if (cooldowns[k] > 0) cooldowns[k] = Math.max(0, cooldowns[k] - dt);
+  if(!panelOpen){
+    attackCooldown=Math.max(0,attackCooldown-dt);
+    hurtCooldown=Math.max(0,hurtCooldown-dt);
+    updatePlayer(dt);
+    updateEnemies(dt);
   }
-  if (invulnerableTime > 0) invulnerableTime = Math.max(0, invulnerableTime - dt);
+  updateCamera(dt);
 
-  // Skill Overlay Updates
-  document.getElementById('cdDash').style.display = cooldowns.dash > 0 ? 'flex' : 'none';
-  document.getElementById('cdDash').textContent = Math.ceil(cooldowns.dash);
-  document.getElementById('cdFoxfire').style.display = cooldowns.foxfire > 0 ? 'flex' : 'none';
-  document.getElementById('cdFoxfire').textContent = Math.ceil(cooldowns.foxfire);
-  document.getElementById('cdBurst').style.display = cooldowns.burst > 0 ? 'flex' : 'none';
-  document.getElementById('cdBurst').textContent = Math.ceil(cooldowns.burst);
-
-  // Particles
-  particles.forEach((p, idx) => {
-    p.position.addScaledVector(p.vel, dt);
-    p.life -= dt;
-    if (p.life <= 0) { scene.remove(p); particles.splice(idx, 1); }
-  });
-
-  if (!currentPanel) {
-    updatePlayerMovement(dt);
-    updateEnemiesLogic(dt);
+  const now=performance.now();
+  for(const f of floaters){
+    if(f.spin==="y")f.obj.rotation.y+=dt*.8;else f.obj.rotation.z+=dt*.8;
+    f.obj.position.y=1.15+Math.sin(now*.0015)*.12;
   }
-  updateCameraPosition();
 
-  renderer.render(scene, camera);
+  toastTime-=dt;
+  if(toastTime<=0)$("toast").style.opacity=".72";
+  messageTime-=dt;
+  if(messageTime<=0)$("message").style.display="none";
+
+  autoSaveTimer+=dt;
+  if(autoSaveTimer>=10){autoSaveTimer=0;if(dirty)saveGame(false);}
+
+  renderer.render(scene,camera);
 }
 
-window.onload = init;
+try{
+  createWorld();
+  clock=new THREE.Clock();
+  loadGame();
+  updateHud();
+  updateInventory();
+  bindControls();
+  notify("Welcome back, Alfa! Progress autosaves every 10 seconds.",3.5);
+  animate();
+}catch(err){
+  console.error(err);
+  $("toast").textContent="Game couldn't start. Reload and check your internet connection.";
+}
+addEventListener("beforeunload",()=>{if(player)saveGame(false);});
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&player)saveGame(false);});
 </script>
 </body>
 </html>
