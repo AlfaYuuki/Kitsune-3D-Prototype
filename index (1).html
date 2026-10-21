@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Kitsune FunZone 3D — RPG v4.3</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#13251d;color:#fff;font-family:system-ui,Arial,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+canvas{display:block}
+button{cursor:pointer;font:inherit}
+#loading{position:fixed;inset:0;z-index:30;background:#0f1d18;display:grid;place-items:center;text-align:center;padding:24px}
+#loading b{font-size:22px;color:#75dcff}
+#loadText{margin:10px auto 0;font-size:13px;color:#c5d9d1;max-width:320px;line-height:1.5}
+#hud{position:fixed;z-index:3;top:max(7px,env(safe-area-inset-top));left:7px;width:min(235px,61vw);padding:8px;background:#101a17e8;border:1px solid #ffffff35;border-radius:11px;pointer-events:none}
+.brand{font-weight:900;color:#75dcff;font-size:13px}
+.small{font-size:10px;color:#c5d9d1}
+.stat{display:flex;justify-content:space-between;gap:6px;font-size:10px;margin-top:4px}
+.bar{height:6px;background:#35423e;border-radius:10px;overflow:hidden;margin-top:3px}
+.fill{height:100%;transition:width .15s}
+#hpFill{background:#ff5268}#xpFill{background:#58c9ff}#enemyFill{background:#ffb04a}
+#bossFill{background:linear-gradient(90deg,#ff3b4e,#ff8a3b)}
+#quest{margin-top:5px;font-size:10px;color:#ffe9a6;line-height:1.35}
+#saveStatus{margin-top:3px;font-size:9px}
+#topButtons{position:fixed;right:7px;top:max(7px,env(safe-area-inset-top));z-index:5;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:48vw}
+.uiBtn{border:1px solid #ffffff55;border-radius:9px;background:#142a27ef;color:white;padding:7px 8px;font-size:10px;font-weight:800}
+.uiBtn.active{background:#27566a;border-color:#75dcff}
+#help{position:fixed;right:10px;top:54px;z-index:3;background:#101a17b9;padding:9px 12px;border-radius:12px;font-size:11px;line-height:1.7;text-align:right;pointer-events:none;display:none}
+#enemyHud{position:fixed;bottom:64px;left:50%;transform:translateX(-50%);width:min(210px,40vw);background:#111b1be8;padding:7px 10px;border-radius:10px;text-align:center;z-index:3;display:none;pointer-events:none}
+#enemyName{font-size:12px;font-weight:800}
+#bossHud{position:fixed;left:50%;transform:translateX(-50%);top:150px;width:min(320px,86vw);background:#1b1011ea;border:1px solid #ff6b7a77;border-radius:10px;padding:6px 10px;text-align:center;z-index:3;display:none;pointer-events:none}
+#bossName{font-size:13px;font-weight:900;color:#ffb1b8}
+#toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:7;background:#101a17e8;padding:9px 13px;border-radius:10px;font-size:12px;text-align:center;max-width:min(90vw,420px);pointer-events:none;transition:opacity .35s}
+#message{display:none;position:fixed;top:28%;left:50%;transform:translateX(-50%);z-index:8;background:#101a17f0;border:1px solid #ffffff40;border-radius:12px;padding:12px 18px;text-align:center;max-width:85vw;pointer-events:none;font-size:14px}
+#prompt{display:none;position:fixed;bottom:112px;left:50%;transform:translateX(-50%);z-index:6;background:#0d2a35ee;border:1px solid #75dcff99;border-radius:20px;padding:7px 14px;font-size:12px;font-weight:800;white-space:nowrap;pointer-events:none;color:#bdf0ff}
+#hurt{position:fixed;inset:0;z-index:6;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,transparent 50%,#ff1f3dcc 100%)}
+#fx{position:fixed;inset:0;z-index:5;pointer-events:none;overflow:hidden}
+.dmg{position:absolute;transform:translate(-50%,-50%);font-weight:900;font-size:19px;color:#fff;text-shadow:0 2px 4px #000,0 0 9px #ff9a49}
+.dmg.hurt{color:#ff6b7a}.dmg.heal{color:#7dffb0}
+#panel{display:none;position:fixed;z-index:9;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92vw);max-height:80vh;overflow:auto;background:#101a17f5;border:1px solid #75dcff85;border-radius:16px;padding:14px;box-shadow:0 15px 60px #000b;touch-action:pan-y}
+#panel h2{margin:0 0 8px;color:#75dcff}
+#panel h3{margin:12px 0 0;font-size:14px}
+#panel p{font-size:12px;color:#c7d8d0}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid #ffffff25;border-radius:10px;padding:9px;margin-top:8px;background:#ffffff08}
+.item b{font-size:12px}
+.item small{display:block;color:#c4d5cf;margin-top:3px;font-size:10px;line-height:1.4}
+.item button{background:#27566a;color:white;border:0;border-radius:8px;padding:8px;font-size:10px;white-space:nowrap}
+.item button:disabled{opacity:.45}
+.danger{background:#6a2735!important}
+#mobile{position:fixed;inset:0;z-index:4;pointer-events:none}
+#stickBase{position:absolute;left:20px;bottom:24px;width:124px;height:124px;border:2px solid #ffffff55;background:#ffffff18;border-radius:50%;pointer-events:auto;touch-action:none}
+#stickKnob{position:absolute;left:33px;top:33px;width:54px;height:54px;border-radius:50%;background:#b9e8ffcc;border:2px solid white;box-shadow:0 3px 14px #0007;pointer-events:none}
+.action{position:absolute;right:18px;border:2px solid #ffffff70;border-radius:50%;width:70px;height:70px;color:white;font-weight:900;font-size:12px;background:#174c60e8;pointer-events:auto;touch-action:none;box-shadow:0 4px 15px #0006}
+#attack{bottom:32px;background:#9d2948ed}
+#interact{bottom:112px;right:96px;width:58px;height:58px;background:#286b54e8}
+#usePotion{bottom:112px;right:26px;width:60px;height:60px;background:#326e50ed}
+#dead{display:none;position:fixed;inset:0;z-index:12;background:#090c0bf0;place-items:center;text-align:center;padding:20px}
+#dead h1{color:#ff6b7a}
+#dead button{padding:12px 18px;border:0;border-radius:10px;background:#58c9ff;font-weight:900;font-size:15px}
+@media(hover:hover) and (pointer:fine){#mobile{display:none}#help{display:block}#bossHud{top:48px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="loading"><div><b>🦊 KITSUNE FUNZONE</b><div id="loadText">Loading the forest…</div></div></div>
+
+<div id="hud">
+  <div class="brand">🦊 KITSUNE FUNZONE</div>
+  <div class="small">3D RPG v4.3 · Alfa Yuuki</div>
+  <div class="stat"><span>LEVEL <b id="level">1</b></span><span id="hpText">100/100 HP</span></div>
+  <div class="bar"><div id="hpFill" class="fill"></div></div>
+  <div class="stat"><span>Experience</span><span id="xpText">0/100 XP</span></div>
+  <div class="bar"><div id="xpFill" class="fill"></div></div>
+  <div id="quest"></div>
+  <div class="small" id="saveStatus">💾 Save ready</div>
+</div>
+
+<div id="topButtons">
+  <button class="uiBtn" id="inventoryBtn">🎒 BAG</button>
+  <button class="uiBtn" id="shopBtn">🛒 SHOP</button>
+  <button class="uiBtn" id="questsBtn">📜 QUESTS</button>
+  <button class="uiBtn" id="saveBtn">💾 SAVE</button>
+</div>
+
+<div id="help"><b>KEYBOARD</b><br>WASD / Arrows — Move<br>Shift — Run<br>Mouse drag — Rotate camera<br>Mouse wheel — Zoom<br>Space / Click — Attack<br>E — Shrine / Interact<br>H — Use potion<br>I — Bag · B — Shop · Q — Quests</div>
+
+<div id="enemyHud"><div id="enemyName">Forest Spirit</div><div class="bar"><div id="enemyFill" class="fill"></div></div><div class="small" id="enemyHp">40/40 HP</div></div>
+<div id="bossHud"><div id="bossName">👹 Oni Warden</div><div class="bar"><div id="bossFill" class="fill"></div></div><div class="small" id="bossHp">360/360</div></div>
+
+<div id="panel">
+  <h2 id="panelTitle">🎒 Inventory & Equipment</h2>
+  <p id="panelDesc">Game is paused while this is open. Progress saves on this device.</p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin:9px 0">
+    <button class="uiBtn" id="bagTab">🎒 BAG</button>
+    <button class="uiBtn" id="shopTab">🛒 SHOP</button>
+    <button class="uiBtn" id="questsTab">📜 QUESTS</button>
+  </div>
+  <div id="equipment"></div>
+  <div id="items"></div>
+  <div id="shopItems" style="display:none"></div>
+  <div id="questItems" style="display:none"></div>
+  <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
+    <button class="uiBtn" id="drinkBtn">🧪 Use potion</button>
+    <button class="uiBtn danger" id="resetBtn">🗑 New game</button>
+    <button class="uiBtn" id="closePanel">CLOSE</button>
+  </div>
+</div>
+
+<div id="fx"></div><div id="hurt"></div><div id="message"></div><div id="prompt"></div>
+<div id="mobile">
+  <div id="stickBase"><div id="stickKnob"></div></div>
+  <button class="action" id="attack">⚔️<br>ATTACK</button>
+  <button class="action" id="interact">⛩️<br>USE</button>
+  <button class="action" id="usePotion">🧪<br>HEAL</button>
+</div>
+<div id="toast">Welcome, Alfa! Defeat five forest spirits.</div>
+<div id="dead"><div><h1>💫 YOU WERE DEFEATED</h1><p>The forest is dangerous, Alfa. Your progress has been saved.</p><button id="respawn">Return to the shrine</button></div></div>
+
+<script type="module">
+const $=id=>document.getElementById(id);
+function fatal(msg){$("loading").style.display="grid";$("loadText").textContent=msg;}
+let THREE;
+try{THREE=await import("three");}
+catch(err){console.error(err);fatal("⚠️ Couldn't load the 3D engine (Three.js). Check your internet connection and reload.");throw err;}
+
+/* =====================================================
+   KITSUNE FUNZONE RPG v4.3
+   v4.2 (shop, quests, curved tails) + review fixes
+   + Oni Warden boss, 2 new weapons, quest alerts
+   ===================================================== */
+const SAVE_KEY="kitsune_funzone_rpg_v4",OLD_SAVE_KEY="kitsune_funzone_rpg_v3";
+const FINE_POINTER=matchMedia("(hover:hover) and (pointer:fine)").matches;
+const ENEMY_SPAWNS=[[-8,-9],[8,-13],[-10,-22],[10,-31],[-8,-41],[9,-48],[-13,-54],[14,-17]];
+const BOSS_SPAWN=[0,-74];
+
+/* Weapons: damage, swing cooldown, price (💎) and look. Wooden Sword is free. */
+const WEAPON_DEFS={
+  "Wooden Sword":{key:null,dmg:8,cd:.48,cost:0,icon:"🪵",desc:"Starter weapon",look:{color:0x9b7a52,emissive:0,ei:0}},
+  "Blue Katana":{key:"blueKatana",dmg:18,cd:.48,cost:3,icon:"💙",desc:"Blue glowing blade",look:{color:0x087dff,emissive:0x005dff,ei:1}},
+  "Crimson Fang":{key:"crimsonFang",dmg:24,cd:.34,cost:5,icon:"🔥",desc:"Light and quick — strikes fast",look:{color:0xff5a4a,emissive:0xff2210,ei:1}},
+  "Spirit Blade":{key:"spiritBlade",dmg:30,cd:.48,cost:6,icon:"✨",desc:"Cyan magical blade",look:{color:0x9cf6ff,emissive:0x18c8e8,ei:1.1}},
+  "Oni Cleaver":{key:"oniCleaver",dmg:46,cd:.78,cost:12,icon:"👹",desc:"Huge and slow, hits like a boulder",req:"boss",look:{color:0xb47bff,emissive:0x7a1fff,ei:1.1}}
+};
+const WEAPONS=Object.keys(WEAPON_DEFS);
+const bounds={minX:-48,maxX:48,minZ:-86,maxZ:28},playerRadius=.47;
+
+let scene,camera,renderer,clock,player,swordPivot,sword,bladeMat,bodyMat;
+let yaw=0,pitch=.25,camDist=7.5,gameOver=false,panelOpen=false,panelView="bag";
+let hp=100,maxHp=100,xp=0,level=1,totalKills=0,bossKills=0,shrineSeen=false;
+let attackCooldown=0,hurtCooldown=0,swingTime=0,toastTime=0,messageTime=0;
+let stickX=0,stickY=0,stickPointer=null,walkTime=0,walkBlend=0,autoSaveTimer=0,dirty=false,faceAngle=0;
+let hurtFlash=0,shake=0,promptShown=false,dragPointer=null,dragMoved=false,lastX=0,lastY=0,startX=0,startY=0;
+const keys={},obstacles=[],enemies=[],floaters=[],tails=[],dmgTexts=[],readyNotified=new Set();
+const questClaims={slayer5:false,slayer12:false,slayer30:false,shrine:false,weapon:false,armor:false,boss:false};
+const inventory={potions:3,spiritCrystals:0};
+const equipment={weapon:"Wooden Sword",armor:"Traveler Outfit"};
+const unlocks={blueKatana:false,crimsonFang:false,spiritBlade:false,oniCleaver:false,spiritArmor:false};
+const camTarget=new THREE.Vector3(),_v=new THREE.Vector3();
+
+/* ---------- helpers ---------- */
+function notify(t,s=2.5){$("toast").textContent=t;$("toast").style.opacity="1";toastTime=s;}
+function popup(t,s=2){$("message").textContent=t;$("message").style.display="block";messageTime=s;}
+function mat(c,r=.85,e={}){return new THREE.MeshStandardMaterial({color:c,roughness:r,...e});}
+function addMesh(g,m,p,x=0,y=0,z=0){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;p.add(o);return o;}
+function addCircle(x,z,r){obstacles.push({type:"circle",x,z,r});}
+function addBox(x,z,sx,sz){obstacles.push({type:"box",x,z,sx,sz});}
+function canStandAt(x,z){
+  if(x<bounds.minX||x>bounds.maxX||z<bounds.minZ||z>bounds.maxZ)return false;
+  for(const o of obstacles){
+    if(o.type==="circle"){if((x-o.x)**2+(z-o.z)**2<(o.r+playerRadius)**2)return false;}
+    else{
+      const cx=Math.max(o.x-o.sx,Math.min(x,o.x+o.sx)),cz=Math.max(o.z-o.sz,Math.min(z,o.z+o.sz));
+      if((x-cx)**2+(z-cz)**2<playerRadius**2)return false;
+    }
+  }
+  return true;
+}
+const markDirty=()=>{dirty=true;};
+const neededXP=()=>100+(level-1)*55;
+const ownsWeapon=n=>n==="Wooden Sword"||!!unlocks[WEAPON_DEFS[n].key];
+const currentDamage=()=>(WEAPON_DEFS[equipment.weapon]||WEAPON_DEFS["Wooden Sword"]).dmg+(level-1)*3;
+const currentCooldown=()=>(WEAPON_DEFS[equipment.weapon]||WEAPON_DEFS["Wooden Sword"]).cd;
+
+function floatText(text,x,y,z,cls=""){
+  const el=document.createElement("div");el.className="dmg "+cls;el.textContent=text;$("fx").appendChild(el);
+  dmgTexts.push({el,pos:new THREE.Vector3(x,y,z),life:0,max:.9});
+}
+function updateFx(dt){
+  camera.updateMatrixWorld();
+  for(let i=dmgTexts.length-1;i>=0;i--){
+    const f=dmgTexts[i];f.life+=dt;
+    if(f.life>=f.max){f.el.remove();dmgTexts.splice(i,1);continue;}
+    _v.copy(f.pos);_v.y+=f.life*1.1;_v.project(camera);
+    if(_v.z>1){f.el.style.display="none";continue;}
+    f.el.style.display="block";
+    f.el.style.left=((_v.x*.5+.5)*innerWidth)+"px";
+    f.el.style.top=((-_v.y*.5+.5)*innerHeight)+"px";
+    f.el.style.opacity=String(1-f.life/f.max);
+  }
+}
+
+/* ---------- world ---------- */
+function createWorld(){
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x9bcbd5);
+  scene.fog=new THREE.Fog(0x9bcbd5,48,145);
+  camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,250);
+  renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;
+  document.body.insertBefore(renderer.domElement,document.body.firstChild);
+  scene.add(new THREE.HemisphereLight(0xdff7ff,0x34482a,2));
+  const sun=new THREE.DirectionalLight(0xffedcc,2.1);
+  sun.position.set(-25,45,20);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
+  sun.shadow.camera.left=-65;sun.shadow.camera.right=65;sun.shadow.camera.top=65;sun.shadow.camera.bottom=-65;
+  scene.add(sun);
+  const ground=addMesh(new THREE.PlaneGeometry(220,240),mat(0x547c49),scene,0,-.12,-28);ground.rotation.x=-Math.PI/2;
+  const path=addMesh(new THREE.PlaneGeometry(8,150),mat(0xb7b09a),scene,0,-.09,-35);path.rotation.x=-Math.PI/2;
+  for(let i=0;i<24;i++){
+    const st=addMesh(new THREE.BoxGeometry(2.4,.08,2),mat(i%2?0xbeb9a5:0x999b8a),scene,(Math.random()-.5)*1.3,-.02,18-i*5);
+    st.rotation.y=(Math.random()-.5)*.12;
+  }
+  makeTrees();makeShrine();makeArena();makePlayer();makeEnemies();spawnBoss();makeLanterns();makeHills();
+}
+function makeTrees(){
+  let seed=20261020;
+  const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
+  const trunk=mat(0x62452d),leaves=[mat(0x285d3a),mat(0x397647),mat(0x477e4a)];
+  const tg=new THREE.CylinderGeometry(.22,.36,2.8,7),cg=[0,1,2].map(j=>new THREE.ConeGeometry(1.5-j*.22,2.4,7));
+  for(let i=0;i<145;i++){
+    const x=(rand()-.5)*100,z=20-rand()*110,s=.7+rand()*1.2,pick=[rand(),rand(),rand()];
+    if(Math.abs(x)<6.8&&z>-67)continue;
+    if(ENEMY_SPAWNS.some(p=>Math.hypot(p[0]-x,p[1]-z)<3.4))continue;
+    if(z<-58&&Math.abs(x)<13)continue;                 // keep the boss arena clear of trees
+    const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(s);scene.add(g);
+    addMesh(tg,trunk,g,0,1.4,0);
+    for(let j=0;j<3;j++)addMesh(cg[j],leaves[Math.floor(pick[j]*3)],g,0,2.7+j*1.1,0);
+    addCircle(x,z,.58*s);
+  }
+}
+function makeShrine(){
+  const red=mat(0xa92f39),dark=mat(0x572c29),stone=mat(0x777d78);
+  for(const x of [-2.3,2.3]){
+    addMesh(new THREE.CylinderGeometry(.22,.29,5.2,10),red,scene,x,2.6,-28);
+    addMesh(new THREE.BoxGeometry(.85,.2,.85),dark,scene,x,.18,-28);addBox(x,-28,.42,.42);
+  }
+  addMesh(new THREE.BoxGeometry(6.5,.45,.8),red,scene,0,5.1,-28);
+  addMesh(new THREE.BoxGeometry(7.4,.35,1),dark,scene,0,5.43,-28);
+  addMesh(new THREE.BoxGeometry(5,.25,.65),red,scene,0,4.65,-28);
+  addMesh(new THREE.BoxGeometry(5.4,2.5,3.2),mat(0x8c4836),scene,0,1.4,-34);
+  addMesh(new THREE.ConeGeometry(4.4,1.7,4),mat(0x303d43),scene,0,3.45,-34);
+  addMesh(new THREE.BoxGeometry(1.1,1.8,.15),dark,scene,0,.95,-32.35);addBox(0,-34,2.7,1.6);
+  addMesh(new THREE.CylinderGeometry(.9,1.15,.55,8),stone,scene,0,.28,-24);
+  const c=addMesh(new THREE.OctahedronGeometry(.55),mat(0x5bdcff,.25,{emissive:0x159bd8,emissiveIntensity:1.5}),scene,0,1.15,-24);
+  floaters.push({obj:c,spin:"y"});addCircle(0,-24,1.15);
+  const ring=addMesh(new THREE.TorusGeometry(1.25,.06,8,32),mat(0x75e6ff,.5,{emissive:0x1388b6,emissiveIntensity:.8}),scene,0,1.15,-24);
+  ring.rotation.x=Math.PI/2;floaters.push({obj:ring,spin:"z"});
+}
+/* Stone pillars with red lamps mark the Oni Warden's arena at the end of the path */
+function makeArena(){
+  const stone=mat(0x6d726e),glow=mat(0xff5a4a,.4,{emissive:0xff2a1a,emissiveIntensity:1.2});
+  const pg=new THREE.CylinderGeometry(.42,.52,3.2,8),cg=new THREE.BoxGeometry(.5,.5,.5);
+  for(const z of [-63,-70,-77,-84])for(const side of [-1,1]){
+    const x=side*8;
+    addMesh(pg,stone,scene,x,1.6,z);addMesh(cg,glow,scene,x,3.45,z);addCircle(x,z,.6);
+  }
+}
+function makeLanterns(){
+  const glow=mat(0xffd58b,.4,{emissive:0xff8c25,emissiveIntensity:1});
+  const bg=new THREE.BoxGeometry(.55,.65,.55),gg=new THREE.BoxGeometry(.38,.55,.38),cg=new THREE.BoxGeometry(.75,.12,.75),bm=mat(0x5b4632),cm=mat(0x493b2d);
+  for(const z of [-5,-15,-25,-35,-45,-55])for(const side of [-1,1]){
+    const x=side*5.5;addMesh(bg,bm,scene,x,.32,z);addMesh(gg,glow,scene,x,.92,z);addMesh(cg,cm,scene,x,1.25,z);
+  }
+}
+function makeHills(){
+  for(let i=0;i<16;i++){
+    const a=i/16*Math.PI*2,r=85;
+    const h=addMesh(new THREE.ConeGeometry(13+Math.random()*7,20+Math.random()*22,7),mat(i%2?0x5d8064:0x6e916b),scene,Math.cos(a)*r,-1,Math.sin(a)*r-28);
+    h.scale.x=1.7;h.rotation.y=Math.random()*Math.PI;h.castShadow=false;
+  }
+}
+
+/* ---------- player ---------- */
+function makeLimb(parent,x,y,z,len,color){
+  const p=new THREE.Group();p.position.set(x,y,z);parent.add(p);
+  addMesh(new THREE.CapsuleGeometry(.13,Math.max(.1,len-.26),4,6),mat(color),p,0,-len/2,0);return p;
+}
+function makeCurvedTail(parent,side,blue){
+  const pivot=new THREE.Group();pivot.position.set(side*.19,.83,.30);parent.add(pivot);
+  const dir=side*.28;
+  const curve=new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0,0,0),new THREE.Vector3(dir*.35,.05,.32),new THREE.Vector3(dir*.8,.13,.72),
+    new THREE.Vector3(dir*1.15,.32,1.08),new THREE.Vector3(dir*1.25,.58,1.42)]);
+  const rings=18,sides=9,verts=[],indices=[];
+  for(let i=0;i<=rings;i++){
+    const t=i/rings,p=curve.getPoint(t),tan=curve.getTangent(t).normalize();
+    const u=new THREE.Vector3(0,1,0).cross(tan).normalize();if(u.length()<.01)u.set(1,0,0);
+    const v=tan.clone().cross(u).normalize();
+    const radius=(.20*Math.sin(Math.PI*(.08+t*.78))+.015)*(1-.20*t);
+    for(let j=0;j<sides;j++){
+      const a=j/sides*Math.PI*2;
+      const pt=p.clone().addScaledVector(u,Math.cos(a)*radius).addScaledVector(v,Math.sin(a)*radius);
+      verts.push(pt.x,pt.y,pt.z);
+    }
+  }
+  for(let i=0;i<rings;i++)for(let j=0;j<sides;j++){
+    const a=i*sides+j,b=i*sides+(j+1)%sides,c=(i+1)*sides+(j+1)%sides,d=(i+1)*sides+j;
+    indices.push(a,b,d,b,c,d);
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute("position",new THREE.Float32BufferAttribute(verts,3));geo.setIndex(indices);geo.computeVertexNormals();
+  const mesh=new THREE.Mesh(geo,blue);mesh.castShadow=true;mesh.receiveShadow=true;pivot.add(mesh);
+  const accent=mat(0x83dfff,.65);
+  for(let k=0;k<3;k++){
+    const tuft=addMesh(new THREE.SphereGeometry(.105,7,6),accent,pivot,dir*(.45+k*.19),.13+k*.10,.55+k*.27);
+    tuft.scale.set(.8,1.15,1.5);
+  }
+  tails.push({mesh:pivot,baseY:side*.13,baseX:side*.035,phase:(side+1)*1.7});
+}
+function makePlayer(){
+  player=new THREE.Group();scene.add(player);
+  bodyMat=mat(0x173d88);
+  const dark=mat(0x121927),skin=mat(0xf0d0b5),blue=mat(0x39bfff),hair=mat(0x182337),gold=mat(0xd7b56b,.4,{metalness:.4});
+  const torso=new THREE.Group();player.add(torso);
+  addMesh(new THREE.CylinderGeometry(.35,.45,.9,9),bodyMat,torso,0,1.05,0);
+  addMesh(new THREE.SphereGeometry(.34,12,10),skin,torso,0,1.72,0);
+  addMesh(new THREE.SphereGeometry(.37,10,8),hair,torso,0,1.9,.09);
+  for(let i=0;i<3;i++){const b=addMesh(new THREE.ConeGeometry(.1,.26,5),hair,torso,(i-1)*.14,1.96,-.28);b.rotation.x=Math.PI+.35;}
+  const white=mat(0xffffff,.3),iris=mat(0x39bfff,.3,{emissive:0x1a8fd0,emissiveIntensity:.8}),pupil=mat(0x0a1020,.3),brow=mat(0x182337);
+  for(const s of [-1,1]){
+    addMesh(new THREE.SphereGeometry(.065,10,8),white,torso,s*.13,1.74,-.29);
+    addMesh(new THREE.SphereGeometry(.04,8,6),iris,torso,s*.13,1.74,-.335);
+    addMesh(new THREE.SphereGeometry(.022,8,6),pupil,torso,s*.13,1.74,-.357);
+    const eb=addMesh(new THREE.BoxGeometry(.11,.025,.03),brow,torso,s*.13,1.84,-.3);eb.rotation.z=s*-.18;
+    const ear=addMesh(new THREE.ConeGeometry(.12,.34,4),blue,torso,s*.24,2.2,.02);ear.rotation.z=s*-.3;
+  }
+  addMesh(new THREE.BoxGeometry(.1,.02,.02),mat(0x8a4b4b),torso,0,1.58,-.31);
+  const em=addMesh(new THREE.BoxGeometry(.18,.18,.05),gold,torso,0,1.25,-.39);em.rotation.z=Math.PI/4;
+  addMesh(new THREE.CylinderGeometry(.45,.45,.1,9),dark,torso,0,.72,0);
+  addMesh(new THREE.BoxGeometry(.16,.12,.05),gold,torso,0,.72,-.45);
+  for(let i=0;i<5;i++){const sp=addMesh(new THREE.ConeGeometry(.14,.42,5),hair,torso,(i-2)*.13,2.12,.02);sp.rotation.z=(i-2)*-.23;}
+  for(const side of [-1,0,1])makeCurvedTail(torso,side,blue);
+  for(const x of [-.43,.43])addMesh(new THREE.SphereGeometry(.2,8,7),dark,torso,x,1.35,0);
+  const leftArm=makeLimb(torso,-.48,1.35,0,.68,0x173d88),rightArm=makeLimb(torso,.48,1.35,0,.68,0x173d88);
+  const leftLeg=makeLimb(player,-.2,.72,0,.72,0x172c52),rightLeg=makeLimb(player,.2,.72,0,.72,0x172c52);
+  player.userData={torso,leftArm,rightArm,leftLeg,rightLeg};
+  swordPivot=new THREE.Group();swordPivot.position.set(.48,1.23,-.04);torso.add(swordPivot);
+  sword=new THREE.Group();swordPivot.add(sword);
+  bladeMat=mat(0xcde7f4,.28,{metalness:.65});
+  addMesh(new THREE.BoxGeometry(.12,.92,.09),bladeMat,sword,0,.55,0);
+  addMesh(new THREE.BoxGeometry(.43,.09,.14),gold,sword,0,.12,0);
+  addMesh(new THREE.BoxGeometry(.13,.28,.13),mat(0x573c29),sword,0,-.02,0);
+  sword.rotation.z=-.35;player.position.set(0,0,0);
+}
+function applyLook(){
+  if(!bladeMat)return;
+  const w=(WEAPON_DEFS[equipment.weapon]||WEAPON_DEFS["Wooden Sword"]).look;
+  bladeMat.color.setHex(w.color);bladeMat.emissive.setHex(w.emissive);bladeMat.emissiveIntensity=w.ei;
+  const spirit=equipment.armor==="Spirit Armor";
+  bodyMat.color.setHex(spirit?0x2aa6c9:0x173d88);bodyMat.emissive.setHex(spirit?0x0b5a78:0);bodyMat.emissiveIntensity=spirit?.6:0;
+}
+
+/* ---------- enemies ---------- */
+function healthBar(){
+  const c=document.createElement("canvas");c.width=256;c.height=40;
+  const tx=new THREE.CanvasTexture(c),sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,depthTest:false,transparent:true}));
+  sp.scale.set(1.6,.25,1);sp.position.y=1.65;sp.userData={canvas:c,ctx:c.getContext("2d"),texture:tx};return sp;
+}
+function drawEnemyBar(e){
+  if(!e.bar)return;                                  // the boss uses the big HUD bar instead
+  const {canvas,ctx,texture}=e.bar.userData;
+  e.drawnHp=Math.ceil(e.hp);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#161b20";ctx.fillRect(0,0,256,40);
+  ctx.fillStyle="#e54848";ctx.fillRect(4,4,248,32);
+  ctx.fillStyle="#5ee08b";ctx.fillRect(4,4,248*Math.max(0,e.hp/e.maxHp),32);
+  ctx.strokeStyle="#fff";ctx.lineWidth=3;ctx.strokeRect(2,2,252,36);
+  texture.needsUpdate=true;
+}
+function spawnEnemy(x,z,index){
+  const g=new THREE.Group();scene.add(g);
+  const skin=mat(index%2?0x8c4ab7:0x4b9560,.85,{emissive:0xff2a2a,emissiveIntensity:0});
+  addMesh(new THREE.SphereGeometry(.55,10,8),skin,g,0,.58,0);addMesh(new THREE.SphereGeometry(.22,8,6),skin,g,0,1.02,0);
+  const eye=mat(0xffe4a2,.4,{emissive:0xff5c24,emissiveIntensity:.7}),horn=mat(0x26302a);
+  for(const s of [-1,1]){
+    const h=addMesh(new THREE.ConeGeometry(.14,.4,5),horn,g,s*.26,1.25,0);h.rotation.z=s*-.35;
+    addMesh(new THREE.SphereGeometry(.065,7,6),eye,g,s*.105,1.05,-.19);
+  }
+  const bar=healthBar();g.add(bar);
+  const e={group:g,skin,x,z,spawnX:x,spawnZ:z,hp:40,maxHp:40,alive:true,dying:0,dyingMax:.3,attackTimer:.55,respawn:0,hitTimer:0,bar,index,drawnHp:0,radius:0};
+  g.position.set(x,0,z);enemies.push(e);drawEnemyBar(e);
+}
+function makeEnemies(){ENEMY_SPAWNS.forEach((p,i)=>spawnEnemy(p[0],p[1],i));}
+
+/* The Oni Warden — a big club-wielding boss with telegraphed attacks you can dodge */
+function spawnBoss(){
+  const g=new THREE.Group();scene.add(g);
+  const skin=mat(0x9c2b2f,.8,{emissive:0xff2a2a,emissiveIntensity:0}),dark=mat(0x2a1a1c),gold=mat(0xd7b56b,.4,{metalness:.4}),bone=mat(0xe8dfc8,.6);
+  const eye=mat(0xffe08a,.3,{emissive:0xff6a1a,emissiveIntensity:1.2}),wood=mat(0x5a3b26);
+  const body=addMesh(new THREE.SphereGeometry(1,14,12),skin,g,0,1.9,0);body.scale.set(1.15,1.35,1);
+  addMesh(new THREE.SphereGeometry(.55,12,10),skin,g,0,3.45,-.05);
+  addMesh(new THREE.CylinderGeometry(1.1,1.2,.25,12),dark,g,0,1.35,0);
+  for(const s of [-1,1]){
+    const h=addMesh(new THREE.ConeGeometry(.16,.75,6),bone,g,s*.38,4.05,-.05);h.rotation.z=s*-.4;
+    addMesh(new THREE.SphereGeometry(.085,8,6),eye,g,s*.2,3.5,-.5);
+    const t=addMesh(new THREE.ConeGeometry(.07,.28,5),bone,g,s*.18,3.15,-.5);t.rotation.x=Math.PI;
+    addMesh(new THREE.CylinderGeometry(.34,.4,1.2,8),skin,g,s*.5,.6,0);
+    if(s===-1){                                           // free left arm hangs at his side
+      const arm=new THREE.Group();arm.position.set(-1.25,2.55,-.05);g.add(arm);
+      addMesh(new THREE.CapsuleGeometry(.26,1.1,4,8),skin,arm,0,-.7,0);
+    }
+  }
+  // Club arm (right side, from the Oni's point of view the swinging side)
+  const club=new THREE.Group();club.position.set(1.25,2.55,-.05);g.add(club);
+  addMesh(new THREE.CapsuleGeometry(.28,1.1,4,8),skin,club,0,-.7,0);
+  addMesh(new THREE.CylinderGeometry(.14,.2,1.9,8),wood,club,0,-1.45,-.15);
+  addMesh(new THREE.CylinderGeometry(.42,.34,.95,10),dark,club,0,-2.25,-.15);
+  for(let k=0;k<6;k++){const a=k/6*Math.PI*2;addMesh(new THREE.ConeGeometry(.09,.2,5),gold,club,Math.cos(a)*.42,-2.25+(k%2)*.3-.15,-.15+Math.sin(a)*.42);}
+  // Red danger zone shown on the ground while the boss winds up
+  const tele=new THREE.Mesh(new THREE.CircleGeometry(1,40),new THREE.MeshBasicMaterial({color:0xff2a3a,transparent:true,opacity:.35,side:THREE.DoubleSide,depthWrite:false}));
+  tele.rotation.x=-Math.PI/2;tele.position.y=.07;tele.visible=false;scene.add(tele);
+  const e={group:g,skin,club,tele,boss:true,x:BOSS_SPAWN[0],z:BOSS_SPAWN[1],spawnX:BOSS_SPAWN[0],spawnZ:BOSS_SPAWN[1],
+    hp:360,maxHp:360,alive:true,dying:0,dyingMax:.8,respawn:0,hitTimer:0,radius:1.4,index:99,drawnHp:0,
+    state:"idle",stateT:0,stateMax:1,atk:"smash",cd:2,cycle:0};
+  g.position.set(e.x,0,e.z);enemies.push(e);
+}
+function resetEnemy(e){
+  e.alive=true;e.dying=0;e.hp=e.maxHp;e.x=e.spawnX;e.z=e.spawnZ;e.attackTimer=.55;e.hitTimer=0;
+  e.group.position.set(e.x,0,e.z);e.group.scale.setScalar(1);e.group.visible=true;
+  if(e.boss){e.state="idle";e.cd=2;e.cycle=0;e.club.rotation.x=0;e.tele.visible=false;}
+  drawEnemyBar(e);
+}
+function tryMove(e,nx,nz){let m=false;if(canStandAt(nx,e.z)){e.x=nx;m=true;}if(canStandAt(e.x,nz)){e.z=nz;m=true;}return m;}
+
+/* ---------- save / load ---------- */
+function saveGame(show=true){
+  try{
+    localStorage.setItem(SAVE_KEY,JSON.stringify({
+      version:4,hp,maxHp,xp,level,totalKills,bossKills,shrineSeen,
+      inventory:{...inventory},equipment:{...equipment},unlocks:{...unlocks},questClaims:{...questClaims},
+      player:{x:player.position.x,z:player.position.z,yaw}
+    }));
+    dirty=false;$("saveStatus").textContent="💾 Saved locally";
+    if(show)notify("💾 Progress saved on this device!",2);return true;
+  }catch(err){
+    $("saveStatus").textContent="⚠️ Save unavailable";
+    if(show)notify("Couldn't save. Check browser storage settings.",3);return false;
+  }
+}
+function loadGame(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY)||localStorage.getItem(OLD_SAVE_KEY);
+    if(!raw)return;
+    const d=JSON.parse(raw);
+    if(d.version!==3&&d.version!==4)return;
+    const wasDead=!(Number(d.hp)>0);
+    level=Math.max(1,Number(d.level)||1);
+    maxHp=Math.max(100,Number(d.maxHp)||100);
+    hp=wasDead?maxHp:Math.min(maxHp,Number(d.hp));
+    xp=Math.max(0,Number(d.xp)||0);
+    // v3/v4.1 saves only stored quest progress (max 5); don't lose it
+    totalKills=Math.max(Number(d.totalKills)||0,Math.min(5,Number(d.questProgress)||0));
+    bossKills=Math.max(0,Number(d.bossKills)||0);
+    shrineSeen=!!d.shrineSeen;
+    if(d.questClaims)for(const k in questClaims)questClaims[k]=!!d.questClaims[k];
+    if(d.inventory){
+      inventory.potions=Math.max(0,Number(d.inventory.potions)||0);
+      inventory.spiritCrystals=Math.max(0,Number(d.inventory.spiritCrystals)||0);
+    }
+    if(d.unlocks)for(const k in unlocks)unlocks[k]=!!d.unlocks[k];
+    if(d.equipment){
+      if(WEAPON_DEFS[d.equipment.weapon])equipment.weapon=d.equipment.weapon;
+      if(["Traveler Outfit","Spirit Armor"].includes(d.equipment.armor))equipment.armor=d.equipment.armor;
+    }
+    // Anything you were already holding stays yours (fixes v4.2 stripping the Blue Katana from older saves)
+    const wk=WEAPON_DEFS[equipment.weapon].key;if(wk)unlocks[wk]=true;
+    if(equipment.armor==="Spirit Armor")unlocks.spiritArmor=true;
+    if(!wasDead&&d.player&&Number.isFinite(d.player.x)&&Number.isFinite(d.player.z)){
+      if(canStandAt(d.player.x,d.player.z))player.position.set(d.player.x,0,d.player.z);
+      yaw=Number(d.player.yaw)||0;
+    }
+    $("saveStatus").textContent="💾 Save loaded";
+  }catch(err){console.warn("Save load failed",err);$("saveStatus").textContent="⚠️ New save started";}
+}
+function newGame(){
+  if(!confirm("Start a new game? Your saved progress will be erased."))return;
+  try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem(OLD_SAVE_KEY);}catch(e){}
+  hp=maxHp=100;xp=0;level=1;totalKills=0;bossKills=0;shrineSeen=false;
+  for(const k in questClaims)questClaims[k]=false;readyNotified.clear();
+  inventory.potions=3;inventory.spiritCrystals=0;
+  equipment.weapon="Wooden Sword";equipment.armor="Traveler Outfit";
+  for(const k in unlocks)unlocks[k]=false;
+  player.position.set(0,0,0);yaw=0;pitch=.25;faceAngle=0;player.rotation.y=0;
+  enemies.forEach(resetEnemy);gameOver=false;$("dead").style.display="none";
+  applyLook();closePanel();updateHud();saveGame(false);notify("New adventure started. Good luck, Alfa!",2.5);
+}
+
+/* ---------- quests ---------- */
+function questRows(){
+  const anyWeapon=WEAPONS.some(n=>n!=="Wooden Sword"&&ownsWeapon(n));
+  return [
+    {id:"slayer5",title:"Forest Threat",desc:"Defeat 5 forest spirits",progress:Math.min(totalKills,5),goal:5,reward:"3 💎 + 100 XP",ready:totalKills>=5,claim:()=>{inventory.spiritCrystals+=3;xp+=100;}},
+    {id:"shrine",title:"A Kitsune's Blessing",desc:"Discover the Blue Kitsune Shrine (press E near the altar)",progress:shrineSeen?1:0,goal:1,reward:"2 💎 + 40 XP",ready:shrineSeen,claim:()=>{inventory.spiritCrystals+=2;xp+=40;}},
+    {id:"weapon",title:"Armed and Ready",desc:"Buy any weapon in the Shop",progress:anyWeapon?1:0,goal:1,reward:"80 XP",ready:anyWeapon,claim:()=>{xp+=80;}},
+    {id:"slayer12",title:"Spirit Hunter",desc:"Defeat 12 forest spirits in total",progress:Math.min(totalKills,12),goal:12,reward:"5 💎 + 120 XP",ready:totalKills>=12,claim:()=>{inventory.spiritCrystals+=5;xp+=120;}},
+    {id:"armor",title:"Spirit Guard",desc:"Buy Spirit Armor in the Shop",progress:unlocks.spiritArmor?1:0,goal:1,reward:"3 💎 + 70 XP",ready:unlocks.spiritArmor,claim:()=>{inventory.spiritCrystals+=3;xp+=70;}},
+    {id:"boss",title:"Oni Slayer",desc:"Defeat the Oni Warden at the end of the path",progress:Math.min(bossKills,1),goal:1,reward:"6 💎 + 250 XP",ready:bossKills>=1,claim:()=>{inventory.spiritCrystals+=6;xp+=250;}},
+    {id:"slayer30",title:"Forest Legend",desc:"Defeat 30 forest spirits in total",progress:Math.min(totalKills,30),goal:30,reward:"8 💎 + 200 XP",ready:totalKills>=30,claim:()=>{inventory.spiritCrystals+=8;xp+=200;}}
+  ];
+}
+/* Announce each quest once when it becomes claimable */
+function scanQuestReady(silent){
+  for(const q of questRows()){
+    if(q.ready&&!questClaims[q.id]&&!readyNotified.has(q.id)){
+      readyNotified.add(q.id);
+      if(!silent){popup("📜 Quest complete: "+q.title,3);notify("Open QUESTS (Q) to claim your reward!",3.5);}
+    }
+  }
+}
+function claimQuest(id){
+  const q=questRows().find(r=>r.id===id);
+  if(!q||questClaims[id]||!q.ready)return;
+  q.claim();questClaims[id]=true;checkLevelUp();updateHud();renderQuests();markDirty();saveGame(false);
+  notify("🎁 Reward claimed: "+q.reward,2.2);
+}
+function renderQuests(){
+  $("questItems").innerHTML=questRows().map(q=>{
+    const c=questClaims[q.id],pct=Math.round(q.progress/q.goal*100);
+    return `<div class="item"><div style="flex:1"><b>${q.title} ${c?"✅":""}</b><small>${q.desc}<br>Progress: ${q.progress}/${q.goal} · Reward: ${q.reward}</small><div class="bar"><div class="fill" style="width:${pct}%;background:${c?"#58c9ff":q.ready?"#58e09a":"#d7b56b"}"></div></div></div><button data-claim="${q.id}" ${c||!q.ready?"disabled":""}>${c?"Claimed":q.ready?"Claim":"In progress"}</button></div>`;
+  }).join("");
+  $("questItems").querySelectorAll("[data-claim]").forEach(b=>b.onclick=()=>claimQuest(b.dataset.claim));
+}
+
+/* ---------- HUD ---------- */
+function updateHud(){
+  $("level").textContent=level;
+  $("hpText").textContent=`${Math.ceil(hp)}/${maxHp} HP`;
+  $("hpFill").style.width=`${Math.max(0,hp/maxHp*100)}%`;
+  $("xpText").textContent=`${xp}/${neededXP()} XP`;
+  $("xpFill").style.width=`${Math.min(100,xp/neededXP()*100)}%`;
+  const rows=questRows(),open=rows.filter(q=>!questClaims[q.id]);
+  const claimable=open.find(q=>q.ready),q=claimable||open[0];
+  $("questsBtn").textContent=claimable?"📜 QUESTS ❗":"📜 QUESTS";
+  if(!q)$("quest").innerHTML="📜 <b>All quests claimed!</b>";
+  else $("quest").textContent="📜 "+(q.ready?`${q.title} — ready! Open QUESTS (Q)`:`${q.title}: ${Math.min(q.progress,q.goal)}/${q.goal}`);
+  scanQuestReady(false);
+}
+function checkLevelUp(){
+  while(xp>=neededXP()){xp-=neededXP();level++;maxHp+=20;hp=Math.min(maxHp,hp+35);popup(`🎉 LEVEL UP! You are now level ${level}!`,2.5);}
+}
+
+/* ---------- bag ---------- */
+function updateInventory(){
+  const rows=WEAPONS.map(n=>`${n}: ${ownsWeapon(n)?"✔":"🔒"}`).join(" · ");
+  const armorNote=equipment.armor==="Spirit Armor"?"Damage resistance: 30%":unlocks.spiritArmor?"Spirit Armor owned (30% resistance)":"Standard protection · Spirit Armor costs 2 💎 in the Shop";
+  const w=WEAPON_DEFS[equipment.weapon];
+  $("equipment").innerHTML=`<h3>⚔️ Equipment</h3>
+    <div class="item"><div><b>Weapon: ${equipment.weapon}</b><small>Damage: ${currentDamage()} (level bonus +${(level-1)*3}) · Speed: ${w.cd<.4?"fast":w.cd>.6?"slow":"normal"}<br>${rows}</small></div><button id="weaponBtn">Change weapon</button></div>
+    <div class="item"><div><b>Armor: ${equipment.armor}</b><small>${armorNote}</small></div><button id="armorBtn">Change armor</button></div>`;
+  $("items").innerHTML=`<h3>🎒 Items</h3>
+    <div class="item"><div><b>🧪 Healing Potions × ${inventory.potions}</b><small>Restore 45 HP · spirits may drop potions</small></div><button id="potionBtn">Use</button></div>
+    <div class="item"><div><b>💎 Spirit Crystals × ${inventory.spiritCrystals}</b><small>Spend these in the Shop</small></div></div>`;
+  $("weaponBtn").onclick=changeWeapon;$("armorBtn").onclick=changeArmor;$("potionBtn").onclick=usePotion;
+}
+function changeWeapon(){
+  const owned=WEAPONS.filter(ownsWeapon);
+  equipment.weapon=owned[(owned.indexOf(equipment.weapon)+1)%owned.length];
+  notify("Equipped: "+equipment.weapon,1.8);applyLook();updateInventory();markDirty();saveGame(false);
+}
+function changeArmor(){
+  if(equipment.armor==="Spirit Armor")equipment.armor="Traveler Outfit";
+  else if(unlocks.spiritArmor)equipment.armor="Spirit Armor";
+  else{notify("Buy Spirit Armor in the Shop first (2 💎).",2);return;}
+  applyLook();updateInventory();markDirty();saveGame(false);notify("Equipped: "+equipment.armor,1.5);
+}
+function usePotion(){
+  if(gameOver)return;
+  if(inventory.potions<=0){notify("No healing potions left!",1.5);return;}
+  if(hp>=maxHp){notify("Your HP is already full.",1.5);return;}
+  const before=hp;inventory.potions--;hp=Math.min(maxHp,hp+45);
+  floatText("+"+Math.round(hp-before),player.position.x,2.5,player.position.z,"heal");
+  updateHud();if(panelOpen)refreshPanel();markDirty();notify("🧪 Restored HP!",1.5);
+}
+
+/* ---------- shop ---------- */
+function renderShop(){
+  let html=`<div class="item"><div><b>💎 Spirit Crystals: ${inventory.spiritCrystals}</b><small>Purchases use up crystals. Spirits and the Oni Warden drop them.</small></div></div>`;
+  for(const n of WEAPONS){
+    const w=WEAPON_DEFS[n],own=ownsWeapon(n),eq=equipment.weapon===n,locked=w.req==="boss"&&bossKills<1&&!own;
+    const label=eq?"Equipped":own?"Equip":locked?"Locked":`Buy ${w.cost} 💎`;
+    const status=own?"Owned":locked?"Defeat the Oni Warden to unlock":`Price: ${w.cost} 💎`;
+    html+=`<div class="item"><div><b>${w.icon} ${n}</b><small>${w.desc}<br>Damage ${w.dmg} · ${w.cd<.4?"fast":w.cd>.6?"slow":"normal"} swing · ${status}</small></div><button data-w="${n}" ${eq||locked?"disabled":""}>${label}</button></div>`;
+  }
+  const arEq=equipment.armor==="Spirit Armor";
+  html+=`<div class="item"><div><b>🛡️ Spirit Armor</b><small>Reduces incoming damage by 30%<br>${unlocks.spiritArmor?"Owned":"Price: 2 💎"}</small></div><button data-i="armor" ${arEq?"disabled":""}>${arEq?"Equipped":unlocks.spiritArmor?"Equip":"Buy 2 💎"}</button></div>
+    <div class="item"><div><b>🧪 Healing Potion</b><small>Restores 45 HP<br>Price: 1 💎</small></div><button data-i="potion">Buy 1 💎</button></div>
+    <div class="item"><div><b>💚 Potion Bundle ×3</b><small>Three healing potions — cheaper than buying singly<br>Price: 2 💎</small></div><button data-i="bundle">Buy 2 💎</button></div>`;
+  $("shopItems").innerHTML=html;
+  $("shopItems").querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>buyWeapon(b.dataset.w));
+  $("shopItems").querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>buyItem(b.dataset.i));
+}
+function afterPurchase(){applyLook();updateHud();renderShop();markDirty();saveGame(false);}
+function buyWeapon(n){
+  const w=WEAPON_DEFS[n];if(!w)return;
+  if(ownsWeapon(n)){equipment.weapon=n;notify("Equipped: "+n,1.5);}
+  else{
+    if(w.req==="boss"&&bossKills<1){notify("Defeat the Oni Warden first!",2);return;}
+    if(inventory.spiritCrystals<w.cost){notify(`Not enough crystals! Need ${w.cost} 💎.`,2);return;}
+    inventory.spiritCrystals-=w.cost;unlocks[w.key]=true;equipment.weapon=n;notify(`Purchased and equipped ${n}!`,2);
+  }
+  afterPurchase();
+}
+function buyItem(id){
+  const cost={armor:2,potion:1,bundle:2}[id];if(cost===undefined)return;
+  if(id==="armor"&&unlocks.spiritArmor){equipment.armor=equipment.armor==="Spirit Armor"?"Traveler Outfit":"Spirit Armor";notify("Equipped: "+equipment.armor,1.5);afterPurchase();return;}
+  if(inventory.spiritCrystals<cost){notify(`Not enough crystals! Need ${cost} 💎.`,2);return;}
+  inventory.spiritCrystals-=cost;
+  if(id==="armor"){unlocks.spiritArmor=true;equipment.armor="Spirit Armor";notify("Purchased and equipped Spirit Armor!",2);}
+  else if(id==="potion"){inventory.potions++;notify("Bought a Healing Potion.",1.5);}
+  else{inventory.potions+=3;notify("Bought 3 Healing Potions.",1.5);}
+  afterPurchase();
+}
+
+/* ---------- panel ---------- */
+function showPanelView(v){
+  panelView=v;
+  $("equipment").style.display=$("items").style.display=v==="bag"?"block":"none";
+  $("shopItems").style.display=v==="shop"?"block":"none";
+  $("questItems").style.display=v==="quests"?"block":"none";
+  $("panelTitle").textContent=v==="shop"?"🛒 Kitsune Shop":v==="quests"?"📜 Quest Journal":"🎒 Inventory & Equipment";
+  $("panelDesc").textContent=v==="shop"?"Spend Spirit Crystals on weapons, armor and potions.":v==="quests"?"Complete objectives, then claim each reward once.":"Game is paused while this is open.";
+  $("bagTab").classList.toggle("active",v==="bag");$("shopTab").classList.toggle("active",v==="shop");$("questsTab").classList.toggle("active",v==="quests");
+  refreshPanel();
+}
+function refreshPanel(){if(panelView==="shop")renderShop();else if(panelView==="quests")renderQuests();else updateInventory();}
+function openPanel(v="bag"){if(gameOver)return;panelOpen=true;$("panel").style.display="block";showPanelView(v);}
+function closePanel(){const was=panelOpen;panelOpen=false;$("panel").style.display="none";if(was)saveGame(false);}
+function togglePanelView(v){if(panelOpen&&panelView===v)closePanel();else openPanel(v);}
+
+/* ---------- combat ---------- */
+function attack(){
+  if(gameOver||panelOpen||attackCooldown>0)return;
+  attackCooldown=currentCooldown();swingTime=.32;
+  let target=null,best=3.2;
+  const fx=-Math.sin(faceAngle),fz=-Math.cos(faceAngle);
+  for(const e of enemies){
+    if(!e.alive)continue;
+    const dx=e.x-player.position.x,dz=e.z-player.position.z,dc=Math.hypot(dx,dz),d=dc-e.radius;   // big bosses are reachable by their edge
+    const dot=(dx*fx+dz*fz)/(dc||1);
+    if(d<best&&dot>0){best=d;target=e;}
+  }
+  if(!target){notify("Swing! Get closer to an enemy.",1.1);return;}
+  const ux=target.x-player.position.x,uz=target.z-player.position.z,ud=Math.hypot(ux,uz)||1;
+  faceAngle=Math.atan2(-ux,-uz);player.rotation.y=faceAngle;
+  const dmg=currentDamage();
+  target.hp-=dmg;target.hitTimer=.14;
+  if(!target.boss)tryMove(target,target.x+ux/ud*.5,target.z+uz/ud*.5);   // bosses don't get knocked back
+  drawEnemyBar(target);
+  floatText(String(dmg),target.x,target.boss?4:1.7,target.z);
+  if(target.hp<=0)target.boss?defeatBoss(target):defeatEnemy(target);
+}
+function defeatEnemy(e){
+  if(!e.alive)return;
+  e.alive=false;e.dying=e.dyingMax;e.respawn=14;
+  inventory.spiritCrystals++;totalKills++;xp+=35;
+  const dropped=Math.random()<.25;if(dropped)inventory.potions++;
+  checkLevelUp();updateHud();if(panelOpen)refreshPanel();markDirty();
+  popup("🌟 Spirit defeated!",1.3);
+  notify(`✨ +35 XP · +1 💎${dropped?" · +1 🧪":""}`,2);
+}
+function defeatBoss(e){
+  if(!e.alive)return;
+  e.alive=false;e.dying=e.dyingMax;e.respawn=180;e.tele.visible=false;
+  bossKills++;inventory.spiritCrystals+=10;inventory.potions+=2;xp+=300;
+  checkLevelUp();updateHud();markDirty();saveGame(false);
+  popup("👹 ONI WARDEN DEFEATED!",3.5);
+  notify("+300 XP · +10 💎 · +2 🧪"+(bossKills===1?" · Oni Cleaver unlocked in the Shop!":""),4.5);
+}
+function takeDamage(amount){
+  if(hurtCooldown>0||gameOver)return;
+  hurtCooldown=.8;
+  const dmg=Math.max(1,Math.ceil(amount*(equipment.armor==="Spirit Armor"?.7:1)));
+  hp=Math.max(0,hp-dmg);hurtFlash=.35;shake=.35;
+  floatText("-"+dmg,player.position.x,2.5,player.position.z,"hurt");
+  updateHud();markDirty();
+  if(hp<=0){gameOver=true;closePanel();saveGame(false);$("dead").style.display="grid";}
+}
+function interact(){
+  if(gameOver||panelOpen)return;
+  if(Math.hypot(player.position.x,player.position.z+24)<4.2){
+    if(!shrineSeen){
+      shrineSeen=true;markDirty();updateHud();
+      popup("⛩️ Shrine of the Blue Kitsune",3);notify("The shrine glows with ancient energy. Press USE/E again for blessings.",3);
+    }else if(hp<maxHp){
+      const before=hp;hp=Math.min(maxHp,hp+35);updateHud();markDirty();
+      floatText("+"+Math.round(hp-before),player.position.x,2.5,player.position.z,"heal");notify("💙 Shrine blessing restored HP!",2);
+    }else{saveGame(false);notify("The shrine recognizes your journey. Progress saved.",2);}
+  }else notify("Find the glowing shrine near the red gate.",1.6);
+}
+
+/* ---------- enemy AI ---------- */
+function updateBoss(e,dt,px,pz,now){
+  const dx=px-e.x,dz=pz-e.z,d=Math.hypot(dx,dz),homeD=Math.hypot(e.spawnX-e.x,e.spawnZ-e.z);
+  const enraged=e.hp<e.maxHp*.5,aggro=!gameOver&&d<20&&homeD<26;
+  e.hitTimer=Math.max(0,e.hitTimer-dt);
+  if(gameOver&&e.state!=="idle"){e.state="idle";e.tele.visible=false;}
+  if(e.state==="idle"){
+    e.tele.visible=false;
+    e.club.rotation.x=THREE.MathUtils.damp(e.club.rotation.x,0,10,dt);
+    if(aggro){
+      e.group.rotation.y=Math.atan2(-dx,-dz);
+      if(d>2.8){
+        const sp=enraged?2.9:2.1,nx=e.x+dx/d*sp*dt,nz=e.z+dz/d*sp*dt;
+        if(Math.hypot(nx-px,nz-pz)>e.radius+.5)tryMove(e,nx,nz);
+      }
+      e.cd-=dt;
+      if(e.cd<=0){
+        const slam=e.cycle%3===2&&d<9;
+        if(slam||d<3.7){
+          e.atk=slam?"slam":"smash";e.cycle++;e.state="windup";
+          e.stateMax=(slam?1.2:.75)*(enraged?.8:1);e.stateT=e.stateMax;
+        }
+      }
+    }else{                                         // lost the player: walk home and heal up
+      if(homeD>.6){const hx=e.spawnX-e.x,hz=e.spawnZ-e.z;e.group.rotation.y=Math.atan2(-hx,-hz);tryMove(e,e.x+hx/homeD*2.4*dt,e.z+hz/homeD*2.4*dt);}
+      e.hp=Math.min(e.maxHp,e.hp+12*dt);
+    }
+  }else if(e.state==="windup"){
+    e.stateT-=dt;
+    const k=1-Math.max(0,e.stateT)/e.stateMax,radius=e.atk==="slam"?6.2:4;
+    if(e.atk==="smash")e.group.rotation.y=Math.atan2(-dx,-dz);
+    e.club.rotation.x=-2.2*k;
+    e.tele.visible=true;e.tele.position.x=e.x;e.tele.position.z=e.z;
+    e.tele.scale.setScalar(radius*(.35+.65*k));e.tele.material.opacity=.2+.35*k;
+    if(e.stateT<=0){                               // the hit lands — step out of the red circle to dodge it
+      if(!gameOver&&Math.hypot(px-e.x,pz-e.z)<radius){
+        takeDamage((e.atk==="slam"?24:16)+level*2);
+      }
+      if(e.atk==="slam")shake=.55;
+      e.state="recover";e.stateT=.7;e.tele.visible=false;
+    }
+  }else{                                           // recover
+    e.stateT-=dt;e.club.rotation.x=.9*Math.max(0,e.stateT/.7);
+    if(e.stateT<=0){e.state="idle";e.cd=enraged?.9:1.7;}
+  }
+  e.group.position.x=e.x;e.group.position.z=e.z;
+  e.group.position.y=.03+Math.sin(now*.003)*.03;
+  e.skin.emissiveIntensity=e.hitTimer>0?.9:(enraged?.3:0);
+  return d<26;                                     // show the boss bar when the player is near
+}
+function updateEnemies(dt){
+  let closest=null,closestD=Infinity,bossE=null;
+  const px=player.position.x,pz=player.position.z,now=performance.now();
+  for(const e of enemies){
+    if(!e.alive){
+      if(e.dying>0){
+        e.dying-=dt;e.group.scale.setScalar(Math.max(.001,e.dying/e.dyingMax));
+        if(e.dying<=0){e.dying=0;e.group.visible=false;}
+      }else{
+        e.respawn-=dt;
+        if(e.respawn<=0&&Math.hypot(px-e.spawnX,pz-e.spawnZ)>(e.boss?14:7))resetEnemy(e);
+      }
+      continue;
+    }
+    if(e.boss){if(updateBoss(e,dt,px,pz,now))bossE=e;continue;}
+    const dx=px-e.x,dz=pz-e.z,d=Math.hypot(dx,dz),homeD=Math.hypot(e.spawnX-e.x,e.spawnZ-e.z);
+    const aggro=!gameOver&&d<12&&homeD<20;
+    if(d<closestD){closestD=d;closest=e;}
+    e.hitTimer=Math.max(0,e.hitTimer-dt);
+    if(aggro){
+      e.group.rotation.y=Math.atan2(-dx,-dz);
+      if(d>1.05){
+        const sp=1.6+Math.min(level*.05,.5),nx=e.x+dx/d*sp*dt,nz=e.z+dz/d*sp*dt;
+        if(Math.hypot(nx-px,nz-pz)>.85)tryMove(e,nx,nz);
+      }
+    }else if(homeD>.6){
+      const hx=e.spawnX-e.x,hz=e.spawnZ-e.z;e.group.rotation.y=Math.atan2(-hx,-hz);
+      tryMove(e,e.x+hx/homeD*2.2*dt,e.z+hz/homeD*2.2*dt);
+    }
+    if(!aggro&&e.hp<e.maxHp){e.hp=Math.min(e.maxHp,e.hp+8*dt);if(Math.ceil(e.hp)!==e.drawnHp)drawEnemyBar(e);}
+    for(const o of enemies){
+      if(o===e||!o.alive||o.boss)continue;
+      const sx=e.x-o.x,sz=e.z-o.z,sd=Math.hypot(sx,sz);
+      if(sd<1.1&&sd>.001)tryMove(e,e.x+sx/sd*dt*1.6,e.z+sz/sd*dt*1.6);
+    }
+    e.group.position.x=e.x;e.group.position.z=e.z;
+    e.group.position.y=e.hitTimer>0?.2:.04+Math.sin(now*.004+e.index)*.04;
+    e.skin.emissiveIntensity=e.hitTimer>0?.9:0;
+    if(aggro&&d<1.5){
+      e.attackTimer-=dt;
+      if(e.attackTimer<=0){e.attackTimer=1.35;takeDamage(8+Math.floor(level*.5));}
+    }else e.attackTimer=.55;
+  }
+  if(closest&&closestD<15){
+    $("enemyHud").style.display="block";
+    $("enemyFill").style.width=`${Math.max(0,closest.hp/closest.maxHp*100)}%`;
+    $("enemyHp").textContent=`${Math.max(0,Math.ceil(closest.hp))}/${closest.maxHp} HP`;
+  }else $("enemyHud").style.display="none";
+  if(bossE){
+    $("bossHud").style.display="block";
+    $("bossName").textContent=bossE.hp<bossE.maxHp*.5?"👹 Oni Warden — ENRAGED!":"👹 Oni Warden";
+    $("bossFill").style.width=`${Math.max(0,bossE.hp/bossE.maxHp*100)}%`;
+    $("bossHp").textContent=`${Math.max(0,Math.ceil(bossE.hp))}/${bossE.maxHp}`;
+  }else $("bossHud").style.display="none";
+}
+
+/* ---------- player / camera ---------- */
+function updatePlayer(dt){
+  if(gameOver)return;
+  const up=keys.KeyW||keys.ArrowUp,down=keys.KeyS||keys.ArrowDown,left=keys.KeyA||keys.ArrowLeft,right=keys.KeyD||keys.ArrowRight;
+  const kx=(right?1:0)-(left?1:0),ky=(down?1:0)-(up?1:0);
+  let ix=kx+stickX,iy=ky+stickY,mag=Math.hypot(ix,iy);
+  if(mag>1){ix/=mag;iy/=mag;mag=1;}
+  const DEAD=.14,moving=mag>DEAD,keyboard=kx!==0||ky!==0;
+  let speed=0;
+  if(moving)speed=keyboard?((keys.ShiftLeft||keys.ShiftRight)?8.4:5.1):8.4*(mag-DEAD)/(1-DEAD);
+  if(moving){
+    const ux=ix/mag,uy=iy/mag;
+    const dx=(ux*Math.cos(yaw)-uy*Math.sin(yaw))*speed*dt,dz=(ux*Math.sin(yaw)+uy*Math.cos(yaw))*speed*dt;
+    const nx=player.position.x+dx,nz=player.position.z+dz;
+    if(canStandAt(nx,player.position.z))player.position.x=nx;
+    if(canStandAt(player.position.x,nz))player.position.z=nz;
+    faceAngle=Math.atan2(-dx,-dz);walkTime+=dt*(1+speed*1.55);markDirty();
+  }
+  let turn=faceAngle-player.rotation.y;turn=Math.atan2(Math.sin(turn),Math.cos(turn));
+  player.rotation.y+=turn*(1-Math.exp(-16*dt));
+  walkBlend+=((moving?1:0)-walkBlend)*(1-Math.exp(-12*dt));
+  const u=player.userData,t=performance.now(),wave=Math.sin(walkTime)*walkBlend,breathe=Math.sin(t*.0015)*.04*(1-walkBlend);
+  u.leftLeg.rotation.x=wave;u.rightLeg.rotation.x=-wave;
+  u.leftArm.rotation.x=-wave*.8+breathe;u.rightArm.rotation.x=wave*.8-breathe;
+  u.torso.position.y=Math.abs(Math.sin(walkTime*2))*.045*walkBlend+Math.sin(t*.0015)*.018*(1-walkBlend);
+  for(const tl of tails){
+    tl.mesh.rotation.y=tl.baseY+Math.sin(t*.003+tl.phase)*(.035+.075*walkBlend);
+    tl.mesh.rotation.x=tl.baseX+Math.sin(t*.0024+tl.phase)*(.018+.035*walkBlend);
+    tl.mesh.rotation.z=Math.sin(t*.0027+tl.phase)*(.018+.035*walkBlend);
+  }
+  if(swingTime>0){
+    swingTime-=dt;const k=1-Math.max(0,swingTime)/.32;
+    swordPivot.rotation.z=-Math.sin(k*Math.PI)*1.9;swordPivot.rotation.x=-Math.sin(k*Math.PI)*.65;u.rightArm.rotation.x=-1.2;
+  }else{
+    swordPivot.rotation.z=THREE.MathUtils.damp(swordPivot.rotation.z,0,12,dt);
+    swordPivot.rotation.x=THREE.MathUtils.damp(swordPivot.rotation.x,0,12,dt);
+  }
+}
+function updateCamera(dt){
+  camTarget.set(player.position.x-Math.sin(yaw)*Math.cos(pitch)*camDist,Math.max(.6,player.position.y+2.3+Math.sin(pitch)*camDist),player.position.z+Math.cos(yaw)*Math.cos(pitch)*camDist);
+  camera.position.lerp(camTarget,1-Math.exp(-7*dt));
+  if(shake>0){camera.position.x+=(Math.random()-.5)*shake*.35;camera.position.y+=(Math.random()-.5)*shake*.35;shake=Math.max(0,shake-dt*1.2);}
+  camera.lookAt(player.position.x,player.position.y+1.15,player.position.z);
+}
+function updatePrompt(){
+  const near=!panelOpen&&!gameOver&&Math.hypot(player.position.x,player.position.z+24)<4.2;
+  if(near===promptShown)return;promptShown=near;
+  $("prompt").style.display=near?"block":"none";
+  if(near)$("prompt").textContent=FINE_POINTER?"⛩️ Press E — pray at the shrine":"⛩️ Tap USE — pray at the shrine";
+}
+
+/* ---------- controls ---------- */
+function bindControls(){
+  addEventListener("keydown",e=>{
+    keys[e.code]=true;
+    if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))e.preventDefault();
+    if(e.repeat)return;
+    if(e.code==="Space")attack();
+    if(e.code==="KeyE")interact();
+    if(e.code==="KeyI")togglePanelView("bag");
+    if(e.code==="KeyB")togglePanelView("shop");
+    if(e.code==="KeyQ")togglePanelView("quests");
+    if(e.code==="Escape"&&panelOpen)closePanel();
+    if(e.code==="KeyH")usePotion();
+  });
+  addEventListener("keyup",e=>{keys[e.code]=false;});
+  addEventListener("blur",()=>{for(const k in keys)keys[k]=false;});
+  document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("button");if(b)b.blur();});
+  const cv=renderer.domElement;
+  cv.addEventListener("contextmenu",e=>e.preventDefault());
+  cv.addEventListener("wheel",e=>{e.preventDefault();camDist=THREE.MathUtils.clamp(camDist+e.deltaY*.005,4,12);},{passive:false});
+  cv.addEventListener("pointerdown",e=>{
+    if(dragPointer!==null)return;
+    dragPointer=e.pointerId;dragMoved=false;lastX=startX=e.clientX;lastY=startY=e.clientY;
+    try{cv.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  cv.addEventListener("pointermove",e=>{
+    if(e.pointerId!==dragPointer)return;
+    if(Math.hypot(e.clientX-startX,e.clientY-startY)>6)dragMoved=true;
+    yaw-=(e.clientX-lastX)*.006;pitch=THREE.MathUtils.clamp(pitch+(e.clientY-lastY)*.003,-.15,.85);
+    lastX=e.clientX;lastY=e.clientY;
+  });
+  const end=e=>{
+    if(e.pointerId!==dragPointer)return;
+    if(e.type==="pointerup"&&e.pointerType==="mouse"&&e.button===0&&!dragMoved)attack();
+    dragPointer=null;
+  };
+  cv.addEventListener("pointerup",end);cv.addEventListener("pointercancel",end);
+  const base=$("stickBase"),knob=$("stickKnob");
+  function moveStick(e){
+    const r=base.getBoundingClientRect();
+    let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);
+    const max=36,len=Math.hypot(dx,dy);if(len>max){dx=dx/len*max;dy=dy/len*max;}
+    stickX=dx/max;stickY=dy/max;knob.style.left=33+dx+"px";knob.style.top=33+dy+"px";
+  }
+  base.addEventListener("pointerdown",e=>{
+    if(stickPointer!==null)return;stickPointer=e.pointerId;
+    try{base.setPointerCapture(e.pointerId);}catch(_){}moveStick(e);
+  });
+  base.addEventListener("pointermove",e=>{if(e.pointerId===stickPointer)moveStick(e);});
+  function release(e){
+    if(e.pointerId!==stickPointer)return;
+    stickPointer=null;stickX=stickY=0;knob.style.left="33px";knob.style.top="33px";
+  }
+  base.addEventListener("pointerup",release);base.addEventListener("pointercancel",release);
+  $("attack").addEventListener("pointerdown",e=>{e.preventDefault();attack();});
+  $("interact").addEventListener("pointerdown",e=>{e.preventDefault();interact();});
+  $("usePotion").addEventListener("pointerdown",e=>{e.preventDefault();usePotion();});
+  $("inventoryBtn").onclick=()=>openPanel("bag");$("shopBtn").onclick=()=>openPanel("shop");$("questsBtn").onclick=()=>openPanel("quests");
+  $("bagTab").onclick=()=>showPanelView("bag");$("shopTab").onclick=()=>showPanelView("shop");$("questsTab").onclick=()=>showPanelView("quests");
+  $("saveBtn").onclick=()=>saveGame(true);$("closePanel").onclick=closePanel;$("drinkBtn").onclick=usePotion;$("resetBtn").onclick=newGame;
+  $("respawn").onclick=()=>{
+    gameOver=false;hp=maxHp;player.position.set(0,0,0);yaw=0;pitch=.25;hurtCooldown=1.5;faceAngle=0;player.rotation.y=0;
+    enemies.forEach(e=>{e.attackTimer=1;if(e.boss){e.state="idle";e.cd=2;e.tele.visible=false;}});
+    $("dead").style.display="none";updateHud();saveGame(false);notify("Back at the shrine. Your progress is safe.",2.5);
+  };
+  addEventListener("resize",()=>{
+    camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  });
+}
+
+/* ---------- main loop ---------- */
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),.04);
+  if(!panelOpen){
+    attackCooldown=Math.max(0,attackCooldown-dt);hurtCooldown=Math.max(0,hurtCooldown-dt);
+    updatePlayer(dt);updateEnemies(dt);
+  }
+  updateCamera(dt);updateFx(dt);updatePrompt();
+  const now=performance.now();
+  for(const f of floaters){
+    if(f.spin==="y")f.obj.rotation.y+=dt*.8;else f.obj.rotation.z+=dt*.8;
+    f.obj.position.y=1.15+Math.sin(now*.0015)*.12;
+  }
+  hurtFlash=Math.max(0,hurtFlash-dt);$("hurt").style.opacity=String(hurtFlash/.35*.8);
+  toastTime-=dt;if(toastTime<=0)$("toast").style.opacity="0";
+  messageTime-=dt;if(messageTime<=0)$("message").style.display="none";
+  autoSaveTimer+=dt;if(autoSaveTimer>=10){autoSaveTimer=0;if(dirty)saveGame(false);}
+  renderer.render(scene,camera);
+}
+
+try{
+  createWorld();clock=new THREE.Clock();loadGame();applyLook();
+  scanQuestReady(true);                      // don't re-announce quests that were already done before this session
+  updateHud();updateInventory();bindControls();
+  $("loading").style.display="none";
+  notify("Welcome back, Alfa! Progress autosaves every 10 seconds.",3.5);
+  window.__kitsune=()=>({hp,maxHp,level,xp,totalKills,bossKills,potions:inventory.potions,crystals:inventory.spiritCrystals,
+    x:player.position.x,z:player.position.z,faceAngle,alive:enemies.filter(e=>e.alive&&!e.boss).length,
+    bossHp:enemies.find(e=>e.boss).hp,bossAlive:enemies.find(e=>e.boss).alive,weapon:equipment.weapon,armor:equipment.armor,
+    claims:{...questClaims},unlocks:{...unlocks}});
+  animate();
+}catch(err){console.error(err);fatal("⚠️ The game couldn't start (WebGL may be disabled). Reload or try another browser.");}
+const quickSave=()=>{if(player)saveGame(false);};
+addEventListener("beforeunload",quickSave);addEventListener("pagehide",quickSave);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)quickSave();});
+</script>
+</body>
+</html>
