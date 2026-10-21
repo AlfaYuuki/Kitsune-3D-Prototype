@@ -404,12 +404,27 @@ function makePlayer(){
     const spike=addMesh(new THREE.ConeGeometry(.14,.42,5),hair,torso,(i-2)*.13,2.12,.02);
     spike.rotation.z=(i-2)*-.23;
   }
-  // Three signature blue fox tails (they sway while moving)
-  for(let i=0;i<3;i++){
-    const tail=addMesh(new THREE.ConeGeometry(.19,1.45,8),blue,torso,(i-1)*.42,.95,.67);
-    tail.rotation.x=-1;tail.rotation.z=(i-1)*-.4;
-    tails.push({mesh:tail,baseZ:tail.rotation.z,phase:i*1.3});
-  }
+  // Three signature blue fox tails — flipped outward 🦊
+for(let i=0;i<3;i++){
+  const tail=addMesh(
+    new THREE.ConeGeometry(.19,1.45,8),
+    blue,
+    torso,
+    (i-1)*.42,
+    .95,
+    .67
+  );
+
+  // Flip the tails to face upward and outward
+  tail.rotation.x=1;
+  tail.rotation.z=(i-1)*.4;
+
+  tails.push({
+    mesh:tail,
+    baseZ:tail.rotation.z,
+    phase:i*1.3
+  });
+}
   for(const x of [-.43,.43])addMesh(new THREE.SphereGeometry(.2,8,7),dark,torso,x,1.35,0);
 
   const leftArm=makeLimb(torso,-.48,1.35,0,.68,0x173d88);
