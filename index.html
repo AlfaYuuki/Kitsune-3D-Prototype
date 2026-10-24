@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Kitsune FunZone 3D — RPG v4.5</title>
+<title>Kitsune FunZone 3D — RPG v4.6</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;overflow:hidden;background:#13251d;color:#fff;font-family:system-ui,Arial,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
@@ -66,7 +66,7 @@ button{cursor:pointer;font:inherit}
 
 <div id="hud">
   <div class="brand">🦊 KITSUNE FUNZONE</div>
-  <div class="small">3D RPG v4.5 · Alfa Yuuki</div>
+  <div class="small">3D RPG v4.6 · Alfa Yuuki</div>
   <div class="stat"><span>LEVEL <b id="level">1</b></span><span id="hpText">100/100 HP</span></div>
   <div class="bar"><div id="hpFill" class="fill"></div></div>
   <div class="stat"><span>Experience</span><span id="xpText">0/100 XP</span></div>
@@ -125,13 +125,13 @@ try{THREE=await import("three");}
 catch(err){console.error(err);fatal("⚠️ Couldn't load the 3D engine (Three.js). Check your internet connection and reload.");throw err;}
 
 /* =====================================================
-   KITSUNE FUNZONE RPG v4.5
+   KITSUNE FUNZONE RPG v4.6
    v4.2 (shop, quests, curved tails) + review fixes
    + Oni Warden boss, 2 new weapons, quest alerts
    ===================================================== */
 const SAVE_KEY="kitsune_funzone_rpg_v4",OLD_SAVE_KEY="kitsune_funzone_rpg_v3";
 const FINE_POINTER=matchMedia("(hover:hover) and (pointer:fine)").matches;
-const ENEMY_SPAWNS=[[-8,-9],[8,-13],[-10,-22],[10,-31],[-8,-41],[9,-48],[-13,-54],[14,-17]];
+const ENEMY_SPAWNS=[[-8,-9],[8,-13],[-16,-22],[16,-32],[-8,-41],[9,-48],[-13,-54],[14,-17]];
 const BOSS_SPAWN=[0,-74];
 
 /* Weapons: damage, swing cooldown, price (💎) and look. Wooden Sword is free. */
@@ -286,11 +286,16 @@ function makeTrees(){
   const trunks=[],limbs=[],blooms=[];
   const par=new THREE.Object3D(),ch=new THREE.Object3D();par.add(ch);ch.rotation.order="YZX";
   const child=(px,py,pz,yaw,tilt,sx,sy,sz)=>{ch.position.set(px,py,pz);ch.rotation.set(0,yaw,tilt);ch.scale.set(sx,sy,sz);par.updateMatrixWorld(true);return ch.matrixWorld.clone();};
-  for(let i=0;i<150;i++){
-    const x=(rand()-.5)*100,z=20-rand()*110,s=.8+rand()*1.5;
-    if(Math.abs(x)<6.8&&z>-67)continue;
-    if(ENEMY_SPAWNS.some(p=>Math.hypot(p[0]-x,p[1]-z)<3.4))continue;
-    if(z<-58&&Math.abs(x)<13)continue;
+  const fixed=[[-12.5,-19],[12.5,-21],[-13,-27],[13,-29],[-12.5,-35],[12.5,-36]];   // blossom trees framing the courtyard edges
+  for(let i=0;i<150+fixed.length;i++){
+    const fx=i<fixed.length;
+    const x=fx?fixed[i][0]:(rand()-.5)*100,z=fx?fixed[i][1]:20-rand()*110,s=fx?1.6:.8+rand()*1.5;
+    if(!fx){
+      if(Math.abs(x)<6.8&&z>-67)continue;
+      if(ENEMY_SPAWNS.some(p=>Math.hypot(p[0]-x,p[1]-z)<3.4))continue;
+      if(z<-58&&Math.abs(x)<13)continue;
+      if(Math.abs(x)<11&&z<-16&&z>-44)continue;      // courtyard around the altar stays open
+    }
     const u=rand(),pal=palettes[u<.42?0:u<.62?1:2];
     par.position.set(x,0,z);par.rotation.set((rand()-.5)*.1,rand()*6.283,(rand()-.5)*.14);par.scale.setScalar(s);
     trunks.push({m:child(0,0,0,0,0,1,1,1),c:pick(rand,barks),v:.85+rand()*.3});
@@ -309,8 +314,11 @@ function makeTrees(){
 /* Stone lanterns with a warm glow halo */
 function makeLanterns(){
   const stone=mat(0x8d93a0,.9,{flatShading:true}),dark=mat(0x666c79,.9),glow=mat(0xffd58b,.4,{emissive:0xff9a30,emissiveIntensity:1.6});
-  for(const z of [-5,-15,-25,-35,-45,-55])for(const side of [-1,1]){
-    const x=side*5.5,g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
+  const spots=[];for(const z of [-5,-15,-25,-35,-45,-55])for(const side of [-1,1])spots.push([side*5.5,z]);
+  spots.push([-2.6,-20.5],[2.6,-20.5]);                  // one on each side of the approach to the altar
+  for(const [x,z] of spots){
+    if(Math.abs(x)<4)addCircle(x,z,.35);
+    const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
     addMesh(new THREE.BoxGeometry(.62,.16,.62),stone,g,0,.08,0);
     addMesh(new THREE.CylinderGeometry(.11,.14,.62,6),stone,g,0,.47,0);
     addMesh(new THREE.BoxGeometry(.5,.1,.5),dark,g,0,.82,0);
@@ -405,7 +413,7 @@ function makeRocks(){
   const cols=[0x7b8195,0x6b7186,0x8c91a3,0x5f657a,0x757a8f],items=[];
   for(let c=0;c<40;c++){
     const cx=(r()-.5)*92,cz=24-r()*106;
-    if(Math.abs(cx)<6.5||(cz<-58&&Math.abs(cx)<12)||(Math.abs(cx)<9&&cz<-20&&cz>-42))continue;
+    if(Math.abs(cx)<6.5||(cz<-58&&Math.abs(cx)<12)||(Math.abs(cx)<12&&cz<-16&&cz>-44))continue;
     if(ENEMY_SPAWNS.some(q=>Math.hypot(q[0]-cx,q[1]-cz)<5.5)||Math.hypot(BOSS_SPAWN[0]-cx,BOSS_SPAWN[1]-cz)<9)continue;
     if(Math.hypot(cx,cz)<7)continue;
     const big=.9+r()*1.6,n=3+Math.floor(r()*4);
@@ -676,7 +684,9 @@ function resetEnemy(e){
   if(e.boss){e.state="idle";e.cd=2;e.cycle=0;e.club.rotation.x=0;e.tele.visible=false;}
   drawEnemyBar(e);
 }
-function tryMove(e,nx,nz){let m=false;if(canStandAt(nx,e.z)){e.x=nx;m=true;}if(canStandAt(e.x,nz)){e.z=nz;m=true;}return m;}
+const altarDist=(x,z)=>Math.hypot(x,z+24);
+const enemyCanStand=(x,z)=>altarDist(x,z)>8&&canStandAt(x,z);       // altar zone is a safe space
+function tryMove(e,nx,nz){let m=false;if(enemyCanStand(nx,e.z)){e.x=nx;m=true;}if(enemyCanStand(e.x,nz)){e.z=nz;m=true;}return m;}
 
 /* ---------- save / load ---------- */
 function saveGame(show=true){
@@ -933,7 +943,9 @@ function takeDamage(amount){
 }
 function interact(){
   if(gameOver||panelOpen)return;
-  if(Math.hypot(player.position.x,player.position.z+24)<4.2){
+  const st=altarState();
+  if(st.near&&!st.facing){notify("Face the crystal, then press USE to pray.",1.8);return;}
+  if(st.near){
     if(!shrineSeen){
       shrineSeen=true;markDirty();updateHud();
       popup("⛩️ Shrine of the Blue Kitsune",3);notify("The shrine glows with ancient energy. Press USE/E again for blessings.",3);
@@ -947,7 +959,7 @@ function interact(){
 /* ---------- enemy AI ---------- */
 function updateBoss(e,dt,px,pz,now){
   const dx=px-e.x,dz=pz-e.z,d=Math.hypot(dx,dz),homeD=Math.hypot(e.spawnX-e.x,e.spawnZ-e.z);
-  const enraged=e.hp<e.maxHp*.5,aggro=!gameOver&&d<20&&homeD<26;
+  const enraged=e.hp<e.maxHp*.5,aggro=!gameOver&&d<20&&homeD<26&&altarDist(px,pz)>9;
   e.hitTimer=Math.max(0,e.hitTimer-dt);
   if(gameOver&&e.state!=="idle"){e.state="idle";e.tele.visible=false;}
   if(e.state==="idle"){
@@ -1010,7 +1022,7 @@ function updateEnemies(dt){
     }
     if(e.boss){if(updateBoss(e,dt,px,pz,now))bossE=e;continue;}
     const dx=px-e.x,dz=pz-e.z,d=Math.hypot(dx,dz),homeD=Math.hypot(e.spawnX-e.x,e.spawnZ-e.z);
-    const aggro=!gameOver&&d<12&&homeD<20;
+    const aggro=!gameOver&&d<12&&homeD<20&&altarDist(px,pz)>9;
     if(d<closestD){closestD=d;closest=e;}
     e.hitTimer=Math.max(0,e.hitTimer-dt);
     if(aggro){
@@ -1094,11 +1106,18 @@ function updateCamera(dt){
   if(shake>0){camera.position.x+=(Math.random()-.5)*shake*.35;camera.position.y+=(Math.random()-.5)*shake*.35;shake=Math.max(0,shake-dt*1.2);}
   camera.lookAt(player.position.x,player.position.y+1.15,player.position.z);
 }
+function altarState(){
+  const dx=-player.position.x,dz=-24-player.position.z,d=Math.hypot(dx,dz);
+  return {near:d<3.8,facing:d<.01||(dx*-Math.sin(faceAngle)+dz*-Math.cos(faceAngle))/d>.45};
+}
+let promptState=0;
 function updatePrompt(){
-  const near=!panelOpen&&!gameOver&&Math.hypot(player.position.x,player.position.z+24)<4.2;
-  if(near===promptShown)return;promptShown=near;
-  $("prompt").style.display=near?"block":"none";
-  if(near)$("prompt").textContent=FINE_POINTER?"⛩️ Press E — pray at the shrine":"⛩️ Tap USE — pray at the shrine";
+  const st=(!panelOpen&&!gameOver)?altarState():{near:false,facing:false};
+  const v=st.near?(st.facing?2:1):0;
+  if(v===promptState)return;promptState=v;
+  $("prompt").style.display=v?"block":"none";
+  if(v===2)$("prompt").textContent=FINE_POINTER?"⛩️ Press E — pray at the crystal":"⛩️ Tap USE — pray at the crystal";
+  else if(v===1)$("prompt").textContent="🔮 Face the crystal to pray";
 }
 
 /* ---------- controls ---------- */
