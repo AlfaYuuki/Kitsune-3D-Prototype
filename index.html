@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Kitsune FunZone 3D — RPG v4.3</title>
+<title>Kitsune FunZone 3D — RPG v4.5</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;overflow:hidden;background:#13251d;color:#fff;font-family:system-ui,Arial,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
@@ -66,12 +66,13 @@ button{cursor:pointer;font:inherit}
 
 <div id="hud">
   <div class="brand">🦊 KITSUNE FUNZONE</div>
-  <div class="small">3D RPG v4.3 · Alfa Yuuki</div>
+  <div class="small">3D RPG v4.5 · Alfa Yuuki</div>
   <div class="stat"><span>LEVEL <b id="level">1</b></span><span id="hpText">100/100 HP</span></div>
   <div class="bar"><div id="hpFill" class="fill"></div></div>
   <div class="stat"><span>Experience</span><span id="xpText">0/100 XP</span></div>
   <div class="bar"><div id="xpFill" class="fill"></div></div>
   <div id="quest"></div>
+  <div class="small" id="worldClock">☀️ Day · New Moon</div>
   <div class="small" id="saveStatus">💾 Save ready</div>
 </div>
 
@@ -124,7 +125,7 @@ try{THREE=await import("three");}
 catch(err){console.error(err);fatal("⚠️ Couldn't load the 3D engine (Three.js). Check your internet connection and reload.");throw err;}
 
 /* =====================================================
-   KITSUNE FUNZONE RPG v4.3
+   KITSUNE FUNZONE RPG v4.5
    v4.2 (shop, quests, curved tails) + review fixes
    + Oni Warden boss, 2 new weapons, quest alerts
    ===================================================== */
@@ -145,6 +146,7 @@ const WEAPONS=Object.keys(WEAPON_DEFS);
 const bounds={minX:-48,maxX:48,minZ:-86,maxZ:28},playerRadius=.47;
 
 let scene,camera,renderer,clock,player,swordPivot,sword,bladeMat,bodyMat;
+let hemiLight,sunLight,moonLight,sunOrb,moonOrb,moonShadow,starField,worldTime=0;
 let yaw=0,pitch=.25,camDist=7.5,gameOver=false,panelOpen=false,panelView="bag";
 let hp=100,maxHp=100,xp=0,level=1,totalKills=0,bossKills=0,shrineSeen=false;
 let attackCooldown=0,hurtCooldown=0,swingTime=0,toastTime=0,messageTime=0;
@@ -199,6 +201,272 @@ function updateFx(dt){
   }
 }
 
+/* ---------- v4.5 graphics: stylized dusk forest (blossom trees, lush grass, glowing flowers) ---------- */
+let flowerMat=null,fireflies=null,petalPts=null,nightAmt=1,_glowTex=null,_petalTex=null;
+const grassTime={value:0},treeSpots=[],haloMats={};
+function srand(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+function pick(r,a){return a[Math.floor(r()*a.length)];}
+function instItems(geo,material,items,opts={}){
+  if(!items.length)return null;
+  const im=new THREE.InstancedMesh(geo,material,items.length),d=new THREE.Object3D(),col=new THREE.Color();
+  for(let i=0;i<items.length;i++){
+    const it=items[i];
+    if(it.m)im.setMatrixAt(i,it.m);
+    else{
+      d.position.set(it.x,it.y,it.z);d.rotation.set(it.rx||0,it.ry||0,it.rz||0);
+      const s=it.s===undefined?1:it.s;d.scale.set((it.sx||1)*s,(it.sy||1)*s,(it.sz||1)*s);
+      d.updateMatrix();im.setMatrixAt(i,d.matrix);
+    }
+    if(it.c!==undefined){col.set(it.c);if(it.v)col.multiplyScalar(it.v);im.setColorAt(i,col);}
+  }
+  im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true;
+  im.castShadow=!!opts.cast;im.receiveShadow=opts.receive!==false;im.frustumCulled=false;
+  scene.add(im);return im;
+}
+/* Merge several shapes into one geometry with a brightness-by-height vertex colour */
+function mergeGeos(parts){
+  const pos=[],nor=[],col=[];
+  for(const part of parts){
+    const g=part.g.index?part.g.toNonIndexed():part.g.clone();
+    const p=g.attributes.position,shade=[];
+    for(let i=0;i<p.count;i++)shade.push(part.c(p.getY(i)));
+    g.applyMatrix4(part.m);
+    const p2=g.attributes.position,n2=g.attributes.normal;
+    for(let i=0;i<p2.count;i++){
+      pos.push(p2.getX(i),p2.getY(i),p2.getZ(i));nor.push(n2.getX(i),n2.getY(i),n2.getZ(i));
+      const k=shade[i];col.push(k,k,k);
+    }
+  }
+  const out=new THREE.BufferGeometry();
+  out.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
+  out.setAttribute("normal",new THREE.Float32BufferAttribute(nor,3));
+  out.setAttribute("color",new THREE.Float32BufferAttribute(col,3));
+  return out;
+}
+function glowTexture(){
+  const c=document.createElement("canvas");c.width=c.height=64;const x=c.getContext("2d"),g=x.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(.35,"rgba(255,255,255,.45)");g.addColorStop(1,"rgba(255,255,255,0)");
+  x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);
+}
+function petalTexture(){
+  const c=document.createElement("canvas");c.width=c.height=32;const x=c.getContext("2d");
+  x.fillStyle="#fff";x.beginPath();x.ellipse(16,16,12,7,.6,0,Math.PI*2);x.fill();return new THREE.CanvasTexture(c);
+}
+function addHalo(x,y,z,hex,size){
+  _glowTex=_glowTex||glowTexture();
+  if(!haloMats[hex])haloMats[hex]=new THREE.SpriteMaterial({map:_glowTex,color:hex,transparent:true,opacity:.75,depthWrite:false,blending:THREE.AdditiveBlending});
+  const s=new THREE.Sprite(haloMats[hex]);s.position.set(x,y,z);s.scale.set(size,size,1);scene.add(s);return s;
+}
+
+/* Painted ground: soft patches of green and teal instead of one flat colour */
+function makeGround(){
+  const geo=new THREE.PlaneGeometry(220,240,110,120),p=geo.attributes.position,cols=new Float32Array(p.count*3);
+  const a=new THREE.Color(0x2c6a33),b=new THREE.Color(0x5aa545),c3=new THREE.Color(0x24685c),tmp=new THREE.Color();
+  for(let i=0;i<p.count;i++){
+    const x=p.getX(i),y=p.getY(i);
+    const n=.5+.25*Math.sin(x*.21+Math.sin(y*.13)*2)+.25*Math.sin(y*.17-x*.09+1.3);
+    tmp.copy(a).lerp(b,Math.min(1,Math.max(0,n)));
+    tmp.lerp(c3,(.5+.5*Math.sin(x*.06+y*.05+2))*.3);
+    cols[i*3]=tmp.r;cols[i*3+1]=tmp.g;cols[i*3+2]=tmp.b;
+  }
+  geo.setAttribute("color",new THREE.BufferAttribute(cols,3));
+  const g=new THREE.Mesh(geo,mat(0xffffff,.95,{vertexColors:true}));
+  g.position.set(0,-.12,-28);g.rotation.x=-Math.PI/2;g.receiveShadow=true;scene.add(g);
+  const path=addMesh(new THREE.PlaneGeometry(8,150),mat(0x4f5469,.95),scene,0,-.09,-35);path.rotation.x=-Math.PI/2;
+}
+
+/* Blossom trees: one InstancedMesh each for trunks, limbs and flower clusters (pink, white and violet) */
+function makeTrees(){
+  const rand=srand(20261020);
+  const trunkG=new THREE.CylinderGeometry(.2,.38,3.1,7);trunkG.translate(0,1.55,0);
+  const limbG=new THREE.CylinderGeometry(.045,.1,1.5,5);limbG.translate(0,.75,0);
+  const bloomG=new THREE.IcosahedronGeometry(.72,1);
+  const palettes=[[0xff9ec9,0xff7fb8,0xffc1dd,0xf58ccd],[0xffe3f0,0xf8d3ec,0xe6d8ff,0xffc9e6],[0xb68aff,0x9f6df5,0xc9a7ff,0x8d68e6]];
+  const barks=[0x5b4136,0x6a4a3a,0x4e3a34];
+  const trunks=[],limbs=[],blooms=[];
+  const par=new THREE.Object3D(),ch=new THREE.Object3D();par.add(ch);ch.rotation.order="YZX";
+  const child=(px,py,pz,yaw,tilt,sx,sy,sz)=>{ch.position.set(px,py,pz);ch.rotation.set(0,yaw,tilt);ch.scale.set(sx,sy,sz);par.updateMatrixWorld(true);return ch.matrixWorld.clone();};
+  for(let i=0;i<150;i++){
+    const x=(rand()-.5)*100,z=20-rand()*110,s=.8+rand()*1.5;
+    if(Math.abs(x)<6.8&&z>-67)continue;
+    if(ENEMY_SPAWNS.some(p=>Math.hypot(p[0]-x,p[1]-z)<3.4))continue;
+    if(z<-58&&Math.abs(x)<13)continue;
+    const u=rand(),pal=palettes[u<.42?0:u<.62?1:2];
+    par.position.set(x,0,z);par.rotation.set((rand()-.5)*.1,rand()*6.283,(rand()-.5)*.14);par.scale.setScalar(s);
+    trunks.push({m:child(0,0,0,0,0,1,1,1),c:pick(rand,barks),v:.85+rand()*.3});
+    for(let k=0;k<4;k++)limbs.push({m:child(0,1.9+k*.35,0,k*1.6+rand()*.8,.75+rand()*.35,1,1,1),c:0x70503e});
+    for(let k=0;k<16;k++){
+      const a=rand()*6.283,rr=Math.sqrt(rand())*1.75,yy=3.0+rand()*1.9-rr*.25,b=.75+rand()*.55;
+      blooms.push({m:child(Math.cos(a)*rr,yy,Math.sin(a)*rr,rand()*6,0,b*1.1,b*.82,b),c:pick(rand,pal),v:.85+rand()*.3});
+    }
+    treeSpots.push([x,z,s]);addCircle(x,z,.58*s);
+  }
+  instItems(trunkG,mat(0xffffff,.9,{flatShading:true}),trunks,{cast:true});
+  instItems(limbG,mat(0xffffff,.9,{flatShading:true}),limbs,{cast:true});
+  instItems(bloomG,mat(0xffffff,.85,{flatShading:true,emissive:0x3a1450,emissiveIntensity:.35}),blooms,{cast:true});
+}
+
+/* Stone lanterns with a warm glow halo */
+function makeLanterns(){
+  const stone=mat(0x8d93a0,.9,{flatShading:true}),dark=mat(0x666c79,.9),glow=mat(0xffd58b,.4,{emissive:0xff9a30,emissiveIntensity:1.6});
+  for(const z of [-5,-15,-25,-35,-45,-55])for(const side of [-1,1]){
+    const x=side*5.5,g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
+    addMesh(new THREE.BoxGeometry(.62,.16,.62),stone,g,0,.08,0);
+    addMesh(new THREE.CylinderGeometry(.11,.14,.62,6),stone,g,0,.47,0);
+    addMesh(new THREE.BoxGeometry(.5,.1,.5),dark,g,0,.82,0);
+    addMesh(new THREE.BoxGeometry(.34,.38,.34),glow,g,0,1.06,0);
+    const roof=addMesh(new THREE.ConeGeometry(.52,.34,4),stone,g,0,1.4,0);roof.rotation.y=Math.PI/4;
+    addMesh(new THREE.SphereGeometry(.09,6,5),dark,g,0,1.62,0);
+    addHalo(x,1.06,z,0xffb25a,2.7);
+  }
+}
+function makeHills(){
+  for(let i=0;i<16;i++){
+    const a=i/16*Math.PI*2,r=85;
+    const h=addMesh(new THREE.ConeGeometry(13+Math.random()*7,20+Math.random()*22,7),mat(i%2?0x3f6b6a:0x4b7a78,.95,{flatShading:true}),scene,Math.cos(a)*r,-1,Math.sin(a)*r-28);
+    h.scale.x=1.7;h.rotation.y=Math.random()*Math.PI;h.castShadow=false;
+  }
+}
+
+/* Tall swaying grass clumps (3 blades each) */
+function makeGrass(){
+  const parts=[],M=new THREE.Matrix4(),Q=new THREE.Quaternion(),E=new THREE.Euler();
+  const offs=[[-.1,0,0,.12,0,.2],[.08,0,.06,-.15,0,-.2],[0,0,-.1,.18,0,-.1]];
+  for(const o of offs){
+    const g=new THREE.ConeGeometry(.07,.8,3,1,true);g.translate(0,.4,0);
+    E.set(o[3],0,o[5]);Q.setFromEuler(E);M.compose(new THREE.Vector3(o[0],0,o[2]),Q,new THREE.Vector3(1,1,1));
+    parts.push({g,m:M.clone(),c:y=>.4+.75*Math.min(1,y/.8)});
+  }
+  const geo=mergeGeos(parts),r=srand(808),items=[],cols=[0x3c8a3a,0x58b04a,0x2f7d4a,0x73c256,0x2a9d7a];
+  let tries=0;
+  while(items.length<4500&&tries++<20000){
+    const near=r()<.55,x=near?(r()<.5?-1:1)*(4+r()*16):(r()-.5)*96,z=24-r()*108;
+    if(Math.abs(x)<4||Math.abs(x)>47)continue;
+    if(Math.abs(x)<3.6&&z<-30&&z>-38)continue;
+    items.push({x,y:-.1,z,ry:r()*6.283,s:.7+r()*.9,c:pick(r,cols),v:.8+r()*.3});
+  }
+  const m=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.9,vertexColors:true,side:THREE.DoubleSide});
+  m.onBeforeCompile=s=>{
+    s.uniforms.uTime=grassTime;
+    s.vertexShader="uniform float uTime;\n"+s.vertexShader.replace("#include <begin_vertex>",`#include <begin_vertex>
+      #ifdef USE_INSTANCING
+      float sw=sin(uTime*1.7+instanceMatrix[3].x*.45+instanceMatrix[3].z*.37);
+      transformed.x+=sw*.14*position.y;transformed.z+=sw*.09*position.y;
+      #endif`);
+  };
+  instItems(geo,m,items,{receive:true});
+}
+
+/* Glowing trumpet flowers in cyan, blue and violet */
+function makeFlowerGeo(){
+  const parts=[],Q=new THREE.Quaternion(),E=new THREE.Euler();
+  function stalk(h,tiltZ,tiltX,k,petalR){
+    E.set(tiltX,0,tiltZ);Q.setFromEuler(E);
+    const stemM=new THREE.Matrix4().compose(new THREE.Vector3(0,0,0),Q,new THREE.Vector3(k,k,k));
+    const stemG=new THREE.CylinderGeometry(.012,.022,h,5);stemG.translate(0,h/2,0);
+    parts.push({g:stemG,m:stemM,c:()=>.3});
+    const top=new THREE.Vector3(0,h,0).applyMatrix4(stemM);
+    const topM=new THREE.Matrix4().compose(top,Q,new THREE.Vector3(k,k,k));
+    const cone=new THREE.ConeGeometry(petalR,.38,8,1,true);cone.rotateX(Math.PI);cone.translate(0,.19,0);
+    parts.push({g:cone,m:topM,c:y=>Math.min(1,.45+y*1.5)});
+    const bud=new THREE.SphereGeometry(.045,6,5);bud.translate(0,.2,0);
+    parts.push({g:bud,m:topM,c:()=>1});
+  }
+  stalk(1.0,.14,0,1,.17);stalk(.62,-.38,.12,.8,.14);stalk(.4,.55,-.2,.65,.12);
+  return mergeGeos(parts);
+}
+function makeFlowers(){
+  const r=srand(777),items=[],centers=[],pal=[0x2fd0ff,0x4d9bff,0x8a6cff,0xb86bff,0x59f0ff,0x35e0ff,0xff8ad8];
+  for(let i=0;i<28;i++)centers.push([(i%2?1:-1)*(5.6+r()*9),24-r()*100]);
+  for(let i=0;i<12;i++){const a=r()*6.283,d=2.8+r()*4;centers.push([Math.cos(a)*d*1.3,-24+Math.sin(a)*d]);}
+  for(let i=0;i<32;i++)centers.push([(r()-.5)*90,24-r()*104]);
+  for(const [cx,cz] of centers){
+    const n=9+Math.floor(r()*14);
+    for(let k=0;k<n;k++){
+      const a=r()*6.283,d=Math.sqrt(r())*2.4,x=cx+Math.cos(a)*d,z=cz+Math.sin(a)*d;
+      if(Math.abs(x)<4.3||x<bounds.minX+1||x>bounds.maxX-1||z<bounds.minZ+1||z>bounds.maxZ-2)continue;
+      if(Math.abs(x)<3.8&&z<-30&&z>-38)continue;
+      if(Math.hypot(x,z+24)<1.9)continue;
+      items.push({x,y:-.1,z,ry:r()*6.283,s:.55+r()*1.0,c:pick(r,pal)});
+    }
+  }
+  flowerMat=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide});
+  instItems(makeFlowerGeo(),flowerMat,items,{receive:false});
+}
+
+/* Blue-grey boulder clusters */
+function makeRocks(){
+  const r=srand(4242),geo=new THREE.IcosahedronGeometry(1,1),p=geo.attributes.position;
+  for(let i=0;i<p.count;i++){
+    const x=p.getX(i),y=p.getY(i),z=p.getZ(i),k=1+.2*Math.sin(x*6.1+y*4.3+z*5.2)+.1*Math.sin(x*13+z*9);
+    p.setXYZ(i,x*k,y*k*.85,z*k);
+  }
+  geo.computeVertexNormals();
+  const cols=[0x7b8195,0x6b7186,0x8c91a3,0x5f657a,0x757a8f],items=[];
+  for(let c=0;c<40;c++){
+    const cx=(r()-.5)*92,cz=24-r()*106;
+    if(Math.abs(cx)<6.5||(cz<-58&&Math.abs(cx)<12)||(Math.abs(cx)<9&&cz<-20&&cz>-42))continue;
+    if(ENEMY_SPAWNS.some(q=>Math.hypot(q[0]-cx,q[1]-cz)<5.5)||Math.hypot(BOSS_SPAWN[0]-cx,BOSS_SPAWN[1]-cz)<9)continue;
+    if(Math.hypot(cx,cz)<7)continue;
+    const big=.9+r()*1.6,n=3+Math.floor(r()*4);
+    for(let k=0;k<n;k++){
+      const rs=k===0?big:big*(.35+r()*.4),x=cx+(k?(r()-.5)*big*2.2:0),z=cz+(k?(r()-.5)*big*2.2:0);
+      items.push({x,y:rs*.45+(k>1?big*.35:0),z,ry:r()*6.283,sx:1.1+r()*.4,sy:.75+r()*.5,sz:1.1+r()*.4,s:rs,c:pick(r,cols),v:.85+r()*.3});
+      if(rs>1.4)addCircle(x,z,rs*.95);
+    }
+  }
+  instItems(geo,mat(0xffffff,.95,{flatShading:true}),items,{cast:true});
+}
+
+/* Cobblestone path and scattered petals */
+function makeCobbles(){
+  const r=srand(55),g=new THREE.CylinderGeometry(1,1.08,.07,7),items=[],cols=[0x8b90a2,0x767c8f,0x9ea2b2,0x6c7287];
+  for(let i=0;i<340;i++)items.push({x:(r()-.5)*7.4,y:-.05+i*.00002,z:26-r()*110,ry:r()*6.283,sx:.42+r()*.3,sz:.34+r()*.25,c:pick(r,cols),v:.9+r()*.2});
+  for(let i=0;i<110;i++){const side=r()<.5?-1:1,sc=.2+r()*.16;items.push({x:side*(3.9+r()*.5),y:-.04,z:26-r()*110,ry:r()*6.283,sx:sc*1.3,sy:1.8,sz:sc,c:pick(r,cols),v:.8+r()*.2});}
+  instItems(g,mat(0xffffff,.9),items,{receive:true});
+}
+function makeFallenPetals(){
+  const r=srand(31),g=new THREE.CircleGeometry(.13,5);g.rotateX(-Math.PI/2);
+  const cols=[0xffa6cc,0xffc9e1,0xf48cc0,0xc9a6ff,0xffffff],items=[];
+  for(const [tx,tz,s] of treeSpots)for(let k=0;k<5;k++){
+    const a=r()*6.283,d=.8+r()*2.8*s,x=tx+Math.cos(a)*d,z=tz+Math.sin(a)*d;
+    items.push({x,y:Math.abs(x)<4.2?-.004:-.1,z,ry:r()*6.283,s:.7+r()*.9,c:pick(r,cols)});
+  }
+  for(let k=0;k<160;k++)items.push({x:(r()-.5)*7.6,y:-.004,z:24-r()*106,ry:r()*6.283,s:.7+r()*.9,c:pick(r,cols)});
+  instItems(g,mat(0xffffff,.8,{side:THREE.DoubleSide}),items,{receive:false});
+}
+
+/* Drifting petals and glowing fireflies around the player */
+function makeAmbient(){
+  _petalTex=_petalTex||petalTexture();_glowTex=_glowTex||glowTexture();
+  const mk=(n,yMin,yMax)=>{const a=new Float32Array(n*3);for(let i=0;i<n;i++){a[i*3]=(Math.random()-.5)*52;a[i*3+1]=yMin+Math.random()*(yMax-yMin);a[i*3+2]=(Math.random()-.5)*52;}
+    const geo=new THREE.BufferGeometry();geo.setAttribute("position",new THREE.BufferAttribute(a,3));return geo;};
+  petalPts=new THREE.Points(mk(220,0,9),new THREE.PointsMaterial({map:_petalTex,color:0xffb3d4,size:.3,transparent:true,depthWrite:false,alphaTest:.05}));
+  fireflies=new THREE.Points(mk(140,.4,5),new THREE.PointsMaterial({map:_glowTex,color:0xaaf4ff,size:.6,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
+  petalPts.frustumCulled=fireflies.frustumCulled=false;scene.add(petalPts);scene.add(fireflies);
+}
+function updateAmbient(dt,now){
+  if(!petalPts)return;
+  const px=player.position.x,pz=player.position.z,t=now*.001,wrap=(v,c)=>c+((v-c+26)%52+52)%52-26;
+  let a=petalPts.geometry.attributes.position.array;
+  for(let i=0;i<a.length;i+=3){
+    a[i]=wrap(a[i]+(Math.sin(t*.7+i)*.6+.35)*dt,px);a[i+1]-=(.5+(i%7)*.04)*dt;a[i+2]=wrap(a[i+2]+Math.cos(t*.6+i*.3)*.5*dt,pz);
+    if(a[i+1]<0)a[i+1]=8+Math.random()*2;
+  }
+  petalPts.geometry.attributes.position.needsUpdate=true;
+  a=fireflies.geometry.attributes.position.array;
+  for(let i=0;i<a.length;i+=3){
+    a[i]=wrap(a[i]+Math.sin(t*.8+i*1.7)*.5*dt,px);a[i+1]=Math.min(5,Math.max(.4,a[i+1]+Math.cos(t*.9+i)*.35*dt));a[i+2]=wrap(a[i+2]+Math.cos(t*.7+i*.9)*.5*dt,pz);
+  }
+  fireflies.geometry.attributes.position.needsUpdate=true;
+  fireflies.material.opacity=(.1+.9*nightAmt)*(.85+.15*Math.sin(t*3));
+}
+function makeScenery(){
+  makeGrass();makeFlowers();makeRocks();makeCobbles();makeFallenPetals();makeAmbient();
+  for(const z of [-63,-70,-77,-84])for(const side of [-1,1])addHalo(side*8,3.45,z,0xff5a3a,2.6);
+  const altar=new THREE.PointLight(0x62e6ff,30,18,2);altar.position.set(0,2.2,-24);scene.add(altar);
+}
+
 /* ---------- world ---------- */
 function createWorld(){
   scene=new THREE.Scene();
@@ -209,36 +477,22 @@ function createWorld(){
   renderer.setSize(innerWidth,innerHeight);
   renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;
   document.body.insertBefore(renderer.domElement,document.body.firstChild);
-  scene.add(new THREE.HemisphereLight(0xdff7ff,0x34482a,2));
-  const sun=new THREE.DirectionalLight(0xffedcc,2.1);
-  sun.position.set(-25,45,20);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
-  sun.shadow.camera.left=-65;sun.shadow.camera.right=65;sun.shadow.camera.top=65;sun.shadow.camera.bottom=-65;
-  scene.add(sun);
-  const ground=addMesh(new THREE.PlaneGeometry(220,240),mat(0x547c49),scene,0,-.12,-28);ground.rotation.x=-Math.PI/2;
-  const path=addMesh(new THREE.PlaneGeometry(8,150),mat(0xb7b09a),scene,0,-.09,-35);path.rotation.x=-Math.PI/2;
-  for(let i=0;i<24;i++){
-    const st=addMesh(new THREE.BoxGeometry(2.4,.08,2),mat(i%2?0xbeb9a5:0x999b8a),scene,(Math.random()-.5)*1.3,-.02,18-i*5);
-    st.rotation.y=(Math.random()-.5)*.12;
-  }
-  makeTrees();makeShrine();makeArena();makePlayer();makeEnemies();spawnBoss();makeLanterns();makeHills();
-}
-function makeTrees(){
-  let seed=20261020;
-  const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-  const trunk=mat(0x62452d),leaves=[mat(0x285d3a),mat(0x397647),mat(0x477e4a)];
-  const tg=new THREE.CylinderGeometry(.22,.36,2.8,7),cg=[0,1,2].map(j=>new THREE.ConeGeometry(1.5-j*.22,2.4,7));
-  for(let i=0;i<145;i++){
-    const x=(rand()-.5)*100,z=20-rand()*110,s=.7+rand()*1.2,pick=[rand(),rand(),rand()];
-    if(Math.abs(x)<6.8&&z>-67)continue;
-    if(ENEMY_SPAWNS.some(p=>Math.hypot(p[0]-x,p[1]-z)<3.4))continue;
-    if(z<-58&&Math.abs(x)<13)continue;                 // keep the boss arena clear of trees
-    const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(s);scene.add(g);
-    addMesh(tg,trunk,g,0,1.4,0);
-    for(let j=0;j<3;j++)addMesh(cg[j],leaves[Math.floor(pick[j]*3)],g,0,2.7+j*1.1,0);
-    addCircle(x,z,.58*s);
-  }
+  hemiLight=new THREE.HemisphereLight(0xdff7ff,0x34482a,1.8);scene.add(hemiLight);
+  sunLight=new THREE.DirectionalLight(0xffedcc,2.1);
+  sunLight.position.set(-25,45,20);sunLight.castShadow=true;sunLight.shadow.mapSize.set(1024,1024);
+  sunLight.shadow.camera.left=-65;sunLight.shadow.camera.right=65;sunLight.shadow.camera.top=65;sunLight.shadow.camera.bottom=-65;scene.add(sunLight);
+  moonLight=new THREE.DirectionalLight(0x9aa9ff,0);moonLight.position.set(20,35,-20);scene.add(moonLight);
+  sunOrb=addMesh(new THREE.SphereGeometry(2.2,16,12),new THREE.MeshBasicMaterial({color:0xffdf88}),scene,0,40,0);
+  sunOrb.material.fog=false;
+  moonOrb=addMesh(new THREE.SphereGeometry(1.65,20,16),new THREE.MeshBasicMaterial({color:0xe2e8ff}),scene,0,40,0);moonOrb.material.fog=false;
+  moonShadow=addMesh(new THREE.SphereGeometry(1.68,20,16),new THREE.MeshBasicMaterial({color:0x172039}),scene,.4,40,.02);moonShadow.material.fog=false;
+  const starPositions=[];for(let i=0;i<260;i++){const a=Math.random()*Math.PI*2,y=18+Math.random()*55,r=75+Math.random()*35;starPositions.push(Math.cos(a)*r,y,Math.sin(a)*r-25);}
+  const starGeo=new THREE.BufferGeometry();starGeo.setAttribute('position',new THREE.Float32BufferAttribute(starPositions,3));
+  starField=new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xffffff,size:.7,sizeAttenuation:false,transparent:true,opacity:0}));scene.add(starField);
+  makeGround();
+  makeTrees();makeShrine();makeArena();makePlayer();makeEnemies();spawnBoss();makeLanterns();makeHills();makeScenery();
 }
 function makeShrine(){
   const red=mat(0xa92f39),dark=mat(0x572c29),stone=mat(0x777d78);
@@ -252,11 +506,14 @@ function makeShrine(){
   addMesh(new THREE.BoxGeometry(5.4,2.5,3.2),mat(0x8c4836),scene,0,1.4,-34);
   addMesh(new THREE.ConeGeometry(4.4,1.7,4),mat(0x303d43),scene,0,3.45,-34);
   addMesh(new THREE.BoxGeometry(1.1,1.8,.15),dark,scene,0,.95,-32.35);addBox(0,-34,2.7,1.6);
-  addMesh(new THREE.CylinderGeometry(.9,1.15,.55,8),stone,scene,0,.28,-24);
-  const c=addMesh(new THREE.OctahedronGeometry(.55),mat(0x5bdcff,.25,{emissive:0x159bd8,emissiveIntensity:1.5}),scene,0,1.15,-24);
+  // The altar sits on the marked cyan-ring spot directly in front of the red torii gate.
+  addMesh(new THREE.CylinderGeometry(1.05,1.22,.38,10),stone,scene,0,.19,-24);
+  addMesh(new THREE.CylinderGeometry(.72,.88,.22,10),mat(0x9fa8a2),scene,0,.48,-24);
+  const c=addMesh(new THREE.OctahedronGeometry(.55),mat(0x5bdcff,.25,{emissive:0x159bd8,emissiveIntensity:1.8}),scene,0,1.22,-24);
   floaters.push({obj:c,spin:"y"});addCircle(0,-24,1.15);
-  const ring=addMesh(new THREE.TorusGeometry(1.25,.06,8,32),mat(0x75e6ff,.5,{emissive:0x1388b6,emissiveIntensity:.8}),scene,0,1.15,-24);
+  const ring=addMesh(new THREE.TorusGeometry(1.3,.075,8,36),mat(0x75e6ff,.5,{emissive:0x1388b6,emissiveIntensity:1}),scene,0,.12,-24);
   ring.rotation.x=Math.PI/2;floaters.push({obj:ring,spin:"z"});
+  for(let i=0;i<4;i++){const a=i*Math.PI/2;const mote=addMesh(new THREE.SphereGeometry(.09,8,6),mat(0xbdf6ff,.3,{emissive:0x55dfff,emissiveIntensity:1}),scene,Math.cos(a)*1.55,.72,-24+Math.sin(a)*1.55);floaters.push({obj:mote,spin:"y"});}
 }
 /* Stone pillars with red lamps mark the Oni Warden's arena at the end of the path */
 function makeArena(){
@@ -265,20 +522,6 @@ function makeArena(){
   for(const z of [-63,-70,-77,-84])for(const side of [-1,1]){
     const x=side*8;
     addMesh(pg,stone,scene,x,1.6,z);addMesh(cg,glow,scene,x,3.45,z);addCircle(x,z,.6);
-  }
-}
-function makeLanterns(){
-  const glow=mat(0xffd58b,.4,{emissive:0xff8c25,emissiveIntensity:1});
-  const bg=new THREE.BoxGeometry(.55,.65,.55),gg=new THREE.BoxGeometry(.38,.55,.38),cg=new THREE.BoxGeometry(.75,.12,.75),bm=mat(0x5b4632),cm=mat(0x493b2d);
-  for(const z of [-5,-15,-25,-35,-45,-55])for(const side of [-1,1]){
-    const x=side*5.5;addMesh(bg,bm,scene,x,.32,z);addMesh(gg,glow,scene,x,.92,z);addMesh(cg,cm,scene,x,1.25,z);
-  }
-}
-function makeHills(){
-  for(let i=0;i<16;i++){
-    const a=i/16*Math.PI*2,r=85;
-    const h=addMesh(new THREE.ConeGeometry(13+Math.random()*7,20+Math.random()*22,7),mat(i%2?0x5d8064:0x6e916b),scene,Math.cos(a)*r,-1,Math.sin(a)*r-28);
-    h.scale.x=1.7;h.rotation.y=Math.random()*Math.PI;h.castShadow=false;
   }
 }
 
@@ -346,7 +589,8 @@ function makePlayer(){
   const leftArm=makeLimb(torso,-.48,1.35,0,.68,0x173d88),rightArm=makeLimb(torso,.48,1.35,0,.68,0x173d88);
   const leftLeg=makeLimb(player,-.2,.72,0,.72,0x172c52),rightLeg=makeLimb(player,.2,.72,0,.72,0x172c52);
   player.userData={torso,leftArm,rightArm,leftLeg,rightLeg};
-  swordPivot=new THREE.Group();swordPivot.position.set(.48,1.23,-.04);torso.add(swordPivot);
+  // Mount the hilt at the right hand, not at the shoulder/torso.
+  swordPivot=new THREE.Group();swordPivot.position.set(0,-.57,-.09);rightArm.add(swordPivot);
   sword=new THREE.Group();swordPivot.add(sword);
   bladeMat=mat(0xcde7f4,.28,{metalness:.65});
   addMesh(new THREE.BoxGeometry(.12,.92,.09),bladeMat,sword,0,.55,0);
@@ -502,12 +746,12 @@ function questRows(){
   const anyWeapon=WEAPONS.some(n=>n!=="Wooden Sword"&&ownsWeapon(n));
   return [
     {id:"slayer5",title:"Forest Threat",desc:"Defeat 5 forest spirits",progress:Math.min(totalKills,5),goal:5,reward:"3 💎 + 100 XP",ready:totalKills>=5,claim:()=>{inventory.spiritCrystals+=3;xp+=100;}},
+    {id:"slayer12",title:"Spirit Hunter",desc:"Defeat 12 forest spirits in total",progress:Math.min(totalKills,12),goal:12,reward:"5 💎 + 120 XP",ready:totalKills>=12,claim:()=>{inventory.spiritCrystals+=5;xp+=120;}},
+    {id:"slayer30",title:"Forest Legend",desc:"Defeat 30 forest spirits in total",progress:Math.min(totalKills,30),goal:30,reward:"8 💎 + 200 XP",ready:totalKills>=30,claim:()=>{inventory.spiritCrystals+=8;xp+=200;}},
     {id:"shrine",title:"A Kitsune's Blessing",desc:"Discover the Blue Kitsune Shrine (press E near the altar)",progress:shrineSeen?1:0,goal:1,reward:"2 💎 + 40 XP",ready:shrineSeen,claim:()=>{inventory.spiritCrystals+=2;xp+=40;}},
     {id:"weapon",title:"Armed and Ready",desc:"Buy any weapon in the Shop",progress:anyWeapon?1:0,goal:1,reward:"80 XP",ready:anyWeapon,claim:()=>{xp+=80;}},
-    {id:"slayer12",title:"Spirit Hunter",desc:"Defeat 12 forest spirits in total",progress:Math.min(totalKills,12),goal:12,reward:"5 💎 + 120 XP",ready:totalKills>=12,claim:()=>{inventory.spiritCrystals+=5;xp+=120;}},
     {id:"armor",title:"Spirit Guard",desc:"Buy Spirit Armor in the Shop",progress:unlocks.spiritArmor?1:0,goal:1,reward:"3 💎 + 70 XP",ready:unlocks.spiritArmor,claim:()=>{inventory.spiritCrystals+=3;xp+=70;}},
-    {id:"boss",title:"Oni Slayer",desc:"Defeat the Oni Warden at the end of the path",progress:Math.min(bossKills,1),goal:1,reward:"6 💎 + 250 XP",ready:bossKills>=1,claim:()=>{inventory.spiritCrystals+=6;xp+=250;}},
-    {id:"slayer30",title:"Forest Legend",desc:"Defeat 30 forest spirits in total",progress:Math.min(totalKills,30),goal:30,reward:"8 💎 + 200 XP",ready:totalKills>=30,claim:()=>{inventory.spiritCrystals+=8;xp+=200;}}
+    {id:"boss",title:"Oni Slayer",desc:"Defeat the Oni Warden at the end of the path",progress:Math.min(bossKills,1),goal:1,reward:"6 💎 + 250 XP",ready:bossKills>=1,claim:()=>{inventory.spiritCrystals+=6;xp+=250;}}
   ];
 }
 /* Announce each quest once when it becomes claimable */
@@ -928,6 +1172,42 @@ function bindControls(){
   });
 }
 
+/* ---------- 60-second day/night cycle + eight moon phases ---------- */
+const MOON_PHASES=["New Moon","Waxing Crescent","First Quarter","Waxing Gibbous","Full Moon","Waning Gibbous","Last Quarter","Waning Crescent"];
+function updateSky(dt){
+  worldTime+=dt;
+  const dayAngle=(worldTime%60)/60*Math.PI*2-Math.PI/2;
+  const sunY=Math.sin(dayAngle),sunX=Math.cos(dayAngle);
+  const daylight=THREE.MathUtils.clamp((sunY+.12)/.42,0,1);
+  const night=1-daylight;nightAmt=night;
+  if(flowerMat)flowerMat.color.setScalar(.62+night*.38);
+  for(const k in haloMats)haloMats[k].opacity=.2+night*.6;
+  const px=player?player.position.x:0,pz=player?player.position.z:0;
+  sunOrb.position.set(px+sunX*70,Math.max(-12,sunY*55+18),pz-28);
+  moonOrb.position.set(px-sunX*65,Math.max(-10,-sunY*48+16),pz-28);
+  moonShadow.position.copy(moonOrb.position);
+  const phase=Math.floor(worldTime/60)%8;
+  // Offset the dark disc across the lunar face to approximate the eight visible phases.
+  const offsets=[0,1.1,1.75,2.45,3.3,2.45,1.75,1.1];
+  moonShadow.position.x=moonOrb.position.x+([0,1,1,1,0,-1,-1,-1][phase])*.9;
+  moonShadow.position.z=moonOrb.position.z+([0,-.25,-.5,-.25,0,.25,.5,.25][phase])*.55;
+  moonShadow.visible=phase!==4;
+  moonOrb.visible=night>.05;moonShadow.visible=night>.05&&phase!==4;
+  sunOrb.visible=daylight>.03;
+  sunLight.position.set(px-sunX*35,Math.max(2,sunY*48+8),pz+20);
+  sunLight.intensity=.08+daylight*2.15;sunLight.color.set(daylight>.35?0xffedcc:0xff9f83);
+  moonLight.position.set(px+sunX*25,Math.max(4,-sunY*35+10),pz-20);moonLight.intensity=night*.75;
+  hemiLight.intensity=.3+daylight*1.55+night*.55;
+  hemiLight.color.set(daylight>.25?0xdff7ff:0x7f78d8);hemiLight.groundColor.set(daylight>.25?0x34482a:0x1d1a45);
+  const skyDay=new THREE.Color(0x9fd3ea),skyDusk=new THREE.Color(0xf08fa8),skyNight=new THREE.Color(0x1b1650);
+  let sky=new THREE.Color();
+  if(daylight>.35)sky.copy(skyDay).lerp(skyDusk,Math.max(0,1-daylight)*.4);
+  else sky.copy(skyNight).lerp(skyDusk,Math.max(0,1-night)*.7);
+  scene.background.copy(sky);scene.fog.color.copy(sky);starField.material.opacity=night*.9;
+  const label=daylight>.72?"☀️ Day":daylight>.25?"🌇 Sunset / Sunrise":"🌙 Night";
+  $("worldClock").textContent=`${label} · ${MOON_PHASES[phase]} · ${Math.floor((worldTime%60)/60*24).toString().padStart(2,"0")}:00`;
+}
+
 /* ---------- main loop ---------- */
 function animate(){
   requestAnimationFrame(animate);
@@ -938,6 +1218,7 @@ function animate(){
   }
   updateCamera(dt);updateFx(dt);updatePrompt();
   const now=performance.now();
+  updateSky(dt);grassTime.value=worldTime;updateAmbient(dt,now);
   for(const f of floaters){
     if(f.spin==="y")f.obj.rotation.y+=dt*.8;else f.obj.rotation.z+=dt*.8;
     f.obj.position.y=1.15+Math.sin(now*.0015)*.12;
