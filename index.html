@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Kitsune FunZone 3D — RPG v5.6</title>
 <link rel="icon" type="image/png" href="favicon.png">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#13251d">
 <style>
 *{box-sizing:border-box}
 body{margin:0;overflow:hidden;background:#13251d;color:#fff;font-family:system-ui,Arial,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
@@ -3029,6 +3031,16 @@ try{
 const quickSave=()=>{if(player)saveGame(false);};
 addEventListener("beforeunload",quickSave);addEventListener("pagehide",quickSave);
 document.addEventListener("visibilitychange",()=>{if(document.hidden)quickSave();});
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch((error) => {
+      console.warn("Service worker registration failed:", error);
+    });
+  });
+}
 </script>
 </body>
 </html>
