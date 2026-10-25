@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "Kitsune FunZone 3D",
+  "short_name": "Kitsune FunZone",
+  "description": "Explore the world of Kitsune FunZone 3D.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#13251d",
+  "theme_color": "#13251d",
+  "icons": [
+    {
+      "src": "./favicon.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}
