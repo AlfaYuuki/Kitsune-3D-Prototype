@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kitsune FunZone — diagnostics</title>
+<style>body{margin:0;padding:14px;background:#0f1d18;color:#d8f0e6;font:13px/1.5 system-ui,Arial,sans-serif}h1{font-size:17px;color:#75dcff;margin:0 0 8px}
+pre{white-space:pre-wrap;word-break:break-word;background:#0a1410;border:1px solid #ffffff30;border-radius:10px;padding:10px;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace}
+button{margin:6px 6px 0 0;padding:10px 14px;border-radius:9px;border:1px solid #75dcff;background:#142a27;color:#fff;font-weight:800;font-size:13px}.ok{color:#7dffb0}.bad{color:#ff7a8a}.w{color:#ffd24a}</style></head><body>
+<h1>🦊 Kitsune FunZone — diagnostics</h1>
+<div>Takes about 40 seconds. Screenshot the whole result and send it to me.</div>
+<pre id="out">Running…</pre>
+<button id="clr">Clear service worker + caches</button><button id="go">Open the game</button>
+<script>
+const out=document.getElementById("out");let lines=[];
+const P=(t,c)=>{lines.push(c?`<span class="${c}">${t}</span>`:t);out.innerHTML=lines.join("\n");};
+const tmo=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error("timeout "+ms/1000+"s")),ms))]);
+document.getElementById("go").onclick=()=>location.href="./";
+document.getElementById("clr").onclick=async()=>{try{for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister();for(const k of await caches.keys())await caches.delete(k);P("Cleared service workers and caches.","ok");}catch(e){P("Clear failed: "+e,"bad");}};
+(async()=>{
+  P("JavaScript: running","ok");
+  P("Browser: "+navigator.userAgent.replace(/^Mozilla\/5.0 /,""));
+  P(`Screen ${innerWidth}x${innerHeight} @${devicePixelRatio}x · memory ${navigator.deviceMemory||"?"} GB · cores ${navigator.hardwareConcurrency||"?"}`);
+  const c=navigator.connection||{};P(`Network: ${navigator.onLine?"online":"OFFLINE"} ${c.effectiveType||""} ${c.saveData?"· DATA SAVER ON":""}`,c.saveData?"w":"");
+  P("Import maps supported: "+(HTMLScriptElement.supports&&HTMLScriptElement.supports("importmap")),(HTMLScriptElement.supports&&HTMLScriptElement.supports("importmap"))?"ok":"bad");
+  try{localStorage.setItem("k","1");localStorage.removeItem("k");P("localStorage: ok","ok");}catch(e){P("localStorage: BLOCKED "+e,"bad");}
+  try{const r=await navigator.serviceWorker.getRegistrations();P(`Service workers registered: ${r.length}`,r.length?"w":"");}catch(e){P("Service workers: n/a");}
+  try{const k=await caches.keys();P(`Cache storages: ${k.length} ${k.join(", ")}`,k.length?"w":"");}catch(e){}
+  // WebGL
+  try{
+    const cv=document.createElement("canvas"),g2=cv.getContext("webgl2"),g1=g2||cv.getContext("webgl");
+    if(!g1)P("WebGL: NOT AVAILABLE (hardware acceleration off or blocked)","bad");
+    else{const d=g1.getExtension("WEBGL_debug_renderer_info");P(`WebGL${g2?"2":"1"}: ok · ${d?g1.getParameter(d.UNMASKED_RENDERER_WEBGL):"renderer hidden"} · max texture ${g1.getParameter(g1.MAX_TEXTURE_SIZE)}`,"ok");}
+  }catch(e){P("WebGL error: "+e,"bad");}
+  // engine hosts: raw fetch then a real module import
+  const urls=["https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","https://unpkg.com/three@0.170.0/build/three.module.js","https://cdnjs.cloudflare.com/ajax/libs/three.js/r170/three.module.min.js"];
+  for(const u of urls){
+    const host=new URL(u).host,t0=performance.now();
+    try{const r=await tmo(fetch(u,{cache:"no-store"}),12000),b=await tmo(r.arrayBuffer(),12000);P(`${host}: HTTP ${r.status} · ${Math.round(b.byteLength/1024)} KB · ${Math.round(performance.now()-t0)} ms`,r.ok?"ok":"bad");}
+    catch(e){P(`${host}: FAILED (${e.message})`,"bad");}
+  }
+  const t1=performance.now();
+  try{const m=await tmo(import(urls[1]),15000);P(`Module import (unpkg): ok · REVISION ${m.REVISION} · ${Math.round(performance.now()-t1)} ms`,"ok");
+    try{const r=new m.WebGLRenderer({antialias:true});P("three.js renderer created: ok","ok");r.dispose();}catch(e){P("three.js renderer FAILED: "+e.message,"bad");}}
+  catch(e){P("Module import (unpkg): FAILED ("+e.message+")","bad");}
+  P("\nDone.","ok");
+})();
+</script></body></html>
