@@ -50,9 +50,58 @@ The v6.7 update opens up four new regions to explore, each with its own scenery,
 
 The regions and their spirit spawn points and chests were checked for on-foot reachability in a headless test environment. The 3D scenery and real-device performance may vary by browser and device.
 
-## 🔜 Next Update — v6.8 **[Soon]**
+## 🔜 v6.8 Roadmap — **[Soon]**
 
-The next update is marked **[Soon]**. More details will be added when the v6.8 plans are ready.
+v6.8 is planned as a five-part update. The following items are roadmap goals and are not yet confirmed as implemented.
+
+### v6.8.1 — 👹 Regional Spirit Bosses
+
+Add one powerful guardian boss to each of the four new regions.
+
+- 🎋 **Bamboo Hollow — Bamboo Guardian**
+- 🍁 **Maple Ridge — Crimson Kitsune**
+- 🌫️ **Mistwater Marsh — Mist Wraith**
+- ❄️ **Frostpeak Pass — Frost Oni**
+
+Each boss is planned to have unique attacks, a health bar, an arena, and a special reward.
+
+### v6.8.2 — 💎 New Equipment & Loot
+
+Make exploration more rewarding.
+
+- Region-exclusive weapons and accessories.
+- Rare crystals dropped by stronger spirits.
+- Special rewards for defeating regional bosses.
+- A collection screen for discovered treasures.
+- Preserve existing items and saved progress.
+
+### v6.8.3 — ⚔️ Combat Overhaul
+
+Make battles more strategic rather than simply increasing enemy HP.
+
+- Different spirit attack patterns.
+- Clear attack warnings and dodge timing.
+- Better hit effects and damage feedback.
+- Improved boss health bars and victory screens.
+
+### v6.8.4 — 🏯 A New Hub Area
+
+Add a small **Kitsune Village** connecting the valley and newly discovered regions.
+
+- A shrine and quest-giver NPCs.
+- A shop and rest area.
+- Region signposts and fast-travel access.
+- A few short exploration quests.
+
+### v6.8.5 — 📱 Android Performance Upgrade
+
+Focus on smoother gameplay without sacrificing the new world's atmosphere.
+
+- Reduce unnecessary object rendering.
+- Use distance-based detail and effects.
+- Improve mobile touch controls and camera behavior.
+- Prevent excessive enemy and particle updates.
+- Add graphics settings: **Low, Medium, and High**.
 
 ## 🎮 How to Play
 
@@ -123,7 +172,7 @@ The game is published through GitHub Pages from the repository's configured Page
 
 ## 🗺️ Project Status
 
-Kitsune FunZone 3D is a work in progress. **v6.7 — Expand the World** is the current release, and **v6.8 — [Soon]** is the next update announcement.
+Kitsune FunZone 3D is a work in progress. **v6.7 — Expand the World** is the current release. **v6.8 — [Soon]** is planned around regional bosses, new loot, combat improvements, Kitsune Village, and Android performance.
 
 ## 👤 Author
 
