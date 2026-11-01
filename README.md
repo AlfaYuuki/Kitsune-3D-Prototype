@@ -6,7 +6,7 @@ Explore a fantasy world, take on quests, grow stronger, meet fox companions, and
 
 🌐 **Play now:** https://alfayuuki.github.io/Kitsune-3D-Prototype/
 
-> **Current version:** v6.2  
+> **Current version:** v6.6  
 > This is an evolving prototype. Features, balance, and performance may change as development continues.
 
 ## ✨ Features
