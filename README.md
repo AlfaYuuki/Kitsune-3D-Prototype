@@ -7,6 +7,7 @@ Explore a fantasy world, take on quests, grow stronger, meet fox companions, and
 🌐 **Play now:** https://alfayuuki.github.io/Kitsune-3D-Prototype/
 
 > **Current version:** v6.6  
+> **Next planned update:** v6.7 — World Expansion  
 > This is an evolving prototype. Features, balance, and performance may change as development continues.
 
 ## ✨ Features
@@ -22,6 +23,18 @@ Explore a fantasy world, take on quests, grow stronger, meet fox companions, and
 - **Save support** for keeping game progress where supported by the browser.
 - **Desktop and mobile controls**, including an on-screen joystick and action buttons.
 - **Performance and troubleshooting tools** to help diagnose loading issues.
+
+## 🗺️ Upcoming — v6.7: World Expansion
+
+The next planned milestone is **World Expansion**: growing the world of Kitsune FunZone 3D and creating more room to explore.
+
+Potential areas of focus include:
+- Expanding the explorable world with additional areas.
+- Adding new landmarks and points of interest.
+- Improving the sense of discovery and navigation between locations.
+- Keeping performance and usability in mind as the world grows.
+
+*These are roadmap ideas, not a guarantee that every item will appear in v6.7. Details may change during development.*
 
 ## 🎮 How to Play
 
@@ -92,7 +105,7 @@ The game is published through GitHub Pages from the repository's configured Page
 
 ## 🗺️ Project Status
 
-Kitsune FunZone 3D is a work in progress. Expect iteration, fixes, and new ideas as the prototype develops.
+Kitsune FunZone 3D is a work in progress. The current version is **v6.6**, with **v6.7 — World Expansion** planned as the next milestone. Expect iteration, fixes, and new ideas as the prototype develops.
 
 ## 👤 Author
 
