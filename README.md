@@ -103,6 +103,68 @@ Focus on smoother gameplay without sacrificing the new world's atmosphere.
 - Prevent excessive enemy and particle updates.
 - Add graphics settings: **Low, Medium, and High**.
 
+## ☑️ v6.8 Development Checklist
+
+Use this checklist to track implementation and testing. Items should only be checked off once they are completed and verified.
+
+### v6.8.1 — 👹 Regional Spirit Bosses
+
+- [ ] 🎋 Bamboo Hollow — Bamboo Guardian
+- [ ] 🍁 Maple Ridge — Crimson Kitsune
+- [ ] 🌫️ Mistwater Marsh — Mist Wraith
+- [ ] ❄️ Frostpeak Pass — Frost Oni
+- [ ] Unique attacks for every boss
+- [ ] Boss health bars and arenas
+- [ ] Special boss rewards
+
+### v6.8.2 — 💎 New Equipment & Loot
+
+- [ ] Region-exclusive weapons
+- [ ] Region-exclusive accessories
+- [ ] Rare crystal drops from stronger spirits
+- [ ] Special regional boss rewards
+- [ ] Treasure collection screen
+- [ ] Verify existing items and saved progress remain intact
+
+### v6.8.3 — ⚔️ Combat Overhaul
+
+- [ ] Different spirit attack patterns
+- [ ] Clear attack warnings
+- [ ] Improve dodge timing and feedback
+- [ ] Improve hit effects and damage feedback
+- [ ] Improve boss health bars
+- [ ] Add victory screens
+
+### v6.8.4 — 🏯 Kitsune Village
+
+- [ ] Create the village hub and connect it to the valley and new regions
+- [ ] Add a shrine and quest-giver NPCs
+- [ ] Add a shop and rest area
+- [ ] Add region signposts and fast travel
+- [ ] Create short exploration quests
+
+### v6.8.5 — 📱 Android Performance Upgrade
+
+- [ ] Reduce unnecessary object rendering
+- [ ] Add distance-based detail and effects
+- [ ] Improve mobile touch controls
+- [ ] Improve mobile camera behavior
+- [ ] Optimize enemy and particle updates
+- [ ] Add Low graphics setting
+- [ ] Add Medium graphics setting
+- [ ] Add High graphics setting
+- [ ] Test FPS, memory use, and stability on Android
+
+### Final Testing & Release
+
+- [ ] Test all four bosses and their rewards
+- [ ] Test loot and collection tracking
+- [ ] Verify existing saves and quests
+- [ ] Test village routes and fast travel
+- [ ] Test desktop and mobile controls
+- [ ] Check for bugs and performance regressions
+- [ ] Prepare and publish the v6.8 release
+
 ## 🎮 How to Play
 
 Open the [live game](https://alfayuuki.github.io/Kitsune-3D-Prototype/) in a modern browser and wait for the world to load.
