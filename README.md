@@ -6,8 +6,8 @@ Explore a fantasy world, take on quests, grow stronger, meet fox companions, and
 
 🌐 **Play now:** https://alfayuuki.github.io/Kitsune-3D-Prototype/
 
-> **Current version:** v6.7 — Expand the World  
-> **Next update:** v6.8 — **[Soon]**  
+> **Current release:** v6.8.5 — Android Performance Upgrade  
+> **v6.8.1–v6.8.4:** Roadmap items in progress / planned  
 > This is an evolving prototype. Features, balance, and performance may change as development continues.
 
 ## ✨ Features
@@ -50,9 +50,9 @@ The v6.7 update opens up four new regions to explore, each with its own scenery,
 
 The regions and their spirit spawn points and chests were checked for on-foot reachability in a headless test environment. The 3D scenery and real-device performance may vary by browser and device.
 
-## 🔜 v6.8 Roadmap — **[Soon]**
+## 🔜 v6.8 Roadmap
 
-v6.8 is planned as a five-part update. The following items are roadmap goals and are not yet confirmed as implemented.
+The v6.8 roadmap is divided into five parts. **v6.8.5 — Android Performance Upgrade has been completed and released.** The other sections remain planned until their implementation and release are confirmed.
 
 ### v6.8.1 — 👹 Regional Spirit Bosses
 
@@ -93,9 +93,9 @@ Add a small **Kitsune Village** connecting the valley and newly discovered regio
 - Region signposts and fast-travel access.
 - A few short exploration quests.
 
-### v6.8.5 — 📱 Android Performance Upgrade
+### v6.8.5 — 📱 Android Performance Upgrade <badge>Released</badge>
 
-Focus on smoother gameplay without sacrificing the new world's atmosphere.
+<text>Completed and released.</text> This update focuses on smoother gameplay without sacrificing the new world's atmosphere.
 
 - Reduce unnecessary object rendering.
 - Use distance-based detail and effects.
@@ -143,17 +143,17 @@ Use this checklist to track implementation and testing. Items should only be che
 - [ ] Add region signposts and fast travel
 - [ ] Create short exploration quests
 
-### v6.8.5 — 📱 Android Performance Upgrade
+### v6.8.5 — 📱 Android Performance Upgrade <badge>Released</badge>
 
-- [ ] Reduce unnecessary object rendering
-- [ ] Add distance-based detail and effects
-- [ ] Improve mobile touch controls
-- [ ] Improve mobile camera behavior
-- [ ] Optimize enemy and particle updates
-- [ ] Add Low graphics setting
-- [ ] Add Medium graphics setting
-- [ ] Add High graphics setting
-- [ ] Test FPS, memory use, and stability on Android
+- [x] Reduce unnecessary object rendering
+- [x] Add distance-based detail and effects
+- [x] Improve mobile touch controls
+- [x] Improve mobile camera behavior
+- [x] Optimize enemy and particle updates
+- [x] Add Low graphics setting
+- [x] Add Medium graphics setting
+- [x] Add High graphics setting
+- [x] Test FPS, memory use, and stability on Android
 
 ### Final Testing & Release
 
@@ -234,7 +234,7 @@ The game is published through GitHub Pages from the repository's configured Page
 
 ## 🗺️ Project Status
 
-Kitsune FunZone 3D is a work in progress. **v6.7 — Expand the World** is the current release. **v6.8 — [Soon]** is planned around regional bosses, new loot, combat improvements, Kitsune Village, and Android performance.
+Kitsune FunZone 3D is a work in progress. **v6.8.5 — Android Performance Upgrade** has been completed and released. The remaining v6.8 roadmap items are regional bosses, new loot, combat improvements, and Kitsune Village.
 
 ## 👤 Author
 
