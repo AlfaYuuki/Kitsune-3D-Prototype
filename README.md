@@ -6,24 +6,26 @@ Explore a fantasy world, take on quests, grow stronger, meet fox companions, and
 
 🌐 **Play now:** https://alfayuuki.github.io/Kitsune-3D-Prototype/
 
-> **Current release:** v6.8.5 — Android Performance Upgrade  
-> **v6.8.1–v6.8.4:** Roadmap items in progress / planned  
+> **Current release:** v6.8 — Spirits Awakening  
+> **Status:** Released — all five v6.8 milestones completed  
 > This is an evolving prototype. Features, balance, and performance may change as development continues.
 
 ## ✨ Features
 
 - **3D world exploration** with a third-person camera.
 - **Expanded world** with four new regions beyond the original map edges.
+- **Regional guardian bosses** with unique encounters and rewards.
 - **Character progression** with levels, health, and experience points.
 - **Quests and a journal** to follow objectives and keep track of your adventure.
 - **Combat and encounters** with enemies and boss-style challenges.
+- **Equipment, loot, and treasure collection** to reward exploration.
 - **Inventory and shop** interfaces for managing items and progression.
 - **Fox companions** to bring along on your journey.
 - **Special domains** with unique abilities and interactions.
 - **Day and time display** to add atmosphere to the world.
 - **Save support** for keeping game progress where supported by the browser.
 - **Desktop and mobile controls**, including an on-screen joystick and action buttons.
-- **Performance and troubleshooting tools** to help diagnose loading issues.
+- **Android graphics settings and performance optimizations**.
 
 ## 🗺️ v6.7 — Expand the World
 
@@ -50,120 +52,118 @@ The v6.7 update opens up four new regions to explore, each with its own scenery,
 
 The regions and their spirit spawn points and chests were checked for on-foot reachability in a headless test environment. The 3D scenery and real-device performance may vary by browser and device.
 
-## 🔜 v6.8 Roadmap
+## 🌟 v6.8 — Spirits Awakening
 
-The v6.8 roadmap is divided into five parts. **v6.8.5 — Android Performance Upgrade has been completed and released.** The other sections remain planned until their implementation and release are confirmed.
+<badge color="success">Completed and released</badge>
+
+v6.8 delivers five milestones, expanding combat, progression, exploration, and mobile performance.
 
 ### v6.8.1 — 👹 Regional Spirit Bosses
 
-Add one powerful guardian boss to each of the four new regions.
+Added one powerful guardian boss to each of the four new regions.
 
 - 🎋 **Bamboo Hollow — Bamboo Guardian**
 - 🍁 **Maple Ridge — Crimson Kitsune**
 - 🌫️ **Mistwater Marsh — Mist Wraith**
 - ❄️ **Frostpeak Pass — Frost Oni**
 
-Each boss is planned to have unique attacks, a health bar, an arena, and a special reward.
+Each boss features unique attacks, a health bar, an arena, and a special reward.
 
 ### v6.8.2 — 💎 New Equipment & Loot
-
-Make exploration more rewarding.
 
 - Region-exclusive weapons and accessories.
 - Rare crystals dropped by stronger spirits.
 - Special rewards for defeating regional bosses.
 - A collection screen for discovered treasures.
-- Preserve existing items and saved progress.
+- Existing items and saved progress preserved.
 
 ### v6.8.3 — ⚔️ Combat Overhaul
-
-Make battles more strategic rather than simply increasing enemy HP.
 
 - Different spirit attack patterns.
 - Clear attack warnings and dodge timing.
 - Better hit effects and damage feedback.
 - Improved boss health bars and victory screens.
 
-### v6.8.4 — 🏯 A New Hub Area
+### v6.8.4 — 🏯 Kitsune Village
 
-Add a small **Kitsune Village** connecting the valley and newly discovered regions.
+Added a small **Kitsune Village** connecting the valley and newly discovered regions.
 
 - A shrine and quest-giver NPCs.
 - A shop and rest area.
 - Region signposts and fast-travel access.
-- A few short exploration quests.
+- Short exploration quests.
 
-### v6.8.5 — 📱 Android Performance Upgrade <badge>Released</badge>
+### v6.8.5 — 📱 Android Performance Upgrade
 
-<text>Completed and released.</text> This update focuses on smoother gameplay without sacrificing the new world's atmosphere.
+Focused on smoother gameplay without sacrificing the new world's atmosphere.
 
-- Reduce unnecessary object rendering.
-- Use distance-based detail and effects.
-- Improve mobile touch controls and camera behavior.
-- Prevent excessive enemy and particle updates.
-- Add graphics settings: **Low, Medium, and High**.
+- Reduced unnecessary object rendering.
+- Added distance-based detail and effects.
+- Improved mobile touch controls and camera behavior.
+- Optimized enemy and particle updates.
+- Added graphics settings: **Low, Medium, and High**.
 
-## ☑️ v6.8 Development Checklist
+## ☑️ v6.8 Completion Checklist
 
-Use this checklist to track implementation and testing. Items should only be checked off once they are completed and verified.
+All v6.8 roadmap milestones and release checks are marked complete.
 
 ### v6.8.1 — 👹 Regional Spirit Bosses
 
-- [ ] 🎋 Bamboo Hollow — Bamboo Guardian
-- [ ] 🍁 Maple Ridge — Crimson Kitsune
-- [ ] 🌫️ Mistwater Marsh — Mist Wraith
-- [ ] ❄️ Frostpeak Pass — Frost Oni
-- [ ] Unique attacks for every boss
-- [ ] Boss health bars and arenas
-- [ ] Special boss rewards
+- [x] 🎋 Bamboo Hollow — Bamboo Guardian
+- [x] 🍁 Maple Ridge — Crimson Kitsune
+- [x] 🌫️ Mistwater Marsh — Mist Wraith
+- [x] ❄️ Frostpeak Pass — Frost Oni
+- [x] Unique attacks for every boss
+- [x] Boss health bars and arenas
+- [x] Special boss rewards
 
 ### v6.8.2 — 💎 New Equipment & Loot
 
-- [ ] Region-exclusive weapons
-- [ ] Region-exclusive accessories
-- [ ] Rare crystal drops from stronger spirits
-- [ ] Special regional boss rewards
-- [ ] Treasure collection screen
-- [ ] Verify existing items and saved progress remain intact
+- [x] Region-exclusive weapons
+- [x] Region-exclusive accessories
+- [x] Rare crystal drops from stronger spirits
+- [x] Special regional boss rewards
+- [x] Treasure collection screen
+- [x] Existing items and saved progress preserved
 
 ### v6.8.3 — ⚔️ Combat Overhaul
 
-- [ ] Different spirit attack patterns
-- [ ] Clear attack warnings
-- [ ] Improve dodge timing and feedback
-- [ ] Improve hit effects and damage feedback
-- [ ] Improve boss health bars
-- [ ] Add victory screens
+- [x] Different spirit attack patterns
+- [x] Clear attack warnings
+- [x] Improved dodge timing and feedback
+- [x] Improved hit effects and damage feedback
+- [x] Improved boss health bars
+- [x] Victory screens
 
 ### v6.8.4 — 🏯 Kitsune Village
 
-- [ ] Create the village hub and connect it to the valley and new regions
-- [ ] Add a shrine and quest-giver NPCs
-- [ ] Add a shop and rest area
-- [ ] Add region signposts and fast travel
-- [ ] Create short exploration quests
+- [x] Village hub connected to the valley and new regions
+- [x] Shrine and quest-giver NPCs
+- [x] Shop and rest area
+- [x] Region signposts and fast travel
+- [x] Short exploration quests
 
-### v6.8.5 — 📱 Android Performance Upgrade <badge>Released</badge>
+### v6.8.5 — 📱 Android Performance Upgrade
 
-- [x] Reduce unnecessary object rendering
-- [x] Add distance-based detail and effects
-- [x] Improve mobile touch controls
-- [x] Improve mobile camera behavior
-- [x] Optimize enemy and particle updates
-- [x] Add Low graphics setting
-- [x] Add Medium graphics setting
-- [x] Add High graphics setting
-- [x] Test FPS, memory use, and stability on Android
+- [x] Reduced unnecessary object rendering
+- [x] Distance-based detail and effects
+- [x] Improved mobile touch controls
+- [x] Improved mobile camera behavior
+- [x] Optimized enemy and particle updates
+- [x] Low graphics setting
+- [x] Medium graphics setting
+- [x] High graphics setting
+- [x] Android performance testing
 
 ### Final Testing & Release
 
-- [ ] Test all four bosses and their rewards
-- [ ] Test loot and collection tracking
-- [ ] Verify existing saves and quests
-- [ ] Test village routes and fast travel
-- [ ] Test desktop and mobile controls
-- [ ] Check for bugs and performance regressions
-- [ ] Prepare and publish the v6.8 release
+- [x] Tested all four bosses and their rewards
+- [x] Tested loot and collection tracking
+- [x] Verified existing saves and quests
+- [x] Tested village routes and fast travel
+- [x] Tested desktop and mobile controls
+- [x] Checked for bugs and performance regressions
+- [x] Completed and published the v6.8 release
 
 ## 🎮 How to Play
 
@@ -234,7 +234,7 @@ The game is published through GitHub Pages from the repository's configured Page
 
 ## 🗺️ Project Status
 
-Kitsune FunZone 3D is a work in progress. **v6.8.5 — Android Performance Upgrade** has been completed and released. The remaining v6.8 roadmap items are regional bosses, new loot, combat improvements, and Kitsune Village.
+**v6.8 — Spirits Awakening** is complete and released. All five milestones — Regional Spirit Bosses, New Equipment & Loot, Combat Overhaul, Kitsune Village, and Android Performance Upgrade — are completed.
 
 ## 👤 Author
 
