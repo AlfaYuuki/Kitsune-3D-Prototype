@@ -48,6 +48,40 @@ Each region has its own environment, spirits, treasures, and exploration rewards
 4. **Kitsune Village** — A new hub with NPCs, a shop, a rest area, signposts, and exploration quests.
 5. **Android Performance** — Rendering optimizations, improved touch controls, and Low / Medium / High graphics settings.
 
+## 🔮 Upcoming Update — v6.9: Echoes of the Forgotten
+
+*A new mystery awakens beyond the known regions.*
+
+### v6.9.1 — Forgotten Shrine
+- A hidden location outside the existing map.
+- Ancient puzzles and secret chambers.
+- Environmental storytelling.
+- A mysterious shrine guardian.
+
+### v6.9.2 — Companion Evolution
+- Companion levels and experience.
+- New companion abilities.
+- Companion interactions.
+- Expanded companion collection.
+
+### v6.9.3 — Crafting & Equipment Upgrade
+- Weapon upgrading.
+- Crystal-based crafting.
+- Equipment rarity.
+- New crafting interface.
+
+### v6.9.4 — Village Life Expansion
+- More NPCs and dialogue.
+- Daily and repeatable quests.
+- Village activities.
+- More reasons to revisit Kitsune Village.
+
+### v6.9.5 — The Forgotten Guardian
+- A major secret boss encounter.
+- Multi-stage battle.
+- Unique rewards.
+- A hidden story reveal.
+
 ## 🎮 Controls
 
 ### Desktop
@@ -86,9 +120,10 @@ Open `index.html` in a modern browser. An internet connection is required for Th
 
 ## 📌 Project Status
 
-- **Current version:** v6.8 — Spirits Awakening
+- **Current release:** v6.8 — Spirits Awakening
 - **v6.7 World Expansion:** Complete
 - **v6.8:** Complete
+- **v6.9:** Planned — Echoes of the Forgotten
 - **Development:** Ongoing
 
 ---
