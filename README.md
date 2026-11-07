@@ -6,7 +6,7 @@ A browser-based 3D RPG adventure by **Alfa Yuuki**, built with JavaScript and Th
 
 [🎮 **Play the game**](https://alfayuuki.github.io/Kitsune-3D-Prototype/) · [GitHub Repository](https://github.com/AlfaYuuki/Kitsune-3D-Prototype)
 
-![Version](https://img.shields.io/badge/version-6.8-blue) ![Status](https://img.shields.io/badge/status-released-brightgreen) ![Platform](https://img.shields.io/badge/platform-browser%20%7C%20mobile-orange)
+![Version](https://img.shields.io/badge/version-6.9-blue) ![Status](https://img.shields.io/badge/status-released-brightgreen) ![Platform](https://img.shields.io/badge/platform-browser%20%7C%20mobile-orange)
 
 ---
 
@@ -50,31 +50,33 @@ Each region has its own environment, spirits, treasures, and exploration rewards
 
 ## 🔮 v6.9 — Echoes of the Forgotten
 
+<sub>✅ Complete — all five milestones finished.</sub>
+
 *A new mystery awakens beyond the known regions.*
 
 ### v6.9.1 — Forgotten Shrine
-<sub>Planned</sub>
+<sub>✅ Complete</sub>
 - A hidden location outside the existing map.
 - Ancient puzzles and secret chambers.
 - Environmental storytelling.
 - A mysterious shrine guardian.
 
 ### v6.9.2 — Companion Evolution
-<sub>Planned</sub>
+<sub>✅ Complete</sub>
 - Companion levels and experience.
 - New companion abilities.
 - Companion interactions.
 - Expanded companion collection.
 
 ### v6.9.3 — Crafting & Equipment Upgrade
-<sub>Planned</sub>
+<sub>✅ Complete</sub>
 - Weapon upgrading.
 - Crystal-based crafting.
 - Equipment rarity.
 - New crafting interface.
 
 ### v6.9.4 — Village Life Expansion
-<sub>Planned</sub>
+<sub>✅ Complete</sub>
 - More NPCs and dialogue.
 - Daily and repeatable quests.
 - Village activities.
@@ -86,6 +88,12 @@ Each region has its own environment, spirits, treasures, and exploration rewards
 - Multi-stage battle.
 - Unique rewards.
 - A hidden story reveal.
+
+## 🚀 v7.0 — Major Update
+
+<sub>🔄 Planning</sub>
+
+The next major evolution of Kitsune FunZone 3D is in planning. Details and milestones will be announced as development plans take shape.
 
 ## 🎮 Controls
 
@@ -125,11 +133,11 @@ Open `index.html` in a modern browser. An internet connection is required for Th
 
 ## 📌 Project Status
 
-- **Current release:** v6.8 — Spirits Awakening
+- **Current completed release:** v6.9 — Echoes of the Forgotten
 - **v6.7 World Expansion:** Complete
-- **v6.8:** Complete
-- **v6.9.5 — The Forgotten Guardian:** Complete
-- **Remaining v6.9 milestones:** 4 planned
+- **v6.8 — Spirits Awakening:** Complete
+- **v6.9 — Echoes of the Forgotten:** Complete
+- **v7.0 — Major Update:** Planning
 - **Development:** Ongoing
 
 ---
