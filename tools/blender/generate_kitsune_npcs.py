@@ -119,7 +119,7 @@ def build(kind):
             obj.select_set(False)
     bpy.ops.object.select_all(action="SELECT")
     bpy.context.scene.unit_settings.system = "METRIC"
-    bpy.context.scene.render.engine = "BLENDER_EEVEE_NEXT"
+    bpy.context.scene.render.engine = "BLENDER_EEVEE_NEXT" if bpy.app.version >= (4, 2, 0) else "BLENDER_EEVEE"
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, kind + ".blend"))
     bpy.ops.export_scene.gltf(filepath=os.path.join(OUT, kind + ".glb"),
                               export_format="GLB", export_apply=True,
