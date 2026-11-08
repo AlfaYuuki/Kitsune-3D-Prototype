@@ -3022,7 +3022,8 @@ function makeStoryWorld(){
     const mk=new THREE.Sprite(new THREE.SpriteMaterial({map:markTexQ,transparent:true,depthTest:false,depthWrite:false}));
     mk.scale.set(.75,.75,1);mk.position.set(n.x,2.95,n.z);mk.visible=false;mk.renderOrder=20;scene.add(mk);
     const hl=ownHalo(n.x,1.2,n.z,id==="hinata"?0xffb0c8:id==="genzo"?0xffe0a0:0xc8b0ff,3.2);
-    npcObjs[id]={g,head,mk,hl,yaw:n.yaw,ph:Math.random()*6};\n    loadNpcCharacterAsset(id,g);
+    npcObjs[id]={g,head,mk,hl,yaw:n.yaw,ph:Math.random()*6};
+    loadNpcCharacterAsset(id,g);
   }
   const stone=mat(0x7d8596,.9,{flatShading:true}),slab=mat(0x6b7186,.9,{flatShading:true});
   const runeMat=new THREE.MeshBasicMaterial({map:runeTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,color:0xffffff});
