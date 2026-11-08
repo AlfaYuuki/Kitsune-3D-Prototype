@@ -400,6 +400,34 @@ function addHalo(x,y,z,hex,size){
 }
 
 /* Painted ground: soft patches of green and teal instead of one flat colour */
+/* Small procedural surface maps: add believable material detail without downloading
+   large assets or increasing draw calls. Keep the noise subtle so the world stays stylized. */
+function makeSurfaceTexture(kind){
+  const c=document.createElement("canvas");c.width=c.height=256;
+  const x=c.getContext("2d"),im=x.createImageData(256,256),d=im.data;
+  const r=srand(kind==="ground"?9107:4821);
+  for(let y=0;y<256;y++)for(let xx=0;xx<256;xx++){
+    const i=(y*256+xx)*4,n=r();
+    let v=kind==="ground"?226+Math.floor(n*27):142+Math.floor(n*48);
+    const grain=(Math.sin(xx*.17+Math.sin(y*.09)*2)+Math.sin(y*.23-xx*.04))*.5;
+    v=Math.max(0,Math.min(255,v+grain*(kind==="ground"?7:13)));
+    if(kind==="ground"&&n>.965){d[i]=v-22;d[i+1]=v-8;d[i+2]=v-26;}
+    else if(kind==="path"){d[i]=v+5;d[i+1]=v+3;d[i+2]=v;}
+    else{d[i]=v;d[i+1]=v;d[i+2]=v;}
+    d[i+3]=255;
+  }
+  x.putImageData(im,0,0);
+  // Fine, irregular streaks break up the otherwise perfectly smooth surface.
+  for(let k=0;k<180;k++){
+    const px=r()*256,py=r()*256;
+    x.strokeStyle=kind==="ground"?"rgba(65,100,45,.13)":"rgba(40,35,30,.18)";
+    x.lineWidth=.4+r()*1.2;x.beginPath();x.moveTo(px,py);x.lineTo(px+(r()-.5)*8,py+1+r()*7);x.stroke();
+  }
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  t.repeat.set(kind==="ground"?22:1,kind==="ground"?24:18);
+  t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+  return t;
+}
 function makeGround(){
   const geo=new THREE.PlaneGeometry(220,240,110,120),p=geo.attributes.position,cols=new Float32Array(p.count*3);
   const a=new THREE.Color(0x2c6a33),b=new THREE.Color(0x5aa545),c3=new THREE.Color(0x24685c),tmp=new THREE.Color();
@@ -411,9 +439,11 @@ function makeGround(){
     cols[i*3]=tmp.r;cols[i*3+1]=tmp.g;cols[i*3+2]=tmp.b;
   }
   geo.setAttribute("color",new THREE.BufferAttribute(cols,3));
-  const g=new THREE.Mesh(geo,mat(0xffffff,.95,{vertexColors:true}));
+  const groundMap=makeSurfaceTexture("ground");
+  const g=new THREE.Mesh(geo,mat(0xffffff,.98,{vertexColors:true,map:groundMap}));
   g.position.set(0,-.12,-28);g.rotation.x=-Math.PI/2;g.receiveShadow=true;scene.add(g);
-  const path=addMesh(new THREE.PlaneGeometry(8,150),mat(0x4f5469,.95),scene,0,-.09,-35);path.rotation.x=-Math.PI/2;
+  const pathMap=makeSurfaceTexture("path");
+  const path=addMesh(new THREE.PlaneGeometry(8,150),mat(0x716b62,.99,{map:pathMap}),scene,0,-.09,-35);path.rotation.x=-Math.PI/2;
 }
 
 /* Blossom trees: one InstancedMesh each for trunks, limbs and flower clusters (pink, white and violet) */
