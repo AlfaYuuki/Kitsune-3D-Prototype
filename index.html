@@ -242,6 +242,8 @@ const dbg=m=>{try{if(window.__dbg)window.__dbg(m);}catch(e){}};
 dbg("game script running");
 function fatal(msg){$("loading").style.display="grid";$("loadText").textContent=msg;}
 let THREE,engineFromBackup=false;
+// Mobile-first quality profile: preserve the anime look without desktop-only rendering costs.
+const KITSUNE_QUALITY={mobileFirst:true,pixelRatio:1,antialias:false,shadowMapSize:512,maxAnisotropy:2,riverSegments:128};
 /* Try the main CDN first, then backups (some networks block one of them). v5.9.1: each source gets a time limit, so a CDN that
    neither answers nor fails can no longer leave the loading screen frozen forever. */
 const ENGINE_SOURCES=["three","https://unpkg.com/three@0.170.0/build/three.module.js","https://cdnjs.cloudflare.com/ajax/libs/three.js/r170/three.module.min.js","https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js"];
@@ -425,7 +427,7 @@ function makeSurfaceTexture(kind){
   }
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;
   t.repeat.set(kind==="ground"?22:1,kind==="ground"?24:18);
-  t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+  t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(KITSUNE_QUALITY.maxAnisotropy,renderer.capabilities.getMaxAnisotropy());
   return t;
 }
 function makeGround(){
@@ -1638,7 +1640,7 @@ function createRealWaterMaterial(){
       vec4 waterWorld=modelMatrix*vec4(transformed,1.0);
       vWaterWorldPos=waterWorld.xyz;
       vWaterWorldNormal=normalize(mat3(modelMatrix)*normal);`);
-    shader.fragmentShader=shader.fragmentShader.replace("#include <common>","#include <common>\nvarying vec3 vWaterWorldPos;\nvarying vec3 vWaterWorldNormal;");
+    shader.fragmentShader=shader.fragmentShader.replace("#include <common>","#include <common>\nvarying vec3 vWaterWorldPos;\nvarying vec3 vWaterWorldNormal;\nuniform float uWaterTime;");
     shader.fragmentShader=shader.fragmentShader.replace("#include <color_fragment>",`#include <color_fragment>
       vec3 waterViewDir=normalize(cameraPosition-vWaterWorldPos);
       float waterFresnel=pow(1.0-max(dot(normalize(vWaterWorldNormal),waterViewDir),0.0),3.2);
@@ -1666,7 +1668,7 @@ function waterTexture(vertical){
 }
 function makeRiver(){
   waterTex=waterTexture(false);
-  const N=220,x0=-110,x1=110,pos=[],uv=[],idx=[];
+  const N=KITSUNE_QUALITY.riverSegments,x0=-110,x1=110,pos=[],uv=[],idx=[];
   for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N,z=riverZ(x);for(const sd of [-1,1]){pos.push(x,0,z+sd*2.75);uv.push(x*.11,sd>0?1:0);}}
   for(let i=0;i<N;i++){const a=i*2;idx.push(a,a+1,a+2,a+1,a+3,a+2);}
   const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
@@ -2975,6 +2977,43 @@ function buildNpcModel(id){
   }
   return {g,head};
 }
+/* Blender / glTF character pipeline
+   Export each Blender character as a GLB with applied transforms, +Y up, and
+   the character standing on the ground at its origin. Add exported paths here.
+   Empty entries intentionally keep the existing procedural character models.
+*/
+const CHARACTER_ASSET_MANIFEST={
+  // hinata:"./assets/characters/npcs/hinata.glb",
+  // genzo:"./assets/characters/npcs/genzo.glb",
+  // sora:"./assets/characters/npcs/sora.glb"
+};
+let gltfLoaderPromise=null;
+async function loadNpcCharacterAsset(id,target){
+  const url=CHARACTER_ASSET_MANIFEST[id];
+  if(!url||!target)return false;
+  try{
+    if(!gltfLoaderPromise)gltfLoaderPromise=import("three/addons/loaders/GLTFLoader.js").then(m=>new m.GLTFLoader());
+    const loader=await gltfLoaderPromise,gltf=await loader.loadAsync(url),root=gltf.scene;
+    root.updateMatrixWorld(true);
+    const bounds=new THREE.Box3().setFromObject(root),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
+    if(!Number.isFinite(size.y)||size.y<.01)throw new Error("GLB has no usable character height");
+    root.scale.setScalar(2.9/size.y);root.updateMatrixWorld(true);
+    const fitted=new THREE.Box3().setFromObject(root),mid=fitted.getCenter(new THREE.Vector3());
+    root.position.x-=mid.x;root.position.z-=mid.z;root.position.y-=fitted.min.y;
+    root.traverse(o=>{
+      if(!o.isMesh)return;
+      o.castShadow=true;o.receiveShadow=true;
+      const materials=Array.isArray(o.material)?o.material:[o.material];
+      materials.forEach(m=>{if(m&&"roughness" in m){m.roughness=Math.max(.42,m.roughness??.7);m.metalness=Math.min(.18,m.metalness??0);m.needsUpdate=true;}});
+    });
+    // Keep the procedural NPC as a safe fallback until the GLB has loaded successfully.
+    target.children.forEach(child=>{child.visible=false;});
+    target.add(root);
+    target.userData.externalCharacterAsset=true;
+    return true;
+  }catch(err){console.warn("Kitsune NPC asset unavailable; keeping procedural model:",id,err);return false;}
+}
+
 function makeStoryWorld(){
   markTexQ=markTexture("!","#ffd24a");markTexA=markTexture("?","#ffe9a6");runeTex=runeTexture();
   for(const id in NPCS){
@@ -2983,7 +3022,7 @@ function makeStoryWorld(){
     const mk=new THREE.Sprite(new THREE.SpriteMaterial({map:markTexQ,transparent:true,depthTest:false,depthWrite:false}));
     mk.scale.set(.75,.75,1);mk.position.set(n.x,2.95,n.z);mk.visible=false;mk.renderOrder=20;scene.add(mk);
     const hl=ownHalo(n.x,1.2,n.z,id==="hinata"?0xffb0c8:id==="genzo"?0xffe0a0:0xc8b0ff,3.2);
-    npcObjs[id]={g,head,mk,hl,yaw:n.yaw,ph:Math.random()*6};
+    npcObjs[id]={g,head,mk,hl,yaw:n.yaw,ph:Math.random()*6};\n    loadNpcCharacterAsset(id,g);
   }
   const stone=mat(0x7d8596,.9,{flatShading:true}),slab=mat(0x6b7186,.9,{flatShading:true});
   const runeMat=new THREE.MeshBasicMaterial({map:runeTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,color:0xffffff});
@@ -3058,11 +3097,11 @@ async function createWorld(){
   scene.fog=new THREE.Fog(0x9bcbd5,48,145);
   camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,250);
   dbg("creating WebGL renderer");
-  renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
+  renderer=new THREE.WebGLRenderer({antialias:KITSUNE_QUALITY.antialias,powerPreference:"low-power"});
   dbg("renderer created");
   renderer.setSize(innerWidth,innerHeight);
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;
+  renderer.setPixelRatio(Math.min(devicePixelRatio,KITSUNE_QUALITY.pixelRatio));
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;sunLight.shadow.mapSize.set(KITSUNE_QUALITY.shadowMapSize,KITSUNE_QUALITY.shadowMapSize);
   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;
   document.body.insertBefore(renderer.domElement,document.body.firstChild);
   hemiLight=new THREE.HemisphereLight(0xdff7ff,0x34482a,1.8);scene.add(hemiLight);
