@@ -99,6 +99,16 @@ button{cursor:pointer;font:inherit}
   #panel .item{padding:7px;margin-top:6px}
   #panel h3{margin:8px 0 0;font-size:13px}
 }
+
+/* Creator portrait lightbox */
+#creatorPortrait:focus-visible{outline:3px solid #75dcff;outline-offset:3px}
+#creditImageViewer{display:none;position:fixed;inset:0;z-index:60;background:#050a0deF;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);align-items:center;justify-content:center;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));touch-action:pan-y}
+#creditImageViewer.open{display:flex}
+#creditImageViewer img{display:block;max-width:min(94vw,900px);max-height:86vh;object-fit:contain;border:1px solid #75dcff99;border-radius:14px;box-shadow:0 0 35px #75dcff35,0 18px 60px #000b;background:#101820}
+#creditImageViewerClose{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px;width:42px;height:42px;border:1px solid #75dcff99;border-radius:50%;background:#142a27;color:#fff;font-size:25px;line-height:1;cursor:pointer}
+#creditImageViewerHint{position:absolute;bottom:max(14px,env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#c8e9f1;font-size:11px;pointer-events:none}
+@media(prefers-reduced-motion:no-preference){#creditImageViewer img{animation:creditZoomIn .18s ease-out}@keyframes creditZoomIn{from{transform:scale(.96);opacity:.6}to{transform:scale(1);opacity:1}}}
+
 </style>
 <script>
 /* Show startup errors on the loading screen instead of hanging silently */
@@ -222,7 +232,7 @@ addEventListener("unhandledrejection",function(e){show(String(e.reason&&e.reason
       <div style="position:relative;overflow:hidden;border:1px solid #75dcff88;border-radius:16px;background:linear-gradient(145deg,#102a2b,#111a2d 62%,#2b1834);padding:12px;box-shadow:0 0 24px #75dcff20">
         <div style="font-size:10px;font-weight:900;letter-spacing:2.2px;color:#75dcff;text-align:center;margin:3px 0 10px">THE MIND BEHIND THE WORLD</div>
         <div style="width:100%;height:min(44vh,380px);min-height:220px;display:grid;place-items:center;overflow:hidden;border-radius:12px;border:1px solid #75dcff77;background:radial-gradient(ellipse,#274b55,#101820 72%);box-shadow:inset 0 0 24px #0008">
-          <img src="Yuuki_Alfa.png" alt="Yuuki Alfa — creator of Kitsune 3D Prototype" style="display:block;width:100%;height:100%;object-fit:contain;object-position:center">
+          <img id="creatorPortrait" src="Yuuki_Alfa.png" alt="Yuuki Alfa — creator of Kitsune 3D Prototype" role="button" tabindex="0" aria-label="Open a larger view of Yuuki Alfa’s portrait" style="display:block;width:100%;height:100%;object-fit:contain;object-position:center;cursor:zoom-in">
         </div>
         <div style="text-align:center;padding:14px 6px 8px">
           <div style="font-size:10px;letter-spacing:2px;font-weight:800;color:#9beeff">PROGRAMMED BY</div>
@@ -10431,5 +10441,27 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
+
+<div id="creditImageViewer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Creator portrait enlarged">
+  <button id="creditImageViewerClose" type="button" aria-label="Close enlarged portrait">×</button>
+  <img src="Yuuki_Alfa.png" alt="Yuuki Alfa — creator of Kitsune 3D Prototype, enlarged view">
+  <div id="creditImageViewerHint">Tap outside the image or press Esc to close</div>
+</div>
+<script>
+(function(){
+  var portrait=document.getElementById("creatorPortrait");
+  var viewer=document.getElementById("creditImageViewer");
+  var close=document.getElementById("creditImageViewerClose");
+  if(!portrait||!viewer||!close)return;
+  function openViewer(){viewer.classList.add("open");viewer.setAttribute("aria-hidden","false");close.focus();}
+  function closeViewer(){viewer.classList.remove("open");viewer.setAttribute("aria-hidden","true");portrait.focus();}
+  portrait.addEventListener("click",openViewer);
+  portrait.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();openViewer();}});
+  close.addEventListener("click",closeViewer);
+  viewer.addEventListener("click",function(e){if(e.target===viewer)closeViewer();});
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"&&viewer.classList.contains("open"))closeViewer();});
+})();
+</script>
+
 </body>
 </html>
