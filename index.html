@@ -208,10 +208,31 @@ addEventListener("unhandledrejection",function(e){show(String(e.reason&&e.reason
   <div id="journalItems" style="display:none"></div>
   <div id="deityItems" style="display:none"></div>
   <div id="settingsItems" style="display:none">
-    <div id="optList"></div>
-    <div id="gfxList"></div>
-    <div class="item"><div><b>💾 Save</b><small>Progress also auto-saves. Tap to save now.</small></div><button class="uiBtn" id="saveBtn">Save game</button></div>
-    <div class="item"><div><b>🗑 Game data</b><small>Erase your saved progress and start over.</small></div><button class="uiBtn danger" id="resetBtn">New game</button></div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin:4px 0 12px">
+      <button class="uiBtn active" id="settingsOptionsTab">⚙️ OPTIONS</button>
+      <button class="uiBtn" id="settingsCreditsTab">✦ CREDITS</button>
+    </div>
+    <div id="settingsOptions">
+      <div id="optList"></div>
+      <div id="gfxList"></div>
+      <div class="item"><div><b>💾 Save</b><small>Progress also auto-saves. Tap to save now.</small></div><button class="uiBtn" id="saveBtn">Save game</button></div>
+      <div class="item"><div><b>🗑 Game data</b><small>Erase your saved progress and start over.</small></div><button class="uiBtn danger" id="resetBtn">New game</button></div>
+    </div>
+    <div id="settingsCredits" style="display:none">
+      <div style="position:relative;overflow:hidden;border:1px solid #75dcff88;border-radius:16px;background:linear-gradient(145deg,#102a2b,#111a2d 62%,#2b1834);padding:12px;box-shadow:0 0 24px #75dcff20">
+        <div style="font-size:10px;font-weight:900;letter-spacing:2.2px;color:#75dcff;text-align:center;margin:3px 0 10px">THE MIND BEHIND THE WORLD</div>
+        <div style="width:100%;height:min(44vh,380px);min-height:220px;display:grid;place-items:center;overflow:hidden;border-radius:12px;border:1px solid #75dcff77;background:radial-gradient(ellipse,#274b55,#101820 72%);box-shadow:inset 0 0 24px #0008">
+          <img src="Yuuki_Alfa.png" alt="Yuuki Alfa — creator of Kitsune 3D Prototype" style="display:block;width:100%;height:100%;object-fit:contain;object-position:center">
+        </div>
+        <div style="text-align:center;padding:14px 6px 8px">
+          <div style="font-size:10px;letter-spacing:2px;font-weight:800;color:#9beeff">PROGRAMMED BY</div>
+          <div style="font-size:clamp(23px,6vw,32px);line-height:1.2;font-weight:950;letter-spacing:.5px;color:#fff;text-shadow:0 0 15px #75dcff88;margin-top:4px">Yuuki Alfa</div>
+          <div style="font-size:11px;color:#c1dce5;margin-top:7px">Kitsune 3D Prototype <span style="color:#75dcff">✦</span> Creator &amp; Developer</div>
+        </div>
+        <div style="height:1px;background:linear-gradient(90deg,transparent,#75dcff99,#ff8de288,transparent);margin:2px 8px 8px"></div>
+        <div style="text-align:center;font-size:10px;color:#9cb9c4;letter-spacing:1px">BUILT WITH CURIOSITY · SHAPED BY IMAGINATION</div>
+      </div>
+    </div>
   </div>
   <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
     <button class="uiBtn" id="drinkBtn">🧪 Use potion</button>
@@ -3455,6 +3476,14 @@ function buyItem(id){
   afterPurchase();
 }
 
+/* Settings sub-tabs: keep the creator showcase inside Settings. */
+function showSettingsSubtab(v){
+  $("settingsOptions").style.display=v==="options"?"block":"none";
+  $("settingsCredits").style.display=v==="credits"?"block":"none";
+  $("settingsOptionsTab").classList.toggle("active",v==="options");
+  $("settingsCreditsTab").classList.toggle("active",v==="credits");
+}
+
 /* ---------- panel ---------- */
 function showPanelView(v){
   panelView=v;
@@ -3469,6 +3498,7 @@ function showPanelView(v){
   $("panelTitle").textContent=v==="shop"?"🛒 Kitsune Shop":v==="quests"?"📜 Quest Journal":v==="domains"?"🌌 Divine Domains":v==="deity"?(DOMAIN_DEFS[deityId].icon+" "+DOMAIN_DEFS[deityId].name):v==="settings"?"⚙️ Settings":v==="companions"?"🦊 Fox Companions":v==="journal"?"📖 Journal":"🎒 Inventory & Equipment";
   $("panelDesc").textContent=v==="shop"?"Spend Spirit Crystals on weapons, armor and potions.":v==="quests"?"Complete objectives, then claim each reward once.":v==="domains"?"Awaken the gods of Life and Creation. Pray at their shrines beside the altar. Game is paused while this is open.":v==="deity"?DOMAIN_DEFS[deityId].title:v==="settings"?"Graphics and game data. Higher graphics need a stronger device.":v==="companions"?"Unlock fox spirits by claiming quests. One follows you and grants a passive bonus.":v==="journal"?"Story quests, daily missions, hidden lore and relics.":"Game is paused while this is open.";
   $("bagTab").classList.toggle("active",v==="bag");$("shopTab").classList.toggle("active",v==="shop");$("questsTab").classList.toggle("active",v==="quests");$("domainsTab").classList.toggle("active",v==="domains");$("settingsTab").classList.toggle("active",v==="settings");$("companionsTab").classList.toggle("active",v==="companions");$("journalTabBtn").classList.toggle("active",v==="journal");
+  if(v==="settings")showSettingsSubtab("options");
   refreshPanel();
 }
 function refreshPanel(){if(panelView==="shop")renderShop();else if(panelView==="quests")renderQuests();else if(panelView==="domains")renderDomains();else if(panelView==="deity")renderDeity();else if(panelView==="settings")renderSettings();else if(panelView==="companions")renderCompanions();else if(panelView==="journal")renderJournal();else updateInventory();}
@@ -3755,7 +3785,7 @@ function bindControls(){
   $("usePotion").addEventListener("pointerdown",e=>{e.preventDefault();usePotion();});
   $("domainA").addEventListener("pointerdown",e=>{e.preventDefault();castAnahita();});
   $("domainD").addEventListener("pointerdown",e=>{e.preventDefault();castDemiurge();});
-  $("companionBtn").onclick=()=>openPanel("companions");$("journalBtn").onclick=()=>openPanel("journal");$("journalTabBtn").onclick=()=>showPanelView("journal");$("companionsTab").onclick=()=>showPanelView("companions");$("settingsBtn").onclick=()=>openPanel("settings");$("settingsTab").onclick=()=>showPanelView("settings");$("domainsBtn").onclick=()=>openPanel("domains");$("domainsTab").onclick=()=>showPanelView("domains");
+  $("companionBtn").onclick=()=>openPanel("companions");$("journalBtn").onclick=()=>openPanel("journal");$("journalTabBtn").onclick=()=>showPanelView("journal");$("companionsTab").onclick=()=>showPanelView("companions");$("settingsBtn").onclick=()=>openPanel("settings");$("settingsTab").onclick=()=>showPanelView("settings");$("settingsOptionsTab").onclick=()=>showSettingsSubtab("options");$("settingsCreditsTab").onclick=()=>showSettingsSubtab("credits");$("domainsBtn").onclick=()=>openPanel("domains");$("domainsTab").onclick=()=>showPanelView("domains");
   $("inventoryBtn").onclick=()=>openPanel("bag");$("shopBtn").onclick=()=>openPanel("shop");$("questsBtn").onclick=()=>openPanel("quests");
   $("bagTab").onclick=()=>showPanelView("bag");$("shopTab").onclick=()=>showPanelView("shop");$("questsTab").onclick=()=>showPanelView("quests");
   $("saveBtn").onclick=()=>saveGame(true);$("closePanel").onclick=closePanel;$("drinkBtn").onclick=usePotion;$("resetBtn").onclick=newGame;
