@@ -101,7 +101,7 @@ button{cursor:pointer;font:inherit}
 }
 
 /* Creator portrait lightbox */
-#creatorPortrait:focus-visible{outline:3px solid #75dcff;outline-offset:3px}
+.creditPortrait:focus-visible{outline:3px solid #75dcff;outline-offset:3px}
 #creditImageViewer{display:none;position:fixed;inset:0;z-index:60;background:#050a0deF;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);align-items:center;justify-content:center;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));touch-action:pan-y}
 #creditImageViewer.open{display:flex}
 #creditImageViewer img{display:block;max-width:min(94vw,900px);max-height:86vh;object-fit:contain;border:1px solid #75dcff99;border-radius:14px;box-shadow:0 0 35px #75dcff35,0 18px 60px #000b;background:#101820}
@@ -230,17 +230,31 @@ addEventListener("unhandledrejection",function(e){show(String(e.reason&&e.reason
     </div>
     <div id="settingsCredits" style="display:none">
       <div style="position:relative;overflow:hidden;border:1px solid #75dcff88;border-radius:16px;background:linear-gradient(145deg,#102a2b,#111a2d 62%,#2b1834);padding:12px;box-shadow:0 0 24px #75dcff20">
-        <div style="font-size:10px;font-weight:900;letter-spacing:2.2px;color:#75dcff;text-align:center;margin:3px 0 10px">THE MIND BEHIND THE WORLD</div>
-        <div style="width:100%;height:min(44vh,380px);min-height:220px;display:grid;place-items:center;overflow:hidden;border-radius:12px;border:1px solid #75dcff77;background:radial-gradient(ellipse,#274b55,#101820 72%);box-shadow:inset 0 0 24px #0008">
-          <img id="creatorPortrait" src="Yuuki_Alfa.png" alt="Yuuki Alfa — creator of Kitsune 3D Prototype" role="button" tabindex="0" aria-label="Open a larger view of Yuuki Alfa’s portrait" style="display:block;width:100%;height:100%;object-fit:contain;object-position:center;cursor:zoom-in">
+        <div style="font-size:10px;font-weight:900;letter-spacing:2.2px;color:#75dcff;text-align:center;margin:3px 0 12px">THE PEOPLE &amp; INSPIRATION BEHIND THE WORLD</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px">
+          <section style="min-width:0;border:1px solid #75dcff55;border-radius:13px;padding:9px;background:#07151b66">
+            <div style="width:100%;height:min(38vh,320px);min-height:190px;display:grid;place-items:center;overflow:hidden;border-radius:10px;border:1px solid #75dcff77;background:radial-gradient(ellipse,#274b55,#101820 72%);box-shadow:inset 0 0 24px #0008">
+              <img class="creditPortrait" data-credit-image src="Yuuki_Alfa.png" alt="Yuuki Alfa — creator and developer of Kitsune 3D Prototype" role="button" tabindex="0" aria-label="Open a larger view of Yuuki Alfa’s portrait" style="display:block;width:100%;height:100%;object-fit:contain;object-position:center;cursor:zoom-in">
+            </div>
+            <div style="text-align:center;padding:12px 4px 5px">
+              <div style="font-size:10px;letter-spacing:2px;font-weight:800;color:#9beeff">CREATOR &amp; DEVELOPER</div>
+              <div style="font-size:clamp(22px,5vw,29px);line-height:1.2;font-weight:950;color:#fff;text-shadow:0 0 15px #75dcff88;margin-top:4px">Yuuki Alfa</div>
+              <div style="font-size:11px;color:#c1dce5;margin-top:7px">Programmed and built this world</div>
+            </div>
+          </section>
+          <section style="min-width:0;border:1px solid #e6a7ff55;border-radius:13px;padding:9px;background:#1b102566">
+            <div style="width:100%;height:min(38vh,320px);min-height:190px;display:grid;place-items:center;overflow:hidden;border-radius:10px;border:1px solid #e6a7ff77;background:radial-gradient(ellipse,#493052,#17101f 72%);box-shadow:inset 0 0 24px #0008">
+              <img class="creditPortrait" data-credit-image src="Yukino_Kitty.png" alt="Kitty Yukino — inspiration and muse of the Kitsune Universe" role="button" tabindex="0" aria-label="Open a larger view of Kitty Yukino’s portrait" style="display:block;width:100%;height:100%;object-fit:contain;object-position:center;cursor:zoom-in">
+            </div>
+            <div style="text-align:center;padding:12px 4px 5px">
+              <div style="font-size:10px;letter-spacing:2px;font-weight:800;color:#e7b7ff">INSPIRATION &amp; MUSE</div>
+              <div style="font-size:clamp(22px,5vw,29px);line-height:1.2;font-weight:950;color:#fff;text-shadow:0 0 15px #d69aff88;margin-top:4px">Kitty Yukino</div>
+              <div style="font-size:11px;color:#e0cde9;margin-top:7px">The heart and inspiration behind the warmth, charm, and magic of the Kitsune Universe</div>
+            </div>
+          </section>
         </div>
-        <div style="text-align:center;padding:14px 6px 8px">
-          <div style="font-size:10px;letter-spacing:2px;font-weight:800;color:#9beeff">PROGRAMMED BY</div>
-          <div style="font-size:clamp(23px,6vw,32px);line-height:1.2;font-weight:950;letter-spacing:.5px;color:#fff;text-shadow:0 0 15px #75dcff88;margin-top:4px">Yuuki Alfa</div>
-          <div style="font-size:11px;color:#c1dce5;margin-top:7px">Kitsune 3D Prototype <span style="color:#75dcff">✦</span> Creator &amp; Developer</div>
-        </div>
-        <div style="height:1px;background:linear-gradient(90deg,transparent,#75dcff99,#ff8de288,transparent);margin:2px 8px 8px"></div>
-        <div style="text-align:center;font-size:10px;color:#9cb9c4;letter-spacing:1px">BUILT WITH CURIOSITY · SHAPED BY IMAGINATION</div>
+        <div style="height:1px;background:linear-gradient(90deg,transparent,#75dcff99,#ff8de288,transparent);margin:12px 8px 8px"></div>
+        <div style="text-align:center;font-size:10px;color:#b9c5d5;letter-spacing:1px">BUILT WITH CURIOSITY · SHAPED BY IMAGINATION</div>
       </div>
     </div>
   </div>
@@ -10444,19 +10458,37 @@ if ("serviceWorker" in navigator) {
 
 <div id="creditImageViewer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Creator portrait enlarged">
   <button id="creditImageViewerClose" type="button" aria-label="Close enlarged portrait">×</button>
-  <img src="Yuuki_Alfa.png" alt="Yuuki Alfa — creator of Kitsune 3D Prototype, enlarged view">
+  <img id="creditImageViewerImage" src="Yuuki_Alfa.png" alt="Enlarged credit portrait">
   <div id="creditImageViewerHint">Tap outside the image or press Esc to close</div>
 </div>
 <script>
 (function(){
-  var portrait=document.getElementById("creatorPortrait");
+  var portraits=document.querySelectorAll("[data-credit-image]");
   var viewer=document.getElementById("creditImageViewer");
+  var enlarged=document.getElementById("creditImageViewerImage");
   var close=document.getElementById("creditImageViewerClose");
-  if(!portrait||!viewer||!close)return;
-  function openViewer(){viewer.classList.add("open");viewer.setAttribute("aria-hidden","false");close.focus();}
-  function closeViewer(){viewer.classList.remove("open");viewer.setAttribute("aria-hidden","true");portrait.focus();}
-  portrait.addEventListener("click",openViewer);
-  portrait.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();openViewer();}});
+  if(!portraits.length||!viewer||!enlarged||!close)return;
+  var activePortrait=null;
+  function openViewer(portrait){
+    activePortrait=portrait;
+    enlarged.src=portrait.getAttribute("src");
+    enlarged.alt=portrait.alt+" — enlarged view";
+    viewer.setAttribute("aria-label","Enlarged portrait: "+portrait.alt);
+    viewer.classList.add("open");
+    viewer.setAttribute("aria-hidden","false");
+    close.focus();
+  }
+  function closeViewer(){
+    viewer.classList.remove("open");
+    viewer.setAttribute("aria-hidden","true");
+    if(activePortrait)activePortrait.focus();
+  }
+  portraits.forEach(function(portrait){
+    portrait.addEventListener("click",function(){openViewer(portrait);});
+    portrait.addEventListener("keydown",function(e){
+      if(e.key==="Enter"||e.key===" "){e.preventDefault();openViewer(portrait);}
+    });
+  });
   close.addEventListener("click",closeViewer);
   viewer.addEventListener("click",function(e){if(e.target===viewer)closeViewer();});
   document.addEventListener("keydown",function(e){if(e.key==="Escape"&&viewer.classList.contains("open"))closeViewer();});
